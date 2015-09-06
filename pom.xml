@@ -57,17 +57,6 @@
 					</configuration>
 				</plugin>
 				<plugin>
-					<groupId>org.jasig.maven</groupId>
-					<artifactId>maven-notice-plugin</artifactId>
-					<version>1.0.6.1</version>
-					<configuration>
-						<noticeTemplate>${project.basedir}/src/main/notice/NOTICE.template</noticeTemplate>
-						<licenseMapping>
-							<param>${project.basedir}/src/main/notice/license-mappings.xml</param>
-						</licenseMapping>
-					</configuration>
-				</plugin>
-				<plugin>
 					<groupId>com.mycila</groupId>
 					<artifactId>license-maven-plugin</artifactId>
 					<version>2.11</version>
@@ -93,20 +82,11 @@
 									<exclude>*:*</exclude>
 								</excludes>
                                 <includes>
-                                    <include>com.google.guava:guava</include>
-                                    <include>com.github.runeflobakk:motif</include>
-                                    <include>joda-time:joda-time</include>
-                                    <include>org.hamcrest:hamcrest-library</include>
-                                    <include>org.hamcrest:hamcrest-core</include>
-                                    <include>junit:junit</include>
-                                    <include>org.slf4j:slf4j-api</include>
-                                    <include>org.slf4j:slf4j-simple</include>
-									<include>org.mockito:mockito-core</include>
-									<include>org.objenesis:objenesis</include>
+									<include>*:*:*:*:test</include>
                                 </includes>
 								<searchTransitive>true</searchTransitive>
 								<message>
-									Detected unknown dependencies! Verify that all licenses are OK, and run mvn notice:generate to update the NOTICE file.
+                                    Only test dependencies are allowed for this library!
 								</message>
 							</bannedDependencies>
 						</rules>
@@ -191,19 +171,6 @@
 						<configuration>
 							<includePom>true</includePom>
 						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.jasig.maven</groupId>
-				<artifactId>maven-notice-plugin</artifactId>
-				<executions>
-					<execution>
-						<id>check-NOTICE-file</id>
-						<phase>verify</phase>
-						<goals>
-							<goal>check</goal>
-						</goals>
 					</execution>
 				</executions>
 			</plugin>
