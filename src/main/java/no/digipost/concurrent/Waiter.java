@@ -64,7 +64,7 @@ public abstract class Waiter {
     }
 
 
-    public class WasInterrupted extends RuntimeException {
+    public static class WasInterrupted extends RuntimeException {
     	protected WasInterrupted(String message, InterruptedException e) {
     		super(message + " " + e.getClass().getSimpleName() + " '" + e.getMessage() + "'", e);
     	}
