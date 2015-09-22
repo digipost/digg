@@ -16,8 +16,21 @@
 package no.digipost.exceptions;
 
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 public final class Exceptions {
+
+    /**
+     * @param t the Throwable to get the causal chain from.
+     * @return the entire chain of causes, including the given Throwable.
+     */
+    public static Stream<Throwable> causalChainOf(Throwable t) {
+        Stream.Builder<Throwable> causes = Stream.builder();
+        for (Throwable cause = t; cause != null; cause = cause.getCause()) {
+            causes.add(cause);
+        }
+        return causes.build();
+    }
 
 	public static String exceptionNameAndMessage(Throwable t) {
 		return t.getClass().getSimpleName() + ": '" + t.getMessage() + "'";
