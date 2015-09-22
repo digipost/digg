@@ -15,9 +15,23 @@
  */
 package no.digipost.function;
 
+import no.digipost.exceptions.Exceptions;
+
 @FunctionalInterface
 public interface ThrowingRunnable<X extends Throwable> {
 
 	void run() throws X;
+
+	default Runnable asUnchecked() {
+        return () -> {
+            try {
+                ThrowingRunnable.this.run();
+            } catch (RuntimeException | Error e) {
+                throw e;
+            } catch (Throwable e) {
+                throw Exceptions.asUnchecked(e);
+            }
+        };
+    }
 
 }

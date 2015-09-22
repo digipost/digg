@@ -15,7 +15,23 @@
  */
 package no.digipost.function;
 
+import no.digipost.exceptions.Exceptions;
+
+import java.util.function.Supplier;
+
 @FunctionalInterface
 public interface ThrowingSupplier<T, X extends Throwable> {
 	T get() throws X;
+
+	default Supplier<T> asUnchecked() {
+        return () -> {
+            try {
+                return ThrowingSupplier.this.get();
+            } catch (RuntimeException | Error e) {
+                throw e;
+            } catch (Throwable e) {
+                throw Exceptions.asUnchecked(e);
+            }
+        };
+    }
 }

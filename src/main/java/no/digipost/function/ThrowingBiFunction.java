@@ -15,7 +15,23 @@
  */
 package no.digipost.function;
 
+import no.digipost.exceptions.Exceptions;
+
+import java.util.function.BiFunction;
+
 @FunctionalInterface
 public interface ThrowingBiFunction<T, U, R, X extends Throwable> {
 	R apply(T t, U u) throws X;
+
+	default BiFunction<T, U, R> asUnchecked() {
+        return (t, u) -> {
+            try {
+                return ThrowingBiFunction.this.apply(t, u);
+            } catch (RuntimeException | Error e) {
+                throw e;
+            } catch (Throwable e) {
+                throw Exceptions.asUnchecked(e);
+            }
+        };
+    }
 }

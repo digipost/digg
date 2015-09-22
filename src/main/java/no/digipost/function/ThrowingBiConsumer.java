@@ -15,7 +15,23 @@
  */
 package no.digipost.function;
 
+import no.digipost.exceptions.Exceptions;
+
+import java.util.function.BiConsumer;
+
 @FunctionalInterface
 public interface ThrowingBiConsumer<T, U, X extends Throwable> {
 	void accept(T t, U u) throws X;
+
+	default BiConsumer<T, U> asUnchecked() {
+        return (t, u) -> {
+            try {
+                ThrowingBiConsumer.this.accept(t, u);
+            } catch (RuntimeException | Error e) {
+                throw e;
+            } catch (Throwable e) {
+                throw Exceptions.asUnchecked(e);
+            }
+        };
+    }
 }
