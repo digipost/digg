@@ -19,6 +19,9 @@ import java.io.Serializable;
 import java.time.*;
 import java.util.concurrent.atomic.AtomicReference;
 
+/**
+ * A fixed controllable {@link Clock}, mainly intended for use in testing.
+ */
 public class ControllableClock extends Clock implements Serializable {
 
 	private final AtomicReference<Instant> now;
