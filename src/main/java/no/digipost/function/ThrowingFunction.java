@@ -17,6 +17,8 @@ package no.digipost.function;
 
 import no.digipost.exceptions.Exceptions;
 
+import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 @FunctionalInterface
@@ -34,4 +36,19 @@ public interface ThrowingFunction<T, R, X extends Throwable> {
             }
 	    };
 	}
+
+	default Function<T, Optional<R>> ifException(BiConsumer<? super T, Exception> exceptionHandler) {
+        return t -> {
+            try {
+                return Optional.of(ThrowingFunction.this.apply(t));
+            } catch (Exception e) {
+                exceptionHandler.accept(t, e);
+                return Optional.empty();
+            } catch (Error err) {
+                throw err;
+            } catch (Throwable thr) {
+                throw Exceptions.asUnchecked(thr);
+            }
+        };
+    }
 }
