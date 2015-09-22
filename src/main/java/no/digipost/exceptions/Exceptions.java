@@ -23,12 +23,12 @@ public final class Exceptions {
 		return t.getClass().getSimpleName() + ": '" + t.getMessage() + "'";
 	}
 
-	public static RuntimeException asUnchecked(Exception e) {
-		return asUnchecked(e, Exceptions::exceptionNameAndMessage);
+	public static RuntimeException asUnchecked(Throwable t) {
+		return asUnchecked(t, Exceptions::exceptionNameAndMessage);
 	}
 
-	public static RuntimeException asUnchecked(Exception e, Function<Exception, String> message) {
-		return e instanceof RuntimeException ? (RuntimeException) e : new RuntimeException(message.apply(e), e);
+	public static <X extends Throwable> RuntimeException asUnchecked(X t, Function<? super X, String> message) {
+		return t instanceof RuntimeException ? (RuntimeException) t : new RuntimeException(message.apply(t), t);
 	}
 
 	private Exceptions() {}
