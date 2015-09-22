@@ -1,0 +1,21 @@
+sudo: false
+cache:
+  directories:
+  - "$HOME/.m2/repository"
+env:
+  global:
+  - secure: Hqaf+a72V36nUhW8XYXiYZlex5+Nu6avS2a1oLugmIuy9hVS2TFeJ1tX1XEnCgsMtA/739UJL22513PTMpyGGNoKHNumrlMb4FRGzifr7zlDR3pnx1M5gJ2f0BZuL8J1ZNzRyUjXUHABclwLPThiKPAut4LVHSfdc1wF08IYJdgORmIPmvJqiWg6Kd/Bd6vKPYRkgIK/lI0TUUcwZjpAITgrBU33fU0k5z9JYu6AmrgqnnmQoipcV3dc4fItljHW/0vGwk8Tx1q3hq/1EtMnVOgamADXsTQS/hEMroPY0hB1TxAGR631NsqfJmkrjz3IDPtsMZflfmd2k/ZnQXaYCGiGxBURViRsNtgV5phGKF0w6+1THlDT+eT3ocAWg7ETnhp/T0CCrsUJJSBr8hFXXQ80Tgfxk9LBrywinWfjg7MvB6AFG5YGZ7Zw6MLbpdzFAuklxwd73Xv1I2/jRw0fN4IjO9PIWWKuRtvDYJRKm+qT1lpIpXk34TFpeiudAXu0T0ZKF5xsi6D8k60pxQLFHKieyWk0VAIdXb6xr576Mu6YGOTfNiKrW3ZONB/sZH3cZNez4FPKiEcCBVpjD5cPLOtuQAoIh22WAuTpr4zIsCfkKcmph74tm6JCHt6g1mFb9SRXsgjOs30C85FUE/PtBOoySUyQomPzN2AeRSRWcMg=
+  - secure: TMIyQDIuJ8uya/4yh0wIwppN5i4kjPSCPMIzsNqHhIpMit6VIZBJMLYdH9AkzuSci8izdhHfPnPpS3SCKqKrxx97S2/ospZl1O+GnGy05HDk/voa6TLfJZ8l8swkhcFELtMBNAHr5wAvG+ExHIP6mEjY22j6xv122kWYz9tmBZBvm+pFhgkrLbQssvEmW06wqdotEMoroqwebtgYacyROetxJaIy8UZhsKfrOyH4FNlKzkZMe1Owsq9wAb3DdwNedxpFtaXz8nfhLYuDmW0YFGwHiahq6PvixXD6uw4em3SOgjeEzMf1UbG0uTWWnwZmTtZ0kbDYvYfLyHtMckfgUpu+Oxyhf0Jr/96J3uPG2NM/ImWF3TFj+dpznG8GZJfLQYNz7EACrMC/cENolbt709YfkRaK5SNRRlOYZNQg3zXD+cuANI7KHtbiSdiYTheaVIwcJ+qHhq3PdD7rnxG70llWK0AKDAsjoJ1KvVIg9EbTohOxlTzQWCjxM260gTlU5sHwjaikQMpcXtc4nzoGJbjaXUH7Vx8iZx3qbtKrReFK2xrdV1XMxbyj+QYBGCR5arqBTfaU9vH20rWltv0bJ+jhCHgochxDToqt9PRnpQVZvAhcOrsxsxHGJ94O6sJlc4feUB4y7lmqg8zWrbUHXok2nOVlSnVDAuWaODW5WIM=
+
+language: java
+jdk:
+- oraclejdk8
+
+before_install:
+- echo "<settings><servers><server><id>sonatype-oss-nexus-snapshots</id><username>\${env.SONATYPE_USER}</username><password>\${env.SONATYPE_PASS}</password></server></servers></settings>" > ~/.m2/deploy-settings.xml
+
+install:
+- mvn deploy --settings ~/.m2/deploy-settings.xml
+
+script:
+- echo "no build script"
