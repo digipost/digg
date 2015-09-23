@@ -31,8 +31,8 @@ import static org.junit.Assert.fail;
 
 public class SimpleIteratorTest {
 
-	@Rule
-	public final ExpectedException expectedException = ExpectedException.none();
+    @Rule
+    public final ExpectedException expectedException = ExpectedException.none();
 
 
     @Test(expected = NoSuchElementException.class)
@@ -72,13 +72,13 @@ public class SimpleIteratorTest {
         fail("Should throw exception");
     }
 
-	@Test
-	public void removeIsUnsupported() {
-		Iterator<String> iterator = oneElement.iterator();
-		iterator.next();
-		expectedException.expect(UnsupportedOperationException.class);
-		iterator.remove();
-	}
+    @Test
+    public void removeIsUnsupported() {
+        Iterator<String> iterator = oneElement.iterator();
+        iterator.next();
+        expectedException.expect(UnsupportedOperationException.class);
+        iterator.remove();
+    }
 
 
 

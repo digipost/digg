@@ -31,33 +31,33 @@ import static org.junit.Assert.assertThat;
 
 public class TargetStateTest {
 
-	@Rule
-	public final Timeout timeout = new Timeout(1, TimeUnit.SECONDS);
+    @Rule
+    public final Timeout timeout = new Timeout(1, TimeUnit.SECONDS);
 
-	@Rule
-	public final ExpectedException expectedException = ExpectedException.none();
+    @Rule
+    public final ExpectedException expectedException = ExpectedException.none();
 
-	@Test
-	public void loopUntilTargetStateIsReached() {
-		CountDownLatch threeTimes = new CountDownLatch(3);
-		TargetState isDone = () -> threeTimes.getCount() == 0;
-		isDone.untilThen(threeTimes::countDown, t -> {});
-		assertThat(isDone.yet(), is(true));
-	}
+    @Test
+    public void loopUntilTargetStateIsReached() {
+        CountDownLatch threeTimes = new CountDownLatch(3);
+        TargetState isDone = () -> threeTimes.getCount() == 0;
+        isDone.untilThen(threeTimes::countDown, t -> {});
+        assertThat(isDone.yet(), is(true));
+    }
 
-	@Test
-	public void loopUntilTaskSignalsEXIT() {
-		AtomicInteger taskIterations = new AtomicInteger(0);
-		TargetState isDone = () -> false;
-		isDone.untilThen(() -> taskIterations.incrementAndGet() == 3 ? EXIT : TRY_REPEAT, exception -> {});
-		assertThat(taskIterations.get(), is(3));
-		assertThat(isDone.yet(), is(false));
-	}
+    @Test
+    public void loopUntilTaskSignalsEXIT() {
+        AtomicInteger taskIterations = new AtomicInteger(0);
+        TargetState isDone = () -> false;
+        isDone.untilThen(() -> taskIterations.incrementAndGet() == 3 ? EXIT : TRY_REPEAT, exception -> {});
+        assertThat(taskIterations.get(), is(3));
+        assertThat(isDone.yet(), is(false));
+    }
 
-	@Test
-	public void returningNullFromTaskIsInvalid() {
-		TargetState isDone = () -> false;
-		expectedException.expect(IllegalStateException.class);
-		isDone.untilThen(() -> null, exception -> { throw (RuntimeException) exception; });
-	}
+    @Test
+    public void returningNullFromTaskIsInvalid() {
+        TargetState isDone = () -> false;
+        expectedException.expect(IllegalStateException.class);
+        isDone.untilThen(() -> null, exception -> { throw (RuntimeException) exception; });
+    }
 }

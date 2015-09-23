@@ -21,9 +21,9 @@ import java.util.function.Supplier;
 
 @FunctionalInterface
 public interface ThrowingSupplier<T, X extends Throwable> {
-	T get() throws X;
+    T get() throws X;
 
-	default Supplier<T> asUnchecked() {
+    default Supplier<T> asUnchecked() {
         return () -> {
             try {
                 return ThrowingSupplier.this.get();

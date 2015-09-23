@@ -25,23 +25,23 @@ import static no.digipost.exceptions.Exceptions.asUnchecked;
 
 public final class IO {
 
-	public static <T extends AutoCloseable> Consumer<T> autoClosing(ThrowingConsumer<T, ? extends Exception> consumer) {
-		return t1 ->
-			autoClosing((T t2) -> {
-				consumer.accept(t2);
-				return null;
-			}).apply(t1);
-	}
+    public static <T extends AutoCloseable> Consumer<T> autoClosing(ThrowingConsumer<T, ? extends Exception> consumer) {
+        return t1 ->
+            autoClosing((T t2) -> {
+                consumer.accept(t2);
+                return null;
+            }).apply(t1);
+    }
 
-	public static <T extends AutoCloseable, R> Function<T, R> autoClosing(ThrowingFunction<T, R, ? extends Exception> function) {
-		return closeable -> {
-			try (T managed = closeable) {
-				return function.apply(managed);
-			} catch (Exception e) {
-				throw asUnchecked(e);
-			}
-		};
-	}
+    public static <T extends AutoCloseable, R> Function<T, R> autoClosing(ThrowingFunction<T, R, ? extends Exception> function) {
+        return closeable -> {
+            try (T managed = closeable) {
+                return function.apply(managed);
+            } catch (Exception e) {
+                throw asUnchecked(e);
+            }
+        };
+    }
 
-	private IO() {}
+    private IO() {}
 }

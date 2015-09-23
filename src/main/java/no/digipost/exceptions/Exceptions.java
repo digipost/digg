@@ -32,17 +32,17 @@ public final class Exceptions {
         return causes.build();
     }
 
-	public static String exceptionNameAndMessage(Throwable t) {
-		return t.getClass().getSimpleName() + ": '" + t.getMessage() + "'";
-	}
+    public static String exceptionNameAndMessage(Throwable t) {
+        return t.getClass().getSimpleName() + ": '" + t.getMessage() + "'";
+    }
 
-	public static RuntimeException asUnchecked(Throwable t) {
-		return asUnchecked(t, Exceptions::exceptionNameAndMessage);
-	}
+    public static RuntimeException asUnchecked(Throwable t) {
+        return asUnchecked(t, Exceptions::exceptionNameAndMessage);
+    }
 
-	public static <X extends Throwable> RuntimeException asUnchecked(X t, Function<? super X, String> message) {
-		return t instanceof RuntimeException ? (RuntimeException) t : new RuntimeException(message.apply(t), t);
-	}
+    public static <X extends Throwable> RuntimeException asUnchecked(X t, Function<? super X, String> message) {
+        return t instanceof RuntimeException ? (RuntimeException) t : new RuntimeException(message.apply(t), t);
+    }
 
-	private Exceptions() {}
+    private Exceptions() {}
 }

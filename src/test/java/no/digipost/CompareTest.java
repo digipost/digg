@@ -30,11 +30,11 @@ import static org.junit.Assume.assumeThat;
 @RunWith(Theories.class)
 public class CompareTest {
 
-	@Theory
-	public void minAndMax(@ForAll(sampleSize=10) int x, @ForAll(sampleSize=10) int y) {
-		assumeThat(x, not(y));
-		assertThat(min(x, y), not(max(x, y)));
-		assertThat(min(x, y), is(min(y, x)));
-		assertThat(max(x, y), is(max(y, x)));
-	}
+    @Theory
+    public void minAndMax(@ForAll(sampleSize=10) int x, @ForAll(sampleSize=10) int y) {
+        assumeThat(x, not(y));
+        assertThat(min(x, y), not(max(x, y)));
+        assertThat(min(x, y), is(min(y, x)));
+        assertThat(max(x, y), is(max(y, x)));
+    }
 }

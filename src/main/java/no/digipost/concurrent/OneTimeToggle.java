@@ -30,31 +30,31 @@ import java.util.function.Supplier;
  */
 public final class OneTimeToggle implements TargetState {
 
-	private final AtomicBoolean toggled = new AtomicBoolean(false);
+    private final AtomicBoolean toggled = new AtomicBoolean(false);
 
-	/**
-	 * Toggle it! This will make {@link #yet()} return <code>true</code>.
-	 */
-	public void now() {
-		toggled.set(true);
-	}
+    /**
+     * Toggle it! This will make {@link #yet()} return <code>true</code>.
+     */
+    public void now() {
+        toggled.set(true);
+    }
 
-	/**
-	 * Toggle it, or throw exception if the toggle has already been done, for instance
-	 * by another thread.
-	 *
-	 * @param <E> the exception type that this method may throw.
-	 * @param exceptionSupplier supply exception to throw if it was already toggled.
-	 */
-	public <E extends Throwable> void nowOrIfAlreadyThenThrow(Supplier<E> exceptionSupplier) throws E {
-		if (toggled.getAndSet(true)) {
-			throw exceptionSupplier.get();
-		}
-	}
+    /**
+     * Toggle it, or throw exception if the toggle has already been done, for instance
+     * by another thread.
+     *
+     * @param <E> the exception type that this method may throw.
+     * @param exceptionSupplier supply exception to throw if it was already toggled.
+     */
+    public <E extends Throwable> void nowOrIfAlreadyThenThrow(Supplier<E> exceptionSupplier) throws E {
+        if (toggled.getAndSet(true)) {
+            throw exceptionSupplier.get();
+        }
+    }
 
-	@Override
+    @Override
     public boolean yet() {
-		return toggled.get();
-	}
+        return toggled.get();
+    }
 
 }

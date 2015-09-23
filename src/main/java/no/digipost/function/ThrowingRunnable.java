@@ -20,9 +20,9 @@ import no.digipost.exceptions.Exceptions;
 @FunctionalInterface
 public interface ThrowingRunnable<X extends Throwable> {
 
-	void run() throws X;
+    void run() throws X;
 
-	default Runnable asUnchecked() {
+    default Runnable asUnchecked() {
         return () -> {
             try {
                 ThrowingRunnable.this.run();

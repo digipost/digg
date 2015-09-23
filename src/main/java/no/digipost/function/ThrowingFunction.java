@@ -23,21 +23,21 @@ import java.util.function.Function;
 
 @FunctionalInterface
 public interface ThrowingFunction<T, R, X extends Throwable> {
-	R apply(T t) throws X;
+    R apply(T t) throws X;
 
-	default Function<T, R> asUnchecked() {
-	    return t -> {
-	        try {
+    default Function<T, R> asUnchecked() {
+        return t -> {
+            try {
                 return ThrowingFunction.this.apply(t);
-	        } catch (RuntimeException | Error e) {
-	            throw e;
+            } catch (RuntimeException | Error e) {
+                throw e;
             } catch (Throwable e) {
                 throw Exceptions.asUnchecked(e);
             }
-	    };
-	}
+        };
+    }
 
-	default Function<T, Optional<R>> ifException(BiConsumer<? super T, Exception> exceptionHandler) {
+    default Function<T, Optional<R>> ifException(BiConsumer<? super T, Exception> exceptionHandler) {
         return t -> {
             try {
                 return Optional.of(ThrowingFunction.this.apply(t));

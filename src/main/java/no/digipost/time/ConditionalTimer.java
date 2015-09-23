@@ -36,71 +36,71 @@ import static java.util.Optional.ofNullable;
  */
 public final class ConditionalTimer<T> {
 
-	public static final class WithCustomClockBuilder {
-		private final Clock clock;
+    public static final class WithCustomClockBuilder {
+        private final Clock clock;
 
-		private WithCustomClockBuilder(Clock clock) {
-			this.clock = clock;
-		}
+        private WithCustomClockBuilder(Clock clock) {
+            this.clock = clock;
+        }
 
-		public <T> ConditionalTimer<T> timeWhen(Predicate<T> condition) {
-			return new ConditionalTimer<>(condition, clock);
-		}
-	}
+        public <T> ConditionalTimer<T> timeWhen(Predicate<T> condition) {
+            return new ConditionalTimer<>(condition, clock);
+        }
+    }
 
-	public static ConditionalTimer.WithCustomClockBuilder using(Clock clock) {
-		return new ConditionalTimer.WithCustomClockBuilder(clock);
-	}
+    public static ConditionalTimer.WithCustomClockBuilder using(Clock clock) {
+        return new ConditionalTimer.WithCustomClockBuilder(clock);
+    }
 
-	public static <T> ConditionalTimer<T> timeWhen(Predicate<T> condition) {
-		return using(Clock.systemUTC()).timeWhen(condition);
-	}
-
-
-	private ConditionalTimer(Predicate<T> condition, Clock clock) {
-		this.condition = condition;
-		this.clock = clock;
-	};
+    public static <T> ConditionalTimer<T> timeWhen(Predicate<T> condition) {
+        return using(Clock.systemUTC()).timeWhen(condition);
+    }
 
 
-	private final Clock clock;
-	private final Predicate<T> condition;
-	private final AtomicReference<Instant> conditionMet = new AtomicReference<>();
+    private ConditionalTimer(Predicate<T> condition, Clock clock) {
+        this.condition = condition;
+        this.clock = clock;
+    };
 
 
-	/**
-	 * Perform inspection of a value to determine if timing should occur.
-	 */
-	public final void inspect(T value) {
-		if (condition.test(value)) {
-			conditionMet.compareAndSet(null, now(clock));
-		} else {
-			conditionMet.set(null);
-		}
-	}
+    private final Clock clock;
+    private final Predicate<T> condition;
+    private final AtomicReference<Instant> conditionMet = new AtomicReference<>();
 
-	/**
-	 * @return the duration of the currently ongoing met condition, or {@link Optional#empty()}
-	 *         if the condition is currently not met.
-	 */
-	public Optional<Duration> getDuration() {
-		return ofNullable(conditionMet.get()).map(whenMet -> between(whenMet, now(clock)));
-	}
 
-	/**
-	 * @return {@code false} if condition is currently not met, {@code true} if the current {@link #getDuration() duration}
-	 *         is longer than the given threshold, or {@code false} otherwise.
-	 */
-	public boolean longerThan(Duration threshold) {
-		return getDuration().filter(duration -> duration.toMillis() > threshold.toMillis()).isPresent();
-	}
+    /**
+     * Perform inspection of a value to determine if timing should occur.
+     */
+    public final void inspect(T value) {
+        if (condition.test(value)) {
+            conditionMet.compareAndSet(null, now(clock));
+        } else {
+            conditionMet.set(null);
+        }
+    }
 
-	/**
-	 * @return {@code true} if condition is currently not met or the current {@link #getDuration() duration} is
-	 *         less than the given threshold, or {@code false} otherwise.
-	 */
-	public boolean sameOrlessThan(Duration threshold) {
-		return !longerThan(threshold);
-	}
+    /**
+     * @return the duration of the currently ongoing met condition, or {@link Optional#empty()}
+     *         if the condition is currently not met.
+     */
+    public Optional<Duration> getDuration() {
+        return ofNullable(conditionMet.get()).map(whenMet -> between(whenMet, now(clock)));
+    }
+
+    /**
+     * @return {@code false} if condition is currently not met, {@code true} if the current {@link #getDuration() duration}
+     *         is longer than the given threshold, or {@code false} otherwise.
+     */
+    public boolean longerThan(Duration threshold) {
+        return getDuration().filter(duration -> duration.toMillis() > threshold.toMillis()).isPresent();
+    }
+
+    /**
+     * @return {@code true} if condition is currently not met or the current {@link #getDuration() duration} is
+     *         less than the given threshold, or {@code false} otherwise.
+     */
+    public boolean sameOrlessThan(Duration threshold) {
+        return !longerThan(threshold);
+    }
 
 }

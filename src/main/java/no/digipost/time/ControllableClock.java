@@ -24,51 +24,51 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public class ControllableClock extends Clock implements Serializable {
 
-	private final AtomicReference<Instant> now;
-	private final ZoneId zone;
+    private final AtomicReference<Instant> now;
+    private final ZoneId zone;
 
-	public ControllableClock(Instant fixedNow) {
-		this(fixedNow, ZoneId.systemDefault());
-	}
+    public ControllableClock(Instant fixedNow) {
+        this(fixedNow, ZoneId.systemDefault());
+    }
 
-	public ControllableClock(LocalDateTime fixedNow) {
-		this(fixedNow.atZone(ZoneId.systemDefault()));
-	}
+    public ControllableClock(LocalDateTime fixedNow) {
+        this(fixedNow.atZone(ZoneId.systemDefault()));
+    }
 
-	public ControllableClock(ZonedDateTime fixedNow) {
-		this(fixedNow.toInstant(), fixedNow.getZone());
-	}
+    public ControllableClock(ZonedDateTime fixedNow) {
+        this(fixedNow.toInstant(), fixedNow.getZone());
+    }
 
-	public ControllableClock(Instant fixedNow, ZoneId zone) {
-		this.now = new AtomicReference<>(fixedNow);
-		this.zone = zone;
-	}
+    public ControllableClock(Instant fixedNow, ZoneId zone) {
+        this.now = new AtomicReference<>(fixedNow);
+        this.zone = zone;
+    }
 
-	@Override
-	public ZoneId getZone() {
-		return zone;
-	}
+    @Override
+    public ZoneId getZone() {
+        return zone;
+    }
 
-	@Override
-	public ControllableClock withZone(ZoneId zone) {
-		return new ControllableClock(now.get(), zone);
-	}
+    @Override
+    public ControllableClock withZone(ZoneId zone) {
+        return new ControllableClock(now.get(), zone);
+    }
 
-	@Override
-	public Instant instant() {
-		return now.get();
-	}
+    @Override
+    public Instant instant() {
+        return now.get();
+    }
 
-	public void set(LocalDateTime dateTime) {
-		set(dateTime.atZone(zone).toInstant());
-	}
+    public void set(LocalDateTime dateTime) {
+        set(dateTime.atZone(zone).toInstant());
+    }
 
-	public void set(Instant instant) {
-		now.set(instant);
-	}
+    public void set(Instant instant) {
+        now.set(instant);
+    }
 
-	public void timePasses(Duration duration) {
-		now.getAndUpdate(previous -> previous.plus(duration));
-	}
+    public void timePasses(Duration duration) {
+        now.getAndUpdate(previous -> previous.plus(duration));
+    }
 
 }

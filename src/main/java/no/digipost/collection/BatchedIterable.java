@@ -21,42 +21,42 @@ import java.util.function.Supplier;
 
 public class BatchedIterable<T, BATCH extends Iterable<? extends T>> implements Iterable<T> {
 
-	private Supplier<BATCH> batchFetcher;
-	private Predicate<? super BATCH> canFetchNextBatch;
+    private Supplier<BATCH> batchFetcher;
+    private Predicate<? super BATCH> canFetchNextBatch;
 
 
-	public static <T, BATCH extends Iterable<? extends T>> Iterable<T> batched(Supplier<BATCH> batchFetcher, Predicate<? super BATCH> fetchNextBatch) {
-		return new BatchedIterable<>(batchFetcher, fetchNextBatch);
-	}
+    public static <T, BATCH extends Iterable<? extends T>> Iterable<T> batched(Supplier<BATCH> batchFetcher, Predicate<? super BATCH> fetchNextBatch) {
+        return new BatchedIterable<>(batchFetcher, fetchNextBatch);
+    }
 
-	private BatchedIterable(Supplier<BATCH> batchFetcher, Predicate<? super BATCH> fetchNextBatch) {
-		this.batchFetcher = batchFetcher;
-		this.canFetchNextBatch = fetchNextBatch;
-	}
+    private BatchedIterable(Supplier<BATCH> batchFetcher, Predicate<? super BATCH> fetchNextBatch) {
+        this.batchFetcher = batchFetcher;
+        this.canFetchNextBatch = fetchNextBatch;
+    }
 
 
-	@Override
+    @Override
     public Iterator<T> iterator() {
-		return new Iterator<T>() {
-			BATCH currentBatch = batchFetcher.get();
-			Iterator<? extends T> currentIterator = currentBatch.iterator();
+        return new Iterator<T>() {
+            BATCH currentBatch = batchFetcher.get();
+            Iterator<? extends T> currentIterator = currentBatch.iterator();
 
-			@Override
+            @Override
             public boolean hasNext() {
-				if (currentIterator.hasNext()) return true;
-				if (canFetchNextBatch.test(currentBatch)) {
-					currentBatch = batchFetcher.get();
-					currentIterator = currentBatch.iterator();
-					return currentIterator.hasNext();
-				}
-				return false;
+                if (currentIterator.hasNext()) return true;
+                if (canFetchNextBatch.test(currentBatch)) {
+                    currentBatch = batchFetcher.get();
+                    currentIterator = currentBatch.iterator();
+                    return currentIterator.hasNext();
+                }
+                return false;
             }
 
-			@Override
+            @Override
             public T next() {
-				return currentIterator.next();
+                return currentIterator.next();
             }
-		};
+        };
     }
 
 }

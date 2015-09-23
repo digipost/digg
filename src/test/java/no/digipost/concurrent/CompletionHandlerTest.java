@@ -30,21 +30,21 @@ import static org.junit.Assert.assertTrue;
 
 public class CompletionHandlerTest {
 
-	@Test
-	public void biConsumerBuilder() {
-		AtomicReference<Boolean> result = new AtomicReference<>();
-		AtomicReference<Throwable> failure = new AtomicReference<>();
-		BiConsumer<Object, Throwable> biConsumer = onSuccess(() -> result.set(true)).orCatch(e -> failure.set(e));
-		biConsumer.accept("ignored", new IOException());
-		biConsumer.accept("result", null);
-		assertTrue(result.get());
-		assertThat(failure.get(), instanceOf(IOException.class));
-	}
+    @Test
+    public void biConsumerBuilder() {
+        AtomicReference<Boolean> result = new AtomicReference<>();
+        AtomicReference<Throwable> failure = new AtomicReference<>();
+        BiConsumer<Object, Throwable> biConsumer = onSuccess(() -> result.set(true)).orCatch(e -> failure.set(e));
+        biConsumer.accept("ignored", new IOException());
+        biConsumer.accept("result", null);
+        assertTrue(result.get());
+        assertThat(failure.get(), instanceOf(IOException.class));
+    }
 
-	@Test
-	public void biFunctionBuilder() {
-		BiFunction<Object, Throwable, Object> handler = CompletionHandler.<Object, Object>onSuccess("result").orCatch(e -> e);
-		assertThat(handler.apply("any", null), is("result"));
-		assertThat(handler.apply("ignored", new IOException()), instanceOf(IOException.class));
-	}
+    @Test
+    public void biFunctionBuilder() {
+        BiFunction<Object, Throwable, Object> handler = CompletionHandler.<Object, Object>onSuccess("result").orCatch(e -> e);
+        assertThat(handler.apply("any", null), is("result"));
+        assertThat(handler.apply("ignored", new IOException()), instanceOf(IOException.class));
+    }
 }

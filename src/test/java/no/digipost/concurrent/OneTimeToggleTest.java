@@ -24,27 +24,27 @@ import static org.junit.Assert.assertThat;
 
 public class OneTimeToggleTest {
 
-	@Rule
-	public final ExpectedException expectedException = ExpectedException.none();
+    @Rule
+    public final ExpectedException expectedException = ExpectedException.none();
 
-	private final OneTimeToggle done = new OneTimeToggle();
+    private final OneTimeToggle done = new OneTimeToggle();
 
-	@Test
-	public void toggleIsAllowedSeveralTimes() {
-		assertThat(done.yet(), is(false));
-		done.now();
-		assertThat(done.yet(), is(true));
-		done.now();
-		assertThat(done.yet(), is(true));
-	}
+    @Test
+    public void toggleIsAllowedSeveralTimes() {
+        assertThat(done.yet(), is(false));
+        done.now();
+        assertThat(done.yet(), is(true));
+        done.now();
+        assertThat(done.yet(), is(true));
+    }
 
-	@Test
-	public void toggleOnceOrThrowException() {
-		assertThat(done.yet(), is(false));
-		done.nowOrIfAlreadyThenThrow(IllegalStateException::new);
-		assertThat(done.yet(), is(true));
+    @Test
+    public void toggleOnceOrThrowException() {
+        assertThat(done.yet(), is(false));
+        done.nowOrIfAlreadyThenThrow(IllegalStateException::new);
+        assertThat(done.yet(), is(true));
 
-		expectedException.expect(IllegalStateException.class);
-		done.nowOrIfAlreadyThenThrow(IllegalStateException::new);
-	}
+        expectedException.expect(IllegalStateException.class);
+        done.nowOrIfAlreadyThenThrow(IllegalStateException::new);
+    }
 }

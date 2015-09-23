@@ -21,9 +21,9 @@ import java.util.function.Consumer;
 
 @FunctionalInterface
 public interface ThrowingConsumer<T, X extends Throwable> {
-	void accept(T t) throws X;
+    void accept(T t) throws X;
 
-	default Consumer<T> asUnchecked() {
+    default Consumer<T> asUnchecked() {
         return t -> {
             try {
                 ThrowingConsumer.this.accept(t);

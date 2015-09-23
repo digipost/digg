@@ -21,9 +21,9 @@ import java.util.function.BiFunction;
 
 @FunctionalInterface
 public interface ThrowingBiFunction<T, U, R, X extends Throwable> {
-	R apply(T t, U u) throws X;
+    R apply(T t, U u) throws X;
 
-	default BiFunction<T, U, R> asUnchecked() {
+    default BiFunction<T, U, R> asUnchecked() {
         return (t, u) -> {
             try {
                 return ThrowingBiFunction.this.apply(t, u);

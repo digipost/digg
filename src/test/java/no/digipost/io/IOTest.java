@@ -25,24 +25,24 @@ import static org.mockito.Mockito.*;
 
 public class IOTest {
 
-	@Test
-	public void closesResourceAfterSuccess() throws Exception {
-		AutoCloseable resource = mock(AutoCloseable.class);
-		IO.autoClosing(r -> {}).accept(resource);
-		verify(resource, times(1)).close();
-	}
+    @Test
+    public void closesResourceAfterSuccess() throws Exception {
+        AutoCloseable resource = mock(AutoCloseable.class);
+        IO.autoClosing(r -> {}).accept(resource);
+        verify(resource, times(1)).close();
+    }
 
-	@Test
-	public void closesResourceAfterFailure() throws Exception {
-		AutoCloseable resource = mock(AutoCloseable.class);
-		Consumer<AutoCloseable> autoClosingConsumer = IO.autoClosing((ThrowingConsumer<AutoCloseable, Exception>) r -> { throw new Exception(); });
-		try {
-			autoClosingConsumer.accept(resource);
-		} catch (RuntimeException e) {
-			verify(resource, times(1)).close();
-			return;
-		}
-		fail("Should throw exception");
-	}
+    @Test
+    public void closesResourceAfterFailure() throws Exception {
+        AutoCloseable resource = mock(AutoCloseable.class);
+        Consumer<AutoCloseable> autoClosingConsumer = IO.autoClosing((ThrowingConsumer<AutoCloseable, Exception>) r -> { throw new Exception(); });
+        try {
+            autoClosingConsumer.accept(resource);
+        } catch (RuntimeException e) {
+            verify(resource, times(1)).close();
+            return;
+        }
+        fail("Should throw exception");
+    }
 
 }

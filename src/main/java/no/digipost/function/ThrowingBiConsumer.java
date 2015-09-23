@@ -21,9 +21,9 @@ import java.util.function.BiConsumer;
 
 @FunctionalInterface
 public interface ThrowingBiConsumer<T, U, X extends Throwable> {
-	void accept(T t, U u) throws X;
+    void accept(T t, U u) throws X;
 
-	default BiConsumer<T, U> asUnchecked() {
+    default BiConsumer<T, U> asUnchecked() {
         return (t, u) -> {
             try {
                 ThrowingBiConsumer.this.accept(t, u);

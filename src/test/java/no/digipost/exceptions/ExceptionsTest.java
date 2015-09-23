@@ -27,15 +27,15 @@ import static org.junit.Assert.assertThat;
 
 public class ExceptionsTest {
 
-	@Test
-	public void causalChainOfNullIsEmptyStream() {
-		assertThat(causalChainOf(null).collect(toList()), empty());
-	}
+    @Test
+    public void causalChainOfNullIsEmptyStream() {
+        assertThat(causalChainOf(null).collect(toList()), empty());
+    }
 
     @Test
     @SuppressWarnings("unchecked")
-	public void returnsTheCausalChainOfExceptions() {
-		List<Throwable> exception = causalChainOf(new Exception(new IllegalStateException(new IOException()))).collect(toList());
-		assertThat(exception, contains(instanceOf(Exception.class), instanceOf(IllegalStateException.class), instanceOf(IOException.class)));
-	}
+    public void returnsTheCausalChainOfExceptions() {
+        List<Throwable> exception = causalChainOf(new Exception(new IllegalStateException(new IOException()))).collect(toList());
+        assertThat(exception, contains(instanceOf(Exception.class), instanceOf(IllegalStateException.class), instanceOf(IOException.class)));
+    }
 }

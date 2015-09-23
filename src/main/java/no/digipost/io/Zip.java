@@ -25,31 +25,31 @@ import java.util.zip.ZipInputStream;
 
 public class Zip {
 
-	public static Entries entriesIn(ZipInputStream zip) {
-		return new Entries(zip);
-	}
+    public static Entries entriesIn(ZipInputStream zip) {
+        return new Entries(zip);
+    }
 
-	public static final class Entries implements Iterable<ZipEntry> {
+    public static final class Entries implements Iterable<ZipEntry> {
 
-		private final ZipInputStream zip;
-		private final OneTimeToggle iteratorRequested = new OneTimeToggle();
+        private final ZipInputStream zip;
+        private final OneTimeToggle iteratorRequested = new OneTimeToggle();
 
-		private Entries(ZipInputStream zip) {
-			this.zip = zip;
-		}
+        private Entries(ZipInputStream zip) {
+            this.zip = zip;
+        }
 
-		@Override
-		public Iterator<ZipEntry> iterator() {
-			iteratorRequested.nowOrIfAlreadyThenThrow(() -> new IllegalStateException("Iterator can only be requested once!"));
-			return new SimpleIterator<ZipEntry>() {
-				@Override
-				protected Optional<ZipEntry> nextIfAvailable() throws Exception {
-					return Optional.ofNullable(zip.getNextEntry());
-				}
-			};
-		}
+        @Override
+        public Iterator<ZipEntry> iterator() {
+            iteratorRequested.nowOrIfAlreadyThenThrow(() -> new IllegalStateException("Iterator can only be requested once!"));
+            return new SimpleIterator<ZipEntry>() {
+                @Override
+                protected Optional<ZipEntry> nextIfAvailable() throws Exception {
+                    return Optional.ofNullable(zip.getNextEntry());
+                }
+            };
+        }
 
-	}
+    }
 
-	private Zip() {}
+    private Zip() {}
 }

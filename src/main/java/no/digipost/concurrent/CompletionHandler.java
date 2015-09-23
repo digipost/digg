@@ -31,59 +31,59 @@ import java.util.function.*;
 public final class CompletionHandler {
 
 
-	public static final ConsumerBuilder<Object> doNothingOnSuccess = onSuccess(() -> {});
+    public static final ConsumerBuilder<Object> doNothingOnSuccess = onSuccess(() -> {});
 
-	public static <R> ConsumerBuilder<R> onSuccess(Runnable runOnSuccess) {
-		return onSuccess((Consumer<R>) result -> runOnSuccess.run());
-	}
+    public static <R> ConsumerBuilder<R> onSuccess(Runnable runOnSuccess) {
+        return onSuccess((Consumer<R>) result -> runOnSuccess.run());
+    }
 
-	public static <R> ConsumerBuilder<R> onSuccess(Consumer<R> resultConsumer) {
-		return new Builder<>(result -> { resultConsumer.accept(result); return null; });
-	}
+    public static <R> ConsumerBuilder<R> onSuccess(Consumer<R> resultConsumer) {
+        return new Builder<>(result -> { resultConsumer.accept(result); return null; });
+    }
 
-	public static <R, U> FunctionBuilder<R, U> onSuccess(U successValue) {
-		return onSuccess(() -> successValue);
-	}
+    public static <R, U> FunctionBuilder<R, U> onSuccess(U successValue) {
+        return onSuccess(() -> successValue);
+    }
 
-	public static <R, U> FunctionBuilder<R, U> onSuccess(Supplier<U> getOnSuccess) {
-		return onSuccess((Function<R, U>) result -> getOnSuccess.get());
-	}
+    public static <R, U> FunctionBuilder<R, U> onSuccess(Supplier<U> getOnSuccess) {
+        return onSuccess((Function<R, U>) result -> getOnSuccess.get());
+    }
 
-	public static <R, U> FunctionBuilder<R, U> onSuccess(Function<R, U> resultMapper) {
-		return new Builder<>(resultMapper);
-	}
+    public static <R, U> FunctionBuilder<R, U> onSuccess(Function<R, U> resultMapper) {
+        return new Builder<>(resultMapper);
+    }
 
 
 
-	public static interface ConsumerBuilder<R> {
-		<E extends Throwable> BiConsumer<R, E> orCatch(Consumer<E> exceptionConsumer);
-	}
+    public static interface ConsumerBuilder<R> {
+        <E extends Throwable> BiConsumer<R, E> orCatch(Consumer<E> exceptionConsumer);
+    }
 
-	public interface FunctionBuilder<R, U> {
-		<E extends Throwable> BiFunction<R, E, U> orCatch(Function<E, U> exceptionMapper);
-	}
+    public interface FunctionBuilder<R, U> {
+        <E extends Throwable> BiFunction<R, E, U> orCatch(Function<E, U> exceptionMapper);
+    }
 
-	private static class Builder<R, U> implements ConsumerBuilder<R>, FunctionBuilder<R, U> {
+    private static class Builder<R, U> implements ConsumerBuilder<R>, FunctionBuilder<R, U> {
 
-		private final Function<R, U> resultMapper;
+        private final Function<R, U> resultMapper;
 
-		Builder(Function<R, U> function) {
-			this.resultMapper = function;
-		}
-
-		@Override
-        public <E extends Throwable> BiConsumer<R, E> orCatch(Consumer<E> exceptionConsumer) {
-			return (result, thrown) -> {
-				orCatch((E t) -> { exceptionConsumer.accept(t);	return null; }).apply(result, thrown);
-			};
+        Builder(Function<R, U> function) {
+            this.resultMapper = function;
         }
 
-		@Override
-		public <E extends Throwable> BiFunction<R, E, U> orCatch(Function<E, U> exceptionMapper) {
-			return (result, thrown) -> thrown != null ? exceptionMapper.apply(thrown) : resultMapper.apply(result);
-		}
-	}
+        @Override
+        public <E extends Throwable> BiConsumer<R, E> orCatch(Consumer<E> exceptionConsumer) {
+            return (result, thrown) -> {
+                orCatch((E t) -> { exceptionConsumer.accept(t);	return null; }).apply(result, thrown);
+            };
+        }
 
-	private CompletionHandler() {}
+        @Override
+        public <E extends Throwable> BiFunction<R, E, U> orCatch(Function<E, U> exceptionMapper) {
+            return (result, thrown) -> thrown != null ? exceptionMapper.apply(thrown) : resultMapper.apply(result);
+        }
+    }
+
+    private CompletionHandler() {}
 
 }

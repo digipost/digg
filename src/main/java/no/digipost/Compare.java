@@ -17,13 +17,13 @@ package no.digipost;
 
 public final class Compare {
 
-	public static <T extends Comparable<T>> T min(T t1, T t2) {
-		return t1.compareTo(t2) > 0 ? t2 : t1;
-	}
+    public static <T extends Comparable<T>> T min(T t1, T t2) {
+        return t1.compareTo(t2) > 0 ? t2 : t1;
+    }
 
-	public static <T extends Comparable<T>> T max(T t1, T t2) {
-		return t2.compareTo(t1) > 0 ? t2 : t1;
-	}
+    public static <T extends Comparable<T>> T max(T t1, T t2) {
+        return t2.compareTo(t1) > 0 ? t2 : t1;
+    }
 
-	private Compare() {}
+    private Compare() {}
 }

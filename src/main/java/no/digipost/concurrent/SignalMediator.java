@@ -29,33 +29,33 @@ import java.util.concurrent.LinkedBlockingQueue;
  */
 public final class SignalMediator {
 
-	public final Waiter signalWaiter;
+    public final Waiter signalWaiter;
 
 
-	private enum Signal { $ }
-	private final BlockingQueue<Signal> signalHolder = new LinkedBlockingQueue<>(1);
+    private enum Signal { $ }
+    private final BlockingQueue<Signal> signalHolder = new LinkedBlockingQueue<>(1);
 
 
 
-	public SignalMediator() {
-		this(SignalMediator.class.getSimpleName());
-	}
+    public SignalMediator() {
+        this(SignalMediator.class.getSimpleName());
+    }
 
-	public SignalMediator(String name) {
-		signalWaiter = new Waiter() {
-			@Override
-			public void doWait() {
-				try {
-	                signalHolder.take();
+    public SignalMediator(String name) {
+        signalWaiter = new Waiter() {
+            @Override
+            public void doWait() {
+                try {
+                    signalHolder.take();
                 } catch (InterruptedException e) {
-                	throw new WasInterrupted(name + " was interrupted", e);
+                    throw new WasInterrupted(name + " was interrupted", e);
                 }
-			}
-		};
-	}
+            }
+        };
+    }
 
-	public void signal() {
-		signalHolder.offer(Signal.$);
-	}
+    public void signal() {
+        signalHolder.offer(Signal.$);
+    }
 
 }

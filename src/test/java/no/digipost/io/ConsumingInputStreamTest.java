@@ -43,97 +43,97 @@ import static org.junit.Assert.assertThat;
 
 public class ConsumingInputStreamTest {
 
-	private static final ExecutorService executorService = Executors.newFixedThreadPool(10);
+    private static final ExecutorService executorService = Executors.newFixedThreadPool(10);
 
-	private ConsumingInputStream input;
+    private ConsumingInputStream input;
 
-	@Test
+    @Test
     public void readingWhatIsWrittenToOutputStream() throws Exception {
-		Future<String> futureString = executorService.submit(delayed(ofMillis(750), "Hello"));
+        Future<String> futureString = executorService.submit(delayed(ofMillis(750), "Hello"));
 
-		input = new ConsumingInputStream(executorService, writeWhenReady(futureString));
+        input = new ConsumingInputStream(executorService, writeWhenReady(futureString));
 
-		assertThat(input.available(), is(0));
+        assertThat(input.available(), is(0));
 
-		try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
-			assertThat("Blocks until string is ready", reader.readLine(), is("Hello"));
-		}
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
+            assertThat("Blocks until string is ready", reader.readLine(), is("Hello"));
+        }
     }
 
 
 
-	@Test
-	public void zippingAnOutputStreamThenUnzippingTheInputStream() throws Exception {
-		final long expectedEntriesAmount = 100;
-		input = new ConsumingInputStream(executorService, ZipOutputStream::new, zip -> {
-			try {
-				for (int i = 0; i < expectedEntriesAmount; i++) {
-					ZipEntry entry = new ZipEntry("file" + i);
-					entry.setMethod(ZipEntry.DEFLATED);
-					entry.setExtra("Extra bytes".getBytes());
-					entry.setComment(
-							"This will be stored in central directory at the end, and not retrieved when " +
-							"reading the zip with ZipInputStream");
-					zip.putNextEntry(entry);
+    @Test
+    public void zippingAnOutputStreamThenUnzippingTheInputStream() throws Exception {
+        final long expectedEntriesAmount = 100;
+        input = new ConsumingInputStream(executorService, ZipOutputStream::new, zip -> {
+            try {
+                for (int i = 0; i < expectedEntriesAmount; i++) {
+                    ZipEntry entry = new ZipEntry("file" + i);
+                    entry.setMethod(ZipEntry.DEFLATED);
+                    entry.setExtra("Extra bytes".getBytes());
+                    entry.setComment(
+                            "This will be stored in central directory at the end, and not retrieved when " +
+                            "reading the zip with ZipInputStream");
+                    zip.putNextEntry(entry);
                     zip.write((entry.getName() + " content").getBytes());
-				}
-			} catch (IOException e) {
-				throw new RuntimeException(e.getMessage(), e);
-			}
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e.getMessage(), e);
+            }
         });
 
 
-		LongAdder entriesAmount = new LongAdder();
-		try (ZipInputStream zip = new ZipInputStream(input)) {
+        LongAdder entriesAmount = new LongAdder();
+        try (ZipInputStream zip = new ZipInputStream(input)) {
 
-			for (ZipEntry entry : Zip.entriesIn(zip)) {
-				assertThat(entry.getName(), is("file" + entriesAmount));
-				assertThat(entry.getExtra(), is("Extra bytes".getBytes()));
-				assertThat(ByteStreams.toByteArray(zip), is((entry.getName() + " content").getBytes()));
-				entriesAmount.increment();
-			}
-		}
-		assertThat(entriesAmount.sum(), is(expectedEntriesAmount));
-	}
-
-
-
-	@Test
-	public void exceptionInProducerPropagatesToInputStream() throws Exception {
-		IllegalStateException producerFailure = new IllegalStateException("Cannot write data");
-		input = new ConsumingInputStream(executorService, out -> { throw producerFailure; });
-		Thread.sleep(200);
-
-		List<Throwable> failures = new ArrayList<>();
-		try { input.read();	} catch (ProducerFailed e) { failures.add(e.getCause().getCause()); }
-		try { input.read(new byte[10]);	} catch (ProducerFailed e) { failures.add(e.getCause().getCause()); }
-		try { input.read(new byte[10], 1, 3); } catch (ProducerFailed e) { failures.add(e.getCause().getCause()); }
-		try { input.skip(1); } catch (ProducerFailed e) { failures.add(e.getCause().getCause()); }
-		try { input.available(); } catch (ProducerFailed e) { failures.add(e.getCause().getCause()); }
-		try { input.close(); } catch (ProducerFailed e) { failures.add(e.getCause().getCause()); }
-
-		assertThat(failures, hasSize(6));
-		assertThat(failures, everyItem(sameInstance((Throwable) producerFailure)));
-	}
-
-
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
-
-	@Test
-    public void failFastForOutputStreamDecorator() {
-		Function<OutputStream, OutputStream> failStreamWrapping = out -> {
-			throw new IllegalStateException("unable to wrap piped stream");
-		};
-		expectedException.expect(IllegalStateException.class);
-		input = new ConsumingInputStream(executorService, failStreamWrapping, out -> {});
+            for (ZipEntry entry : Zip.entriesIn(zip)) {
+                assertThat(entry.getName(), is("file" + entriesAmount));
+                assertThat(entry.getExtra(), is("Extra bytes".getBytes()));
+                assertThat(ByteStreams.toByteArray(zip), is((entry.getName() + " content").getBytes()));
+                entriesAmount.increment();
+            }
+        }
+        assertThat(entriesAmount.sum(), is(expectedEntriesAmount));
     }
 
 
 
-	private Consumer<OutputStream> writeWhenReady(final Future<String> futureString) {
-	    return out -> {
-			String s;
+    @Test
+    public void exceptionInProducerPropagatesToInputStream() throws Exception {
+        IllegalStateException producerFailure = new IllegalStateException("Cannot write data");
+        input = new ConsumingInputStream(executorService, out -> { throw producerFailure; });
+        Thread.sleep(200);
+
+        List<Throwable> failures = new ArrayList<>();
+        try { input.read();	} catch (ProducerFailed e) { failures.add(e.getCause().getCause()); }
+        try { input.read(new byte[10]);	} catch (ProducerFailed e) { failures.add(e.getCause().getCause()); }
+        try { input.read(new byte[10], 1, 3); } catch (ProducerFailed e) { failures.add(e.getCause().getCause()); }
+        try { input.skip(1); } catch (ProducerFailed e) { failures.add(e.getCause().getCause()); }
+        try { input.available(); } catch (ProducerFailed e) { failures.add(e.getCause().getCause()); }
+        try { input.close(); } catch (ProducerFailed e) { failures.add(e.getCause().getCause()); }
+
+        assertThat(failures, hasSize(6));
+        assertThat(failures, everyItem(sameInstance((Throwable) producerFailure)));
+    }
+
+
+    @Rule
+    public ExpectedException expectedException = ExpectedException.none();
+
+    @Test
+    public void failFastForOutputStreamDecorator() {
+        Function<OutputStream, OutputStream> failStreamWrapping = out -> {
+            throw new IllegalStateException("unable to wrap piped stream");
+        };
+        expectedException.expect(IllegalStateException.class);
+        input = new ConsumingInputStream(executorService, failStreamWrapping, out -> {});
+    }
+
+
+
+    private Consumer<OutputStream> writeWhenReady(final Future<String> futureString) {
+        return out -> {
+            String s;
             try {
                 s = futureString.get(4, TimeUnit.SECONDS);
                 out.write(s.getBytes());
@@ -145,17 +145,17 @@ public class ConsumingInputStreamTest {
 
 
 
-	private Callable<String> delayed(final Duration delay, final String expectedString) {
-	    return () -> {
-			Thread.sleep(delay.toMillis());
-			return expectedString;
+    private Callable<String> delayed(final Duration delay, final String expectedString) {
+        return () -> {
+            Thread.sleep(delay.toMillis());
+            return expectedString;
         };
     }
 
 
 
-	@AfterClass
-	public static void shutdownExecutorService() {
-		executorService.shutdownNow();
-	}
+    @AfterClass
+    public static void shutdownExecutorService() {
+        executorService.shutdownNow();
+    }
 }

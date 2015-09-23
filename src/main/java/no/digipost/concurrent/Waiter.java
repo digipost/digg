@@ -29,15 +29,15 @@ import java.time.Duration;
 public abstract class Waiter {
 
 
-	/**
-	 * Invoking this method will do nothing but block for
-	 * any duration decided by the instance it is
-	 * invoked on.
-	 *
-	 * @throws WasInterrupted if the current thread is
-	 *         {@link Thread#interrupt() interrupted} while the
-	 *         method is blocking.
-	 */
+    /**
+     * Invoking this method will do nothing but block for
+     * any duration decided by the instance it is
+     * invoked on.
+     *
+     * @throws WasInterrupted if the current thread is
+     *         {@link Thread#interrupt() interrupted} while the
+     *         method is blocking.
+     */
     public abstract void doWait();
 
     Waiter() {
@@ -47,27 +47,27 @@ public abstract class Waiter {
 
 
     public static Waiter wait(Duration duration) {
-    	return wait(duration, Waiter.class.getSimpleName());
+        return wait(duration, Waiter.class.getSimpleName());
     }
 
     public static Waiter wait(Duration duration, String waiterName) {
-    	return new Waiter() {
-			@Override
-			public void doWait() {
-				try {
-		    		Thread.sleep(duration.toMillis());
-		    	} catch (InterruptedException e) {
-		    		throw new WasInterrupted(waiterName + " was interrupted.", e);
-		    	}
-			}
-		};
+        return new Waiter() {
+            @Override
+            public void doWait() {
+                try {
+                    Thread.sleep(duration.toMillis());
+                } catch (InterruptedException e) {
+                    throw new WasInterrupted(waiterName + " was interrupted.", e);
+                }
+            }
+        };
     }
 
 
     public static class WasInterrupted extends RuntimeException {
-    	protected WasInterrupted(String message, InterruptedException e) {
-    		super(message + " " + e.getClass().getSimpleName() + " '" + e.getMessage() + "'", e);
-    	}
+        protected WasInterrupted(String message, InterruptedException e) {
+            super(message + " " + e.getClass().getSimpleName() + " '" + e.getMessage() + "'", e);
+        }
     }
 
 }
