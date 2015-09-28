@@ -59,11 +59,11 @@ public class ExceptionsTest {
 
     @Test
     public void getAThrowingSupplierUnchecked() {
-        assertThat(supplyUnchecked(() -> 42), is(42));
+        assertThat(getUnchecked(() -> 42), is(42));
 
         Exception e = new Exception();
         try {
-            supplyUnchecked(() -> { throw e; });
+            getUnchecked(() -> { throw e; });
         } catch (RuntimeException ex) {
             assertThat(ex.getCause(), sameInstance(e));
             return;

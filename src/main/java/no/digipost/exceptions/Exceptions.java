@@ -49,22 +49,21 @@ public final class Exceptions {
 
 
     /**
-     * Immediately get a value from the given {@link ThrowingSupplier supplier},
+     * Immediately {@link ThrowingSupplier#get get} a result from the given {@code supplier},
      * and if needed, convert any thrown exceptions to unckecked.
      *
      * @param supplier The {@link ThrowingSupplier}.
-     * @return the value.
+     * @return the result.
      */
-    public static <T> T supplyUnchecked(ThrowingSupplier<T, ? extends Throwable> supplier) {
+    public static <T> T getUnchecked(ThrowingSupplier<T, ? extends Throwable> supplier) {
         return supplier.asUnchecked().get();
     }
 
     /**
-     * Immediately {@link Runnable#run() run} the given {@code runnable},
+     * Immediately {@link ThrowingRunnable#run() run} the given {@code runnable},
      * and if needed, convert any thrown exceptions to unckecked.
      *
      * @param runnable The {@link ThrowingRunnable}.
-     * @return the value.
      */
     public static void runUnchecked(ThrowingRunnable<? extends Throwable> runnable) {
         runnable.asUnchecked().run();
