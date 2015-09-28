@@ -15,6 +15,9 @@
  */
 package no.digipost.exceptions;
 
+import no.digipost.function.ThrowingRunnable;
+import no.digipost.function.ThrowingSupplier;
+
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -42,6 +45,29 @@ public final class Exceptions {
 
     public static <X extends Throwable> RuntimeException asUnchecked(X t, Function<? super X, String> message) {
         return t instanceof RuntimeException ? (RuntimeException) t : new RuntimeException(message.apply(t), t);
+    }
+
+
+    /**
+     * Immediately get a value from the given {@link ThrowingSupplier supplier},
+     * and if needed, convert any thrown exceptions to unckecked.
+     *
+     * @param supplier The {@link ThrowingSupplier}.
+     * @return the value.
+     */
+    public static <T> T supplyUnchecked(ThrowingSupplier<T, ? extends Throwable> supplier) {
+        return supplier.asUnchecked().get();
+    }
+
+    /**
+     * Immediately {@link Runnable#run() run} the given {@code runnable},
+     * and if needed, convert any thrown exceptions to unckecked.
+     *
+     * @param runnable The {@link ThrowingRunnable}.
+     * @return the value.
+     */
+    public static void runUnchecked(ThrowingRunnable<? extends Throwable> runnable) {
+        runnable.asUnchecked().run();
     }
 
     private Exceptions() {}

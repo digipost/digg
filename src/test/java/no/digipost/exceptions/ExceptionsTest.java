@@ -15,17 +15,19 @@
  */
 package no.digipost.exceptions;
 
+import no.digipost.concurrent.OneTimeToggle;
 import org.junit.Test;
 
 import java.io.IOException;
 import java.util.List;
 
 import static java.util.stream.Collectors.toList;
-import static no.digipost.exceptions.Exceptions.causalChainOf;
+import static no.digipost.exceptions.Exceptions.*;
 import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
+import static org.junit.Assert.*;
 
 public class ExceptionsTest {
+
 
     @Test
     public void causalChainOfNullIsEmptyStream() {
@@ -38,4 +40,35 @@ public class ExceptionsTest {
         List<Throwable> exception = causalChainOf(new Exception(new IllegalStateException(new IOException()))).collect(toList());
         assertThat(exception, contains(instanceOf(Exception.class), instanceOf(IllegalStateException.class), instanceOf(IOException.class)));
     }
+
+    @Test
+    public void runAThrowingRunnableUnchecked() {
+        OneTimeToggle toggled = new OneTimeToggle();
+        Exceptions.runUnchecked(() -> toggled.nowOrIfAlreadyThenThrow(() -> new AssertionError("should not be run twice!")));
+        assertTrue(toggled.yet());
+
+        Exception e = new Exception();
+        try {
+            runUnchecked(() -> { throw e; });
+        } catch (RuntimeException ex) {
+            assertThat(ex.getCause(), sameInstance(e));
+            return;
+        }
+        fail("Should throw exception");
+    }
+
+    @Test
+    public void getAThrowingSupplierUnchecked() {
+        assertThat(supplyUnchecked(() -> 42), is(42));
+
+        Exception e = new Exception();
+        try {
+            supplyUnchecked(() -> { throw e; });
+        } catch (RuntimeException ex) {
+            assertThat(ex.getCause(), sameInstance(e));
+            return;
+        }
+        fail("Should throw exception");
+    }
+
 }
