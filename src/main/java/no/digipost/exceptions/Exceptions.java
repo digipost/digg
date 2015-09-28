@@ -15,6 +15,7 @@
  */
 package no.digipost.exceptions;
 
+import no.digipost.function.ThrowingFunction;
 import no.digipost.function.ThrowingRunnable;
 import no.digipost.function.ThrowingSupplier;
 
@@ -47,6 +48,17 @@ public final class Exceptions {
         return t instanceof RuntimeException ? (RuntimeException) t : new RuntimeException(message.apply(t), t);
     }
 
+    /**
+     * Immediately {@link ThrowingFunction#apply apply} the given {@code function} with the given {@code argument},
+     * and if needed, convert any thrown exceptions to unckecked.
+     *
+     * @param function The {@link ThrowingFunction}.
+     * @param argument The argument to pass to {@link ThrowingFunction#apply(Object)}
+     * @return the result.
+     */
+    public static <T, R> R applyUnchecked(ThrowingFunction<T, R, ? extends Throwable> function, T argument) {
+        return function.asUnchecked().apply(argument);
+    }
 
     /**
      * Immediately {@link ThrowingSupplier#get get} a result from the given {@code supplier},

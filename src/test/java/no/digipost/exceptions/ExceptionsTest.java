@@ -71,4 +71,18 @@ public class ExceptionsTest {
         fail("Should throw exception");
     }
 
+    @Test
+    public void applyAThrowingFunctionUnchecked() {
+        assertThat(applyUnchecked(Math::round, 4.6f), is(5));
+
+        Exception e = new Exception();
+        try {
+            applyUnchecked(t -> { throw e; }, "anything");
+        } catch (RuntimeException ex) {
+            assertThat(ex.getCause(), sameInstance(e));
+            return;
+        }
+        fail("Should throw exception");
+    }
+
 }
