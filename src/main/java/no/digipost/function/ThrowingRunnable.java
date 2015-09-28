@@ -17,16 +17,24 @@ package no.digipost.function;
 
 import no.digipost.exceptions.Exceptions;
 
+import java.util.function.Consumer;
+
 @FunctionalInterface
 public interface ThrowingRunnable<X extends Throwable> {
 
     void run() throws X;
 
     default Runnable asUnchecked() {
+        return ifException(e -> { throw Exceptions.asUnchecked(e); });
+    }
+
+    default Runnable ifException(Consumer<Exception> exceptionHandler) {
         return () -> {
             try {
                 ThrowingRunnable.this.run();
-            } catch (RuntimeException | Error e) {
+            } catch (Exception e) {
+                exceptionHandler.accept(e);
+            } catch (Error e) {
                 throw e;
             } catch (Throwable e) {
                 throw Exceptions.asUnchecked(e);

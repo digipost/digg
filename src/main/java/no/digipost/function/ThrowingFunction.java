@@ -19,31 +19,37 @@ import no.digipost.exceptions.Exceptions;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 @FunctionalInterface
 public interface ThrowingFunction<T, R, X extends Throwable> {
     R apply(T t) throws X;
 
+
     default Function<T, R> asUnchecked() {
-        return t -> {
-            try {
-                return ThrowingFunction.this.apply(t);
-            } catch (RuntimeException | Error e) {
-                throw e;
-            } catch (Throwable e) {
-                throw Exceptions.asUnchecked(e);
-            }
-        };
+        return ifExceptionApply((t, e) -> { throw Exceptions.asUnchecked(e); });
     }
 
     default Function<T, Optional<R>> ifException(BiConsumer<? super T, Exception> exceptionHandler) {
         return t -> {
+            return Optional.ofNullable(ifExceptionApply((failingT, e) -> {
+                exceptionHandler.accept(failingT, e);
+                return null;
+            }).apply(t));
+        };
+    }
+
+    default Function<T, R> ifExceptionApply(Function<Exception, ? extends R> exceptionMapper) {
+        return ifExceptionApply((t, e) -> exceptionMapper.apply(e));
+    }
+
+    default Function<T, R> ifExceptionApply(BiFunction<? super T, Exception, ? extends R> exceptionMapper) {
+        return t -> {
             try {
-                return Optional.of(ThrowingFunction.this.apply(t));
+                return ThrowingFunction.this.apply(t);
             } catch (Exception e) {
-                exceptionHandler.accept(t, e);
-                return Optional.empty();
+                return exceptionMapper.apply(t, e);
             } catch (Error err) {
                 throw err;
             } catch (Throwable thr) {

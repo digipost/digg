@@ -17,6 +17,9 @@ package no.digipost.function;
 
 import no.digipost.exceptions.Exceptions;
 
+import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 @FunctionalInterface
@@ -24,10 +27,25 @@ public interface ThrowingSupplier<T, X extends Throwable> {
     T get() throws X;
 
     default Supplier<T> asUnchecked() {
+        return ifExceptionGet(e -> { throw Exceptions.asUnchecked(e); });
+    }
+
+    default Supplier<Optional<T>> ifException(Consumer<Exception> exceptionHandler) {
+        return () -> {
+            return Optional.ofNullable(ifExceptionGet(e -> {
+                exceptionHandler.accept(e);
+                return null;
+            }).get());
+        };
+    }
+
+    default Supplier<T> ifExceptionGet(Function<Exception, T> recoveryFunction) {
         return () -> {
             try {
                 return ThrowingSupplier.this.get();
-            } catch (RuntimeException | Error e) {
+            } catch (Exception e) {
+                return recoveryFunction.apply(e);
+            } catch (Error e) {
                 throw e;
             } catch (Throwable e) {
                 throw Exceptions.asUnchecked(e);

@@ -19,7 +19,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import static java.util.Optional.empty;
 import static org.hamcrest.Matchers.is;
@@ -27,7 +27,7 @@ import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
-public class ThrowingFunctionsTest {
+public class ThrowingSupplierTest {
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -38,25 +38,25 @@ public class ThrowingFunctionsTest {
 
     @Test
     public void rethrowOriginalRuntimeException() {
-        ThrowingFunction<Integer, ?, Exception> fn = i -> {throw ex;};
+        ThrowingSupplier<?, Exception> fn = () -> {throw ex;};
         expectedException.expect(sameInstance(ex));
-        fn.asUnchecked().apply(42);
+        fn.asUnchecked().get();
     }
 
     @Test
     public void rethrowOriginalError() {
-        ThrowingFunction<Integer, ?, Exception> fn = i -> {throw err;};
+        ThrowingSupplier<?, Exception> fn = () -> {throw err;};
         expectedException.expect(sameInstance(err));
-        fn.asUnchecked().apply(42);
+        fn.asUnchecked().get();
     }
 
     @Test
     public void translateToEmptyOptionalAndDelegateExceptionToHandler() {
-        ThrowingFunction<Integer, ?, Exception> fn = i -> {throw ex;};
+        ThrowingSupplier<?, Exception> fn = () -> {throw ex;};
         @SuppressWarnings("unchecked")
-        BiConsumer<Integer, Exception> handler = mock(BiConsumer.class);
+        Consumer<Exception> handler = mock(Consumer.class);
 
-        assertThat(fn.ifException(handler).apply(42), is(empty()));
-        verify(handler, times(1)).accept(42, ex);
+        assertThat(fn.ifException(handler).get(), is(empty()));
+        verify(handler, times(1)).accept(ex);
     }
 }
