@@ -15,8 +15,10 @@
  */
 package no.digipost;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * Party people, turn up tha...
@@ -68,6 +70,25 @@ public final class Base {
         } else {
             throw throwIfNull.get();
         }
+    }
+
+
+    /**
+     * Extract (derive) multiple values from one given object.
+     *
+     * @param object the object to extract values from.
+     * @param extractors each function that will extract a value from the given object.
+     *
+     * @return a stream of values to be extracted.
+     *
+     *
+     * @param <T> The type of the object to extract from.
+     * @param <R> The resulting most common type of the extracted values. Typically, the extractors
+     *            should yield the same type.
+     */
+    @SafeVarargs
+    public static final <T, R> Stream<R> extract(T object, Function<? super T, ? extends Optional<R>> ... extractors) {
+        return Stream.of(extractors).map(f -> f.apply(object)).filter(Optional::isPresent).map(Optional::get);
     }
 
     private Base() {}

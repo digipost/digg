@@ -23,6 +23,11 @@ import org.junit.contrib.theories.Theory;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
+import java.util.Optional;
+
+import static co.unruly.matchers.StreamMatchers.contains;
+import static co.unruly.matchers.StreamMatchers.empty;
+import static no.digipost.Base.extract;
 import static no.digipost.Base.nonNull;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
@@ -51,6 +56,13 @@ public class BaseTest {
         expectedException.expectMessage("my value");
         nonNull("my value", (Object) null, IllegalStateException::new);
     }
+
+    @Test
+    public void extractValuesFromAnObject() {
+        assertThat(extract("abc", (String s) -> Optional.of(s.charAt(0)), s -> Optional.empty(), (String s) -> Optional.of(s.charAt(2))), contains('a', 'c'));
+        assertThat(extract("abc", s -> Optional.empty(), s -> Optional.empty()), empty());
+    }
+
 
 
 
