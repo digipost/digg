@@ -39,8 +39,10 @@ public final class Base {
      * @throws NullPointerException if {@code t} is {@code null}.
      */
     public static <T> T nonNull(String description, T t) {
-        return nonNull(description, t, NullPointerException::new);
+        return nonNull(description, d -> t);
     }
+
+
 
     /**
      * Not allow {@code null}-references.
@@ -52,23 +54,51 @@ public final class Base {
      * @return            the same instance given as argument.
      * @throws X          if {@code t} is {@code null}.
      */
-    public static <T, X extends Throwable> T nonNull(String description, T t, Function<String, X> throwIfNull) throws X {
+    public static <T, X extends Throwable> T nonNull(String description, T t, Function<? super String, X> throwIfNull) throws X {
         return nonNull(t, () -> throwIfNull.apply(description + " can not be null"));
     }
 
     /**
      * Not allow {@code null}-references.
      *
-     * @param t the reference
+     * @param t           the reference
      * @param throwIfNull the exception to throw if {@code t} is {@code null}
-     * @return the same instance given as argument.
-     * @throws X if {@code t} is {@code null}.
+     * @return            the same instance given as argument.
+     * @throws X          if {@code t} is {@code null}.
      */
     public static <T, X extends Throwable> T nonNull(T t, Supplier<X> throwIfNull) throws X {
-        if (t != null) {
-            return t;
+        return nonNull("a reference", s -> t, s -> throwIfNull.get());
+    }
+
+    /**
+     * Not allow {@code null}-references. This is a convenience method for when a descriptive refKey
+     * can be used to resolve the reference, for instance to resolve resources
+     * on classpath with {@link Class#getResourceAsStream(String) .class::getResourceAsStream}.
+     * The refKey will appear in the exception message if the resolved reference is {@code null}.
+     *
+     * @param descriptiveRefKey the key used to resolve the reference
+     * @param refResolver       the function the will resolve the non-null result based on the description.
+     * @return                  the reference resolved by {@code refResolver}, never {@code null}
+     */
+    public static <T> T nonNull(String descriptiveRefKey, Function<? super String, T> refResolver) {
+        return nonNull(descriptiveRefKey, refResolver, d -> new NullPointerException("Tried to resolve " + d + ", but got null!"));
+    }
+
+    /**
+     * Not allow {@code null}-references.
+     *
+     * @param descriptiveRefKey the key used to resolve the reference
+     * @param refResolver       the function the will resolve the non-null result based on the description.
+     * @param throwIfNull       the function to construct the exception if the {@code refResolver} yields {@code null}.
+     * @return                  the reference resolved by {@code refResolver}, never {@code null}
+     * @throws X                if {@code refResolver} yields {@code null}
+     */
+    public static <T, X extends Throwable> T nonNull(String descriptiveRefKey, Function<? super String, T> refResolver, Function<? super String, X> throwIfNull) throws X {
+        T ref = refResolver.apply(descriptiveRefKey);
+        if (ref != null) {
+            return ref;
         } else {
-            throw throwIfNull.get();
+            throw throwIfNull.apply(descriptiveRefKey);
         }
     }
 

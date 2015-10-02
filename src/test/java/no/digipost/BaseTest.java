@@ -39,8 +39,11 @@ public class BaseTest {
     public final ExpectedException expectedException = ExpectedException.none();
 
     @Theory(nullsAccepted = false)
-    public void yieldsSameInstanceOnNonNullReferences(@ForAll String value) {
+    public void yieldsSameInstanceOnNonNullReferences(@ForAll String value) throws NullPointerException {
         assertThat(nonNull("my value", value), sameInstance(value));
+        assertThat(nonNull(value, d -> d), sameInstance(value));
+        assertThat(Base.<String, NullPointerException>nonNull("my value", value, NullPointerException::new), sameInstance(value));
+        assertThat(Base.<String, NullPointerException>nonNull(value, d -> d, d -> new NullPointerException()), sameInstance(value));
     }
 
     @Test
@@ -55,6 +58,13 @@ public class BaseTest {
         expectedException.expect(IllegalStateException.class);
         expectedException.expectMessage("my value");
         nonNull("my value", (Object) null, IllegalStateException::new);
+    }
+
+    @Test
+    public void throwsExceptionWithDescriptionInMessage() {
+        String resourceName = "all/your/base/is/belong/to/us";
+        expectedException.expectMessage(resourceName);
+        nonNull(resourceName, getClass()::getResource);
     }
 
     @Test
