@@ -20,6 +20,7 @@ import no.digipost.exceptions.Exceptions;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
 import java.util.function.Function;
 
 @FunctionalInterface
@@ -29,6 +30,10 @@ public interface ThrowingFunction<T, R, X extends Throwable> {
 
     default Function<T, R> asUnchecked() {
         return ifExceptionApply((t, e) -> { throw Exceptions.asUnchecked(e); });
+    }
+
+    default Function<T, Optional<R>> ifException(Consumer<Exception> exceptionHandler) {
+        return ifException((t, e) -> exceptionHandler.accept(e));
     }
 
     default Function<T, Optional<R>> ifException(BiConsumer<? super T, Exception> exceptionHandler) {
@@ -47,7 +52,7 @@ public interface ThrowingFunction<T, R, X extends Throwable> {
     default Function<T, R> ifExceptionApply(BiFunction<? super T, Exception, ? extends R> exceptionMapper) {
         return t -> {
             try {
-                return ThrowingFunction.this.apply(t);
+                return apply(t);
             } catch (Exception e) {
                 return exceptionMapper.apply(t, e);
             } catch (Error err) {

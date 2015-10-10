@@ -20,6 +20,7 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 import static java.util.Optional.empty;
 import static org.hamcrest.Matchers.is;
@@ -32,7 +33,7 @@ public class ThrowingFunctionTest {
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
 
-    private final RuntimeException ex = new RuntimeException();
+    private final RuntimeException ex = new RuntimeException("fail");
 
     private final Error err = new Error();
 
@@ -53,10 +54,22 @@ public class ThrowingFunctionTest {
     @Test
     public void translateToEmptyOptionalAndDelegateExceptionToHandler() {
         ThrowingFunction<Integer, ?, Exception> fn = i -> {throw ex;};
-        @SuppressWarnings("unchecked")
-        BiConsumer<Integer, Exception> handler = mock(BiConsumer.class);
 
-        assertThat(fn.ifException(handler).apply(42), is(empty()));
-        verify(handler, times(1)).accept(42, ex);
+        @SuppressWarnings("unchecked")
+        Consumer<Exception> getException = mock(Consumer.class);
+        assertThat(fn.ifException(getException).apply(42), is(empty()));
+        verify(getException, times(1)).accept(ex);
+
+        @SuppressWarnings("unchecked")
+        BiConsumer<Integer, Exception> getValueAndException = mock(BiConsumer.class);
+        assertThat(fn.ifException(getValueAndException).apply(42), is(empty()));
+        verify(getValueAndException, times(1)).accept(42, ex);
+    }
+
+    @Test
+    public void mapThrownExceptionToResultValue() {
+        ThrowingFunction<Integer, String, Exception> fn = i -> {throw ex;};
+
+        assertThat(fn.ifExceptionApply(Exception::getMessage).apply(42), is("fail"));
     }
 }
