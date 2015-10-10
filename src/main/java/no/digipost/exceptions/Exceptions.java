@@ -15,10 +15,9 @@
  */
 package no.digipost.exceptions;
 
-import no.digipost.function.ThrowingFunction;
-import no.digipost.function.ThrowingRunnable;
-import no.digipost.function.ThrowingSupplier;
+import no.digipost.function.*;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -80,6 +79,68 @@ public final class Exceptions {
     public static void runUnchecked(ThrowingRunnable<? extends Throwable> runnable) {
         runnable.asUnchecked().run();
     }
+
+
+    /**
+     * Convenience to acquire a {@link ThrowingFunction}-reference from a lambda expression.
+     */
+    public static final <T, R, X extends Throwable> ThrowingFunction<T, R, X> mayThrow(ThrowingFunction<T, R, X> function) {
+        return function;
+    }
+
+    /**
+     * Convenience to acquire a {@link ThrowingBiFunction}-reference from a lambda expression.
+     */
+    public static final <T, U, R, X extends Throwable> ThrowingBiFunction<T, U, R, X> mayThrow(ThrowingBiFunction<T, U, R, X> bifunction) {
+        return bifunction;
+    }
+
+    /**
+     * Convenience to acquire a {@link ThrowingSupplier}-reference from a lambda expression.
+     */
+    public static final <T, X extends Throwable> ThrowingSupplier<T, X> mayThrow(ThrowingSupplier<T, X> supplier) {
+        return supplier;
+    }
+
+    /**
+     * Convenience to acquire a {@link ThrowingConsumer}-reference from a lambda expression.
+     */
+    public static final <T, X extends Throwable> ThrowingConsumer<T, X> mayThrow(ThrowingConsumer<T, X> consumer) {
+        return consumer;
+    }
+
+    /**
+     * Convenience to acquire a {@link ThrowingBiConsumer}-reference from a lambda expression.
+     */
+    public static final <T, U, X extends Throwable> ThrowingBiConsumer<T, U, X> mayThrow(ThrowingBiConsumer<T, U, X> consumer) {
+        return consumer;
+    }
+
+    /**
+     * Convenience to acquire a {@link ThrowingRunnable}-reference from a lambda expression.
+     */
+    public static final <T, X extends Throwable> ThrowingRunnable<X> mayThrow(ThrowingRunnable<X> runnable) {
+        return runnable;
+    }
+
+
+    /**
+     * This consumer rethrows any given {@link Exception} as an unchecked {@link RuntimeException}.
+     */
+    public static final Consumer<Exception> rethrowAnyException = rethrow(Exceptions::asUnchecked);
+
+
+    /**
+     * Create a exception handler ({@link Consumer}) which simply rethrows given exceptions.
+     *
+     * @param createUnchecked a function to convert a (typically) checked exception to {@link RuntimeException}.
+     * @return the {@link Consumer} which rethrows any given exception.
+     */
+    public static final <T extends Throwable> Consumer<T> rethrow(Function<T, ? extends RuntimeException> createUnchecked) {
+        return e -> { throw createUnchecked.apply(e); };
+    }
+
+
 
     private Exceptions() {}
 }

@@ -17,20 +17,33 @@ package no.digipost.function;
 
 import no.digipost.exceptions.Exceptions;
 
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+
+import static no.digipost.exceptions.Exceptions.rethrowAnyException;
 
 @FunctionalInterface
 public interface ThrowingConsumer<T, X extends Throwable> {
     void accept(T t) throws X;
 
     default Consumer<T> asUnchecked() {
+        return ifException(rethrowAnyException);
+    }
+
+    default Consumer<T> ifException(Consumer<Exception> exceptionHandler) {
+        return ifException((t, e) -> exceptionHandler.accept(e));
+    }
+
+    default Consumer<T> ifException(BiConsumer<? super T, Exception> exceptionHandler) {
         return t -> {
             try {
-                ThrowingConsumer.this.accept(t);
-            } catch (RuntimeException | Error e) {
-                throw e;
-            } catch (Throwable e) {
-                throw Exceptions.asUnchecked(e);
+                accept(t);
+            } catch (Exception e) {
+                exceptionHandler.accept(t, e);
+            } catch (Error err) {
+                throw err;
+            } catch (Throwable thr) {
+                throw Exceptions.asUnchecked(thr);
             }
         };
     }

@@ -16,17 +16,25 @@
 package no.digipost.exceptions;
 
 import no.digipost.concurrent.OneTimeToggle;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.function.Consumer;
 
 import static java.util.stream.Collectors.toList;
 import static no.digipost.exceptions.Exceptions.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 public class ExceptionsTest {
+
+    @Rule
+    public final ExpectedException expectedException = ExpectedException.none();
 
 
     @Test
@@ -84,5 +92,24 @@ public class ExceptionsTest {
         }
         fail("Should throw exception");
     }
+
+    @Test
+    public void factoryMethodsForThrowingFunctionalInterfaces() throws Throwable {
+        assertThat(mayThrow((t) -> t).apply("a"), is("a"));
+        assertThat(mayThrow((t, u) -> t).apply("a", "b"), is("a"));
+        assertThat(mayThrow(() -> "a").get(), is("a"));
+
+        Exception ex = new Exception();
+        @SuppressWarnings("unchecked")
+        Consumer<Exception> exceptionHandler = mock(Consumer.class);
+        mayThrow(t -> { if (t == null) throw ex; }).ifException(exceptionHandler).accept(null);
+        verify(exceptionHandler).accept(ex);
+
+        expectedException.expect(sameInstance(ex));
+        mayThrow((t, u) -> { if (t == null) throw ex; }).accept(null, null);
+    }
+
+
+
 
 }
