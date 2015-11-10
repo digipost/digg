@@ -25,8 +25,11 @@ import java.util.List;
 
 import static co.unruly.matchers.StreamMatchers.empty;
 import static co.unruly.matchers.StreamMatchers.equalTo;
+import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 import static no.digipost.Enums.fromCommaSeparatedNames;
+import static no.digipost.Enums.toCommaSeparatedNames;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 @RunWith(Theories.class)
@@ -45,6 +48,11 @@ public class EnumsTest {
     @Test
     public void noEnumsFoundInNullString() {
         assertThat(fromCommaSeparatedNames(null, MyEnum.class), empty());
+    }
+
+    @Theory
+    public void convertToCommaSeparatedListOfEnumNames(@ForAll MyEnum ... enums) {
+        assertThat(toCommaSeparatedNames(enums), is(stream(enums).map(Enum::name).collect(joining(","))));
     }
 
 }

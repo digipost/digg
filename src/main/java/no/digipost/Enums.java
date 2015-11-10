@@ -15,11 +15,15 @@
  */
 package no.digipost;
 
+import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collector;
 import java.util.stream.Stream;
 
+import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
+import static java.util.stream.Collectors.joining;
 
 public final class Enums {
 
@@ -28,17 +32,41 @@ public final class Enums {
     }
 
     public static <E extends Enum<E>> Stream<E> fromCommaSeparated(String enumsString, Function<String, String> toEnumName, Class<E> enumType) {
-        return fromString(enumsString, "\\s*,\\s*", toEnumName.<E>andThen(e -> Enum.valueOf(enumType, e)));
+        return fromEnumsString(enumsString, "\\s*,\\s*", toEnumName.<E>andThen(e -> Enum.valueOf(enumType, e)));
     }
 
-    public static <E extends Enum<E>> Stream<E> fromString(String enumsString, String delimRegex, Function<String, E> convertToEnum) {
-        return fromString(enumsString, delimRegex, e -> true, convertToEnum);
+    public static <E extends Enum<E>> Stream<E> fromEnumsString(String enumsString, String delimRegex, Function<String, E> convertToEnum) {
+        return fromEnumsString(enumsString, delimRegex, e -> true, convertToEnum);
     }
 
-    public static <E extends Enum<E>> Stream<E> fromString(String enumsString, String delimRegex, Predicate<String> included, Function<String, E> convertToEnum) {
+    public static <E extends Enum<E>> Stream<E> fromEnumsString(String enumsString, String delimRegex, Predicate<String> included, Function<String, E> convertToEnum) {
         String trimmed = enumsString != null ? enumsString.trim() : "";
         return trimmed.isEmpty() ? Stream.empty() : stream(trimmed.split(delimRegex)).filter(included).map(convertToEnum);
     }
+
+    @SafeVarargs
+    public static <E extends Enum<E>> String toCommaSeparatedNames(E ... enums) {
+        return toCommaSeparatedNames(asList(enums));
+    }
+
+    public static <E extends Enum<E>> String toCommaSeparatedNames(Collection<E> enums) {
+        return toNames(enums, ",");
+    }
+
+    public static <E extends Enum<E>> String toNames(Collection<E> enums, String delim) {
+        return toEnumsString(enums, e -> e.name(), delim);
+    }
+
+    public static <E extends Enum<E>> String toEnumsString(Collection<E> enums, Function<? super E, String> toString, String delim) {
+        return toEnumsString(enums, toString, joining(","));
+    }
+
+    public static <E extends Enum<E>> String toEnumsString(Collection<E> enums, Function<? super E, String> toString, Collector<? super String, ?, String> collector) {
+        return enums.stream().map(toString).collect(collector);
+    }
+
+
+
 
     private Enums() {}
 }
