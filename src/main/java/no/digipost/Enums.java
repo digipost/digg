@@ -50,19 +50,34 @@ public final class Enums {
     }
 
     public static <E extends Enum<E>> String toCommaSeparatedNames(Collection<E> enums) {
-        return toNames(enums, ",");
+        return toNames(",", enums);
     }
 
-    public static <E extends Enum<E>> String toNames(Collection<E> enums, String delim) {
-        return toEnumsString(enums, e -> e.name(), delim);
+    @SafeVarargs
+    public static <E extends Enum<E>> String toNames(String delim, E ... enums) {
+        return toNames(delim, asList(enums));
     }
 
-    public static <E extends Enum<E>> String toEnumsString(Collection<E> enums, Function<? super E, String> toString, String delim) {
-        return toEnumsString(enums, toString, joining(","));
+    public static <E extends Enum<E>> String toNames(String delim, Collection<E> enums) {
+        return toStringOf(Enum::name, delim, enums);
     }
 
-    public static <E extends Enum<E>> String toEnumsString(Collection<E> enums, Function<? super E, String> toString, Collector<? super String, ?, String> collector) {
-        return enums.stream().map(toString).collect(collector);
+    @SafeVarargs
+    public static <E extends Enum<E>> String toStringOf(Function<? super E, String> enumAsString, String delim, E ... enums) {
+        return toStringOf(enumAsString, delim, asList(enums));
+    }
+
+    public static <E extends Enum<E>> String toStringOf(Function<? super E, String> enumAsString, String delim, Collection<E> enums) {
+        return toStringOf(enumAsString, joining(delim), enums);
+    }
+
+    @SafeVarargs
+    public static <E extends Enum<E>> String toStringOf(Function<? super E, String> enumAsString, Collector<? super String, ?, String> joiner, E ... enums) {
+        return toStringOf(enumAsString, joiner, asList(enums));
+    }
+
+    public static <E extends Enum<E>> String toStringOf(Function<? super E, String> enumAsString, Collector<? super String, ?, String> joiner, Collection<E> enums) {
+        return enums.stream().map(enumAsString).collect(joiner);
     }
 
 

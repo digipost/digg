@@ -22,13 +22,13 @@ import org.junit.contrib.theories.Theory;
 import org.junit.runner.RunWith;
 
 import java.util.List;
+import java.util.function.Function;
 
 import static co.unruly.matchers.StreamMatchers.empty;
 import static co.unruly.matchers.StreamMatchers.equalTo;
-import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
-import static no.digipost.Enums.fromCommaSeparatedNames;
-import static no.digipost.Enums.toCommaSeparatedNames;
+import static no.digipost.Enums.*;
+import static no.digipost.EnumsTest.MyEnum.*;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -46,13 +46,21 @@ public class EnumsTest {
     }
 
     @Test
-    public void noEnumsFoundInNullString() {
+    public void noEnumsAreFoundInNullString() {
         assertThat(fromCommaSeparatedNames(null, MyEnum.class), empty());
     }
 
+    @Test
+    public void convertToStringOfDelimiterSeparatedStrings() {
+        Function<? super MyEnum, String> lowerCasedEnumName = e -> e.name().toLowerCase();
+        assertThat(toStringOf(lowerCasedEnumName, joining(": ", "[", "]"), A, ABA, AA), is("[a: aba: aa]"));
+    }
+
     @Theory
-    public void convertToCommaSeparatedListOfEnumNames(@ForAll MyEnum ... enums) {
-        assertThat(toCommaSeparatedNames(enums), is(stream(enums).map(Enum::name).collect(joining(","))));
+    public void toStringConversionsAreSpecialCasesOfTheGenericBaseCase(@ForAll MyEnum ... enums) {
+        assertThat(toCommaSeparatedNames(enums), is(toStringOf(Enum::name, joining(","), enums)));
+        assertThat(toNames(": ", enums), is(toStringOf(Enum::name, joining(": "), enums)));
+        assertThat(toStringOf(e -> e.name().toLowerCase(), "#", enums), is(toStringOf(e -> e.name().toLowerCase(), joining("#"), enums)));
     }
 
 }
