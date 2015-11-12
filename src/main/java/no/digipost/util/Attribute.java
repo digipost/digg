@@ -16,7 +16,6 @@
 package no.digipost.util;
 
 import java.io.Serializable;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -32,7 +31,7 @@ import static java.util.Optional.ofNullable;
  *
  * @param <V> The type of the object this attribute is mapping.
  */
-public final class Attribute<V> implements Serializable {
+public final class Attribute<V> implements GetsNamedValue<V>, SetsNamedValue<V>, Serializable {
 
     public final String name;
 
@@ -40,41 +39,21 @@ public final class Attribute<V> implements Serializable {
         this.name = name;
     }
 
-    public void setOn(Map<String, ? super V> map, V value) {
-        setOn(map::put, value);
-    }
-
+    @Override
     public void setOn(BiConsumer<String, ? super V> setter, V value) {
         setter.accept(name, value);
     }
 
-    public Optional<V> getFrom(Map<String, ? super V> map) {
-        return getFrom(map::get);
-    }
-
+    @Override
     public Optional<V> getFrom(Function<String, ?> getter) {
         @SuppressWarnings("unchecked")
         V attributeValue = (V) getter.apply(name);
         return ofNullable(attributeValue);
     }
 
-    public V requireFrom(Map<String, ? super V> map) {
-        return requireFrom(map::get);
-    }
-
-    public V requireFrom(Function<String, ?> getter) {
-        return getFrom(getter).orElseThrow(() -> new NotFound(this));
-    }
-
     @Override
     public String toString() {
         return "attribute '" + name + "'";
-    }
-
-    public static class NotFound extends RuntimeException {
-        public NotFound(Attribute<?> attribute) {
-            super("The " + attribute + " was not found!");
-        }
     }
 
     @Override
