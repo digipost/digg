@@ -42,4 +42,11 @@ public class RegexTest {
         Pattern pattern = Pattern.compile("(a)");
         assertThat(Regex.extractGroups("b", pattern), empty());
     }
+
+    @Test
+    public void extractRepeatedlyOccuringGroups() {
+        Pattern pattern = Pattern.compile("(^.|(?<=_).)[Y|A]");
+        assertThat(Regex.extractGroups("MY_DATABASE_TABLE", pattern), contains("M", "D", "T"));
+    }
+
 }

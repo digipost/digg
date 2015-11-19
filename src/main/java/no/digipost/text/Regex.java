@@ -45,11 +45,13 @@ public final class Regex {
      *         found or no groups are defined.
      */
     public static Stream<String> groups(Matcher matcher) {
-        if (matcher.find()) {
-            return Stream.iterate(1, i -> i + 1).limit(matcher.groupCount()).map(matcher::group);
-        } else {
-            return Stream.empty();
+        Stream.Builder<String> streams = Stream.builder();
+        while (matcher.find()) {
+            for (int i = 1; i <= matcher.groupCount(); i++) {
+                streams.add(matcher.group(i));
+            }
         }
+        return streams.build();
     }
 
 
