@@ -15,10 +15,12 @@
  */
 package no.digipost.util;
 
+import no.digipost.concurrent.OneTimeToggle;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
@@ -27,6 +29,7 @@ import static java.util.Collections.singleton;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 public class AtMostOneTest {
 
@@ -39,12 +42,19 @@ public class AtMostOneTest {
     @Test
     public void noElementsYieldsEmptyOptional() {
         assertThat(AtMostOne.from(emptyList()).discardRemaining(), is(Optional.empty()));
-        assertThat(AtMostOne.from(emptyList()).<AssertionError>orThrowIfAnyRemaining(AssertionError::new), is(Optional.empty()));
+        assertThat(AtMostOne.from(emptyList()).<AssertionError>orIfExcessiveThrow(AssertionError::new), is(Optional.empty()));
     }
 
     @Test
     public void picksOutFirstElementInSingleElementList() {
-        assertThat(AtMostOne.from(singleton("a")).orThrowIfAnyRemaining(AssertionError::new).get(), is("a"));
+        assertThat(AtMostOne.from(singleton("a")).get().get(), is("a"));
+    }
+
+    @Test
+    public void handleExcessiveElements() {
+        OneTimeToggle excessiveElements = new OneTimeToggle();
+        AtMostOne.from(asList("a", "b")).orElse(excessiveElements::now);
+        assertTrue(excessiveElements.yet());
     }
 
 
@@ -57,6 +67,15 @@ public class AtMostOneTest {
 
         RuntimeException e = new RuntimeException();
         expectedException.expect(sameInstance(e));
-        atMostOne.orThrowIfAnyRemaining(() -> e);
+        atMostOne.orIfExcessiveThrow(() -> e);
+    }
+
+    @Test
+    public void throwsInternalExceptionIfMultipleElements() {
+        List<String> elements = asList("a", "b");
+        AtMostOne<String> atMostOne = AtMostOne.from(elements);
+
+        expectedException.expect(AtMostOne.TooManyElements.class);
+        atMostOne.get();
     }
 }
