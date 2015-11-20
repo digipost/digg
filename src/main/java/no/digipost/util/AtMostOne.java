@@ -31,7 +31,7 @@ import static java.util.stream.Collectors.toList;
  * This class offers a subtle functionality which is not available in the
  * Collection/Stream API of Java: to retrieve the only element that is expected to be present,
  * and, importantly,
- * {@link #orThrowIfAnyRemaining(Supplier) throw an exception if there are elements that will be discarded}
+ * {@link #orIfExcessiveThrow(Supplier) throw an exception if there are elements that will be discarded}
  * if assuming that there is at most one element present.
  *
  * @param <T> The type of the contained object.
