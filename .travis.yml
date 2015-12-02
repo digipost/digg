@@ -13,6 +13,8 @@ jdk:
 before_install:
 - echo "<settings><servers><server><id>sonatype-oss-nexus-snapshots</id><username>\${env.SONATYPE_USER}</username><password>\${env.SONATYPE_PASS}</password></server></servers></settings>" > ~/.m2/deploy-settings.xml
 install:
-- mvn clean deploy --settings ~/.m2/deploy-settings.xml
+- export mavenBuildGoal="$([[ ${TRAVIS_TAG} == '' ]] && echo deploy || echo verify)"
+- echo "Maven will ${mavenBuildGoal}"
+- mvn clean ${mavenBuildGoal} --settings ~/.m2/deploy-settings.xml
 script:
 - echo "no build script"
