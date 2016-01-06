@@ -27,13 +27,13 @@ import java.util.Optional;
 
 import static co.unruly.matchers.StreamMatchers.contains;
 import static co.unruly.matchers.StreamMatchers.empty;
-import static no.digipost.Base.extract;
-import static no.digipost.Base.nonNull;
+import static no.digipost.DiggBase.extract;
+import static no.digipost.DiggBase.nonNull;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
 
 @RunWith(Theories.class)
-public class BaseTest {
+public class DiggBaseTest {
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -42,8 +42,8 @@ public class BaseTest {
     public void yieldsSameInstanceOnNonNullReferences(@ForAll String value) throws NullPointerException {
         assertThat(nonNull("my value", value), sameInstance(value));
         assertThat(nonNull(value, d -> d), sameInstance(value));
-        assertThat(Base.<String, NullPointerException>nonNull("my value", value, NullPointerException::new), sameInstance(value));
-        assertThat(Base.<String, NullPointerException>nonNull(value, d -> d, d -> new NullPointerException()), sameInstance(value));
+        assertThat(DiggBase.<String, NullPointerException>nonNull("my value", value, NullPointerException::new), sameInstance(value));
+        assertThat(DiggBase.<String, NullPointerException>nonNull(value, d -> d, d -> new NullPointerException()), sameInstance(value));
     }
 
     @Test

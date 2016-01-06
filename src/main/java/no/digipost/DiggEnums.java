@@ -25,7 +25,7 @@ import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
 import static java.util.stream.Collectors.joining;
 
-public final class Enums {
+public final class DiggEnums {
 
     public static <E extends Enum<E>> Stream<E> fromCommaSeparatedNames(String enumNames, Class<E> enumType) {
         return fromCommaSeparated(enumNames, Function.<String>identity(), enumType);
@@ -83,5 +83,5 @@ public final class Enums {
 
 
 
-    private Enums() {}
+    private DiggEnums() {}
 }

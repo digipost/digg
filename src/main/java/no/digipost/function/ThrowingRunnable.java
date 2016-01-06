@@ -15,7 +15,7 @@
  */
 package no.digipost.function;
 
-import no.digipost.exceptions.Exceptions;
+import no.digipost.DiggExceptions;
 
 import java.util.function.Consumer;
 
@@ -25,7 +25,7 @@ public interface ThrowingRunnable<X extends Throwable> {
     void run() throws X;
 
     default Runnable asUnchecked() {
-        return ifException(e -> { throw Exceptions.asUnchecked(e); });
+        return ifException(e -> { throw DiggExceptions.asUnchecked(e); });
     }
 
     default Runnable ifException(Consumer<Exception> exceptionHandler) {
@@ -37,7 +37,7 @@ public interface ThrowingRunnable<X extends Throwable> {
             } catch (Error e) {
                 throw e;
             } catch (Throwable e) {
-                throw Exceptions.asUnchecked(e);
+                throw DiggExceptions.asUnchecked(e);
             }
         };
     }

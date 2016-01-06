@@ -27,13 +27,13 @@ import java.util.function.Function;
 import static co.unruly.matchers.StreamMatchers.empty;
 import static co.unruly.matchers.StreamMatchers.equalTo;
 import static java.util.stream.Collectors.joining;
-import static no.digipost.Enums.*;
-import static no.digipost.EnumsTest.MyEnum.*;
+import static no.digipost.DiggEnums.*;
+import static no.digipost.DiggEnumsTest.MyEnum.*;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 @RunWith(Theories.class)
-public class EnumsTest {
+public class DiggEnumsTest {
 
     enum MyEnum {
         A, AA, ABA, ABC

@@ -15,12 +15,12 @@
  */
 package no.digipost.function;
 
-import no.digipost.exceptions.Exceptions;
+import no.digipost.DiggExceptions;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-import static no.digipost.exceptions.Exceptions.rethrowAnyException;
+import static no.digipost.DiggExceptions.rethrowAnyException;
 
 @FunctionalInterface
 public interface ThrowingConsumer<T, X extends Throwable> {
@@ -43,7 +43,7 @@ public interface ThrowingConsumer<T, X extends Throwable> {
             } catch (Error err) {
                 throw err;
             } catch (Throwable thr) {
-                throw Exceptions.asUnchecked(thr);
+                throw DiggExceptions.asUnchecked(thr);
             }
         };
     }

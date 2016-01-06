@@ -37,7 +37,7 @@ public final class DiggCollectors {
     }
 
     public static <T, K, V> Collector<T, ?, Map<K, List<V>>> toMultimap(Function<? super T, K> keyExtractor, Function<? super T, Optional<V>> extractor) {
-        return Collectors.toMap(keyExtractor, extractor.andThen(Optionals::toList), DiggCollectors::concat);
+        return Collectors.toMap(keyExtractor, extractor.andThen(DiggOptionals::toList), DiggCollectors::concat);
     }
 
 

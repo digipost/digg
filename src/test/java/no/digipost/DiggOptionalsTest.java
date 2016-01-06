@@ -22,12 +22,12 @@ import org.junit.rules.ExpectedException;
 import java.util.List;
 import java.util.Optional;
 
-import static no.digipost.Optionals.toList;
+import static no.digipost.DiggOptionals.toList;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertThat;
 
-public class OptionalsTest {
+public class DiggOptionalsTest {
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();

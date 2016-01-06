@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.exceptions;
+package no.digipost;
 
 import no.digipost.concurrent.OneTimeToggle;
 import org.junit.Rule;
@@ -25,13 +25,13 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import static java.util.stream.Collectors.toList;
-import static no.digipost.exceptions.Exceptions.*;
+import static no.digipost.DiggExceptions.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
-public class ExceptionsTest {
+public class DiggExceptionsTest {
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -52,7 +52,7 @@ public class ExceptionsTest {
     @Test
     public void runAThrowingRunnableUnchecked() {
         OneTimeToggle toggled = new OneTimeToggle();
-        Exceptions.runUnchecked(() -> toggled.nowOrIfAlreadyThenThrow(() -> new AssertionError("should not be run twice!")));
+        DiggExceptions.runUnchecked(() -> toggled.nowOrIfAlreadyThenThrow(() -> new AssertionError("should not be run twice!")));
         assertTrue(toggled.yet());
 
         Exception e = new Exception();

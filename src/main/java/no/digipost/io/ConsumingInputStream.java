@@ -15,7 +15,7 @@
  */
 package no.digipost.io;
 
-import no.digipost.exceptions.Exceptions;
+import no.digipost.DiggExceptions;
 
 import java.io.*;
 import java.util.concurrent.ExecutorService;
@@ -62,7 +62,7 @@ public class ConsumingInputStream extends InputStream {
             outputPipe = new PipedOutputStream(inputPipe);
             decoratedOutputPipe = outputStreamDecorator.apply(outputPipe);
         } catch (IOException e) {
-            throw Exceptions.asUnchecked(e);
+            throw DiggExceptions.asUnchecked(e);
         }
         this.producing = executorService.submit(new Producer<>(outputPipe, decoratedOutputPipe, write));
     }
@@ -173,7 +173,7 @@ public class ConsumingInputStream extends InputStream {
             try {
                 write.accept(decoratedOutputPipe);
             } catch (Exception e) {
-                throw Exceptions.asUnchecked(e);
+                throw DiggExceptions.asUnchecked(e);
             } finally {
                 try {
                     try {
@@ -185,7 +185,7 @@ public class ConsumingInputStream extends InputStream {
                     if (attemptToCloseInputStream.get()) {
                         return;
                     }
-                    throw Exceptions.asUnchecked(e);
+                    throw DiggExceptions.asUnchecked(e);
                 }
             }
         }

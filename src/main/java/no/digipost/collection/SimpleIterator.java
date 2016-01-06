@@ -15,7 +15,7 @@
  */
 package no.digipost.collection;
 
-import no.digipost.exceptions.Exceptions;
+import no.digipost.DiggExceptions;
 
 import java.util.Iterator;
 import java.util.NoSuchElementException;
@@ -47,7 +47,7 @@ public abstract class SimpleIterator<T> implements Iterator<T> {
         try {
             next = nextIfAvailable();
         } catch (Exception e) {
-            throw Exceptions.asUnchecked(e);
+            throw DiggExceptions.asUnchecked(e);
         }
         return next.isPresent();
     }

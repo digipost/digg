@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.exceptions;
+package no.digipost;
 
 import no.digipost.function.*;
 
@@ -21,7 +21,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-public final class Exceptions {
+public final class DiggExceptions {
 
     /**
      * @param t the Throwable to get the causal chain from.
@@ -40,7 +40,7 @@ public final class Exceptions {
     }
 
     public static RuntimeException asUnchecked(Throwable t) {
-        return asUnchecked(t, Exceptions::exceptionNameAndMessage);
+        return asUnchecked(t, DiggExceptions::exceptionNameAndMessage);
     }
 
     public static <X extends Throwable> RuntimeException asUnchecked(X t, Function<? super X, String> message) {
@@ -127,7 +127,7 @@ public final class Exceptions {
     /**
      * This consumer rethrows any given {@link Exception} as an unchecked {@link RuntimeException}.
      */
-    public static final Consumer<Exception> rethrowAnyException = rethrow(Exceptions::asUnchecked);
+    public static final Consumer<Exception> rethrowAnyException = rethrow(DiggExceptions::asUnchecked);
 
 
     /**
@@ -142,5 +142,5 @@ public final class Exceptions {
 
 
 
-    private Exceptions() {}
+    private DiggExceptions() {}
 }

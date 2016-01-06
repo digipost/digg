@@ -15,7 +15,7 @@
  */
 package no.digipost.function;
 
-import no.digipost.exceptions.Exceptions;
+import no.digipost.DiggExceptions;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -27,7 +27,7 @@ public interface ThrowingSupplier<T, X extends Throwable> {
     T get() throws X;
 
     default Supplier<T> asUnchecked() {
-        return ifExceptionGet(e -> { throw Exceptions.asUnchecked(e); });
+        return ifExceptionGet(e -> { throw DiggExceptions.asUnchecked(e); });
     }
 
     default Supplier<Optional<T>> ifException(Consumer<Exception> exceptionHandler) {
@@ -48,7 +48,7 @@ public interface ThrowingSupplier<T, X extends Throwable> {
             } catch (Error e) {
                 throw e;
             } catch (Throwable e) {
-                throw Exceptions.asUnchecked(e);
+                throw DiggExceptions.asUnchecked(e);
             }
         };
     }

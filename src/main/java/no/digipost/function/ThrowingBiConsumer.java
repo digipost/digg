@@ -15,7 +15,7 @@
  */
 package no.digipost.function;
 
-import no.digipost.exceptions.Exceptions;
+import no.digipost.DiggExceptions;
 
 import java.util.function.BiConsumer;
 
@@ -30,7 +30,7 @@ public interface ThrowingBiConsumer<T, U, X extends Throwable> {
             } catch (RuntimeException | Error e) {
                 throw e;
             } catch (Throwable e) {
-                throw Exceptions.asUnchecked(e);
+                throw DiggExceptions.asUnchecked(e);
             }
         };
     }

@@ -21,7 +21,7 @@ import no.digipost.function.ThrowingFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static no.digipost.exceptions.Exceptions.asUnchecked;
+import static no.digipost.DiggExceptions.asUnchecked;
 
 public final class IO {
 

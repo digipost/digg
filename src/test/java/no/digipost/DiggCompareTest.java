@@ -20,15 +20,15 @@ import org.junit.contrib.theories.Theories;
 import org.junit.contrib.theories.Theory;
 import org.junit.runner.RunWith;
 
-import static no.digipost.Compare.max;
-import static no.digipost.Compare.min;
+import static no.digipost.DiggCompare.max;
+import static no.digipost.DiggCompare.min;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assume.assumeThat;
 
 @RunWith(Theories.class)
-public class CompareTest {
+public class DiggCompareTest {
 
     @Theory
     public void minAndMax(@ForAll(sampleSize=10) int x, @ForAll(sampleSize=10) int y) {

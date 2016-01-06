@@ -15,7 +15,7 @@
  */
 package no.digipost.function;
 
-import no.digipost.exceptions.Exceptions;
+import no.digipost.DiggExceptions;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -29,7 +29,7 @@ public interface ThrowingFunction<T, R, X extends Throwable> {
 
 
     default Function<T, R> asUnchecked() {
-        return ifExceptionApply((t, e) -> { throw Exceptions.asUnchecked(e); });
+        return ifExceptionApply((t, e) -> { throw DiggExceptions.asUnchecked(e); });
     }
 
     default Function<T, Optional<R>> ifException(Consumer<Exception> exceptionHandler) {
@@ -58,7 +58,7 @@ public interface ThrowingFunction<T, R, X extends Throwable> {
             } catch (Error err) {
                 throw err;
             } catch (Throwable thr) {
-                throw Exceptions.asUnchecked(thr);
+                throw DiggExceptions.asUnchecked(thr);
             }
         };
     }

@@ -23,11 +23,11 @@ import java.util.stream.Stream;
 /**
  * Party people, turn up tha...
  *
- * <h1>&ndash;&ndash; {@link Base} &ndash;&ndash;</h1>
+ * <h1>&ndash;&ndash; {@link DiggBase} &ndash;&ndash;</h1>
  *
  * <p>This class contains basic utilities. Basically.</p>
  */
-public final class Base {
+public final class DiggBase {
 
     /**
      * Not allow {@code null}-references.
@@ -121,6 +121,6 @@ public final class Base {
         return Stream.of(extractors).map(f -> f.apply(object)).filter(Optional::isPresent).map(Optional::get);
     }
 
-    private Base() {}
+    private DiggBase() {}
 
 }

@@ -26,8 +26,8 @@ import static java.time.Duration.ZERO;
 import static java.time.Duration.between;
 import static java.time.Instant.MIN;
 import static java.util.Objects.hash;
-import static no.digipost.Compare.max;
-import static no.digipost.Compare.min;
+import static no.digipost.DiggCompare.max;
+import static no.digipost.DiggCompare.min;
 
 /**
  * A time span is the composition of two instants on the time line,

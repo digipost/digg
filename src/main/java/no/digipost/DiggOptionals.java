@@ -27,7 +27,7 @@ import static java.util.stream.Collectors.toCollection;
 /**
  * Utilities for working with {@link Optional}s.
  */
-public final class Optionals {
+public final class DiggOptionals {
 
     /**
      * Unwrap an {@link Optional} into a zero or one element {@link Collections#unmodifiableList(List) unmodifiable} list.
@@ -61,5 +61,5 @@ public final class Optionals {
     }
 
 
-    public Optionals() {}
+    public DiggOptionals() {}
 }
