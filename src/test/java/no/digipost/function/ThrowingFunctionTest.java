@@ -72,4 +72,14 @@ public class ThrowingFunctionTest {
 
         assertThat(fn.ifExceptionApply(Exception::getMessage).apply(42), is("fail"));
     }
+
+    @Test
+    public void composeFunctions() throws Exception {
+        ThrowingFunction<Character, String, Exception> toString = c -> c.toString();
+        assertThat(toString.andThen(String::toUpperCase).apply('c'), is("C"));
+
+        ThrowingBiFunction<Character, Character, String, Exception> join = (c1, c2) -> c1.toString() + c2;
+        assertThat(join.andThen(String::toUpperCase).apply('a', 'b'), is("AB"));
+    }
+
 }

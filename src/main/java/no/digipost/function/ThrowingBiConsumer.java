@@ -34,4 +34,11 @@ public interface ThrowingBiConsumer<T, U, X extends Throwable> {
             }
         };
     }
+
+    default ThrowingBiConsumer<T, U, X> andThen(ThrowingBiConsumer<? super T, ? super U, ? extends X> after) {
+        return (t, u) -> {
+            accept(t, u);
+            after.accept(t, u);
+        };
+    }
 }

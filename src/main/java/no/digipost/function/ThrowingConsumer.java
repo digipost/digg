@@ -47,4 +47,11 @@ public interface ThrowingConsumer<T, X extends Throwable> {
             }
         };
     }
+
+    default ThrowingConsumer<T, X> andThen(ThrowingConsumer<? super T, ? extends X> after) {
+        return t -> {
+            accept(t);
+            after.accept(t);
+        };
+    }
 }

@@ -34,4 +34,9 @@ public interface ThrowingBiFunction<T, U, R, X extends Throwable> {
             }
         };
     }
+
+    default <V> ThrowingBiFunction<T, U, V, X> andThen(ThrowingFunction<? super R, V, ? extends X> after) {
+        return (t, u) -> after.apply(apply(t, u));
+    }
+
 }
