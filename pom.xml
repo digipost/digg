@@ -218,6 +218,7 @@
                 </executions>
                 <configuration>
                     <additionalparam>-Xdoclint:-missing</additionalparam>
+                    <quiet>true</quiet>
                 </configuration>
             </plugin>
             <plugin>
