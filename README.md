@@ -5,6 +5,8 @@ This library contains general functionality developed by the Digipost team.
 
 The term "Digg" is Norwegian jargon for tasty stuff, like candy.
 
+Javadoc: http://www.javadoc.io/doc/no.digipost/digg
+
 
 
 ### License
