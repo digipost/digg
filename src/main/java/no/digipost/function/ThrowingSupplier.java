@@ -27,7 +27,11 @@ public interface ThrowingSupplier<T, X extends Throwable> {
     T get() throws X;
 
     default Supplier<T> asUnchecked() {
-        return ifExceptionGet(e -> { throw DiggExceptions.asUnchecked(e); });
+        return ifExceptionThrow(DiggExceptions::asUnchecked);
+    }
+
+    default Supplier<T> ifExceptionThrow(Function<? super Exception, ? extends RuntimeException> exceptionMapper) {
+        return () -> ifException(e -> { throw exceptionMapper.apply(e); }).get().get();
     }
 
     default Supplier<Optional<T>> ifException(Consumer<Exception> exceptionHandler) {

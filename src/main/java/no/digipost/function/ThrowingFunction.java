@@ -29,7 +29,15 @@ public interface ThrowingFunction<T, R, X extends Throwable> {
 
 
     default Function<T, R> asUnchecked() {
-        return ifExceptionApply((t, e) -> { throw DiggExceptions.asUnchecked(e); });
+        return ifExceptionThrow(e -> DiggExceptions.asUnchecked(e));
+    }
+
+    default Function<T, R> ifExceptionThrow(Function<? super Exception, ? extends RuntimeException> exceptionMapper) {
+        return ifExceptionThrow((t, e) -> exceptionMapper.apply(e));
+    }
+
+    default Function<T, R> ifExceptionThrow(BiFunction<? super T, ? super Exception, ? extends RuntimeException> exceptionMapper) {
+        return ifException((t, e) -> { throw exceptionMapper.apply(t, e); }).andThen(Optional::get);
     }
 
     default Function<T, Optional<R>> ifException(Consumer<Exception> exceptionHandler) {

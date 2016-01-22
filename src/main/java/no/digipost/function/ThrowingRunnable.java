@@ -18,6 +18,7 @@ package no.digipost.function;
 import no.digipost.DiggExceptions;
 
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 @FunctionalInterface
 public interface ThrowingRunnable<X extends Throwable> {
@@ -25,7 +26,11 @@ public interface ThrowingRunnable<X extends Throwable> {
     void run() throws X;
 
     default Runnable asUnchecked() {
-        return ifException(e -> { throw DiggExceptions.asUnchecked(e); });
+        return ifExceptionThrow(DiggExceptions::asUnchecked);
+    }
+
+    default Runnable ifExceptionThrow(Function<? super Exception, ? extends RuntimeException> exceptionMapper) {
+        return ifException(e -> { throw exceptionMapper.apply(e); });
     }
 
     default Runnable ifException(Consumer<Exception> exceptionHandler) {
