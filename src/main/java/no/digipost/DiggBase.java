@@ -102,14 +102,38 @@ public final class DiggBase {
         }
     }
 
-
     /**
      * Extract (derive) multiple values from one given object.
      *
      * @param object the object to extract values from.
+     * @param extractors each function that will extract a value from the given object. The resulting
+     *                   value <em>must not</em> be {@code null}. Use {@link #extract(Object, Function...)}
+     *                   if the extractors may yield non-existing values.
+     *
+     * @return a stream of the extracted values. The resulting stream will have the same size as the amount of
+     *         given extractors.
+     *
+     * @param <T> The type of the object to extract from.
+     * @param <R> The resulting most common type of the extracted values. Typically, the extractors
+     *            should yield the same type.
+     */
+    @SafeVarargs
+    public static final <T, R> Stream<R> extract(T object, Function<? super T, ? extends R> ... extractors) {
+        return Stream.of(extractors).map(e -> e.apply(object));
+    }
+
+    /**
+     * Extract (derive) multiple values from one given object. This will only include the "present"
+     * values yielded from the given extractors, and is a shorthand for:
+     * <p>
+     * {@code {@link #extract(Object, Function...) extract(object, extractors...)}{@link Stream#filter(java.util.function.Predicate) .filter(}{@link Optional#isPresent() Optional::isPresent)}{@link Stream#map(Function) .map(}{@link Optional#get() Optional::get)}}
+     * </p>
+     *
+     * @param object the object to extract values from.
      * @param extractors each function that will extract a value from the given object.
      *
-     * @return a stream of values to be extracted.
+     * @return a stream of values to be extracted. The resulting stream will have either the same size as
+     *         or less than the amount of given extractors.
      *
      *
      * @param <T> The type of the object to extract from.
@@ -117,8 +141,8 @@ public final class DiggBase {
      *            should yield the same type.
      */
     @SafeVarargs
-    public static final <T, R> Stream<R> extract(T object, Function<? super T, ? extends Optional<R>> ... extractors) {
-        return Stream.of(extractors).map(f -> f.apply(object)).filter(Optional::isPresent).map(Optional::get);
+    public static final <T, R> Stream<R> extractIfPresent(T object, Function<? super T, ? extends Optional<R>> ... extractors) {
+        return extract(object, extractors).filter(Optional::isPresent).map(Optional::get);
     }
 
     private DiggBase() {}
