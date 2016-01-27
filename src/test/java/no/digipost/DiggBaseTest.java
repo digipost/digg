@@ -16,7 +16,6 @@
 package no.digipost;
 
 import com.pholser.junit.quickcheck.ForAll;
-import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.contrib.theories.Theories;
@@ -28,7 +27,6 @@ import java.util.Optional;
 
 import static co.unruly.matchers.StreamMatchers.contains;
 import static co.unruly.matchers.StreamMatchers.empty;
-import static java.util.stream.Collectors.toList;
 import static no.digipost.DiggBase.*;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
@@ -76,7 +74,7 @@ public class DiggBaseTest {
 
     @Test
     public void extractValuesIncludesEverythingEvenNulls() {
-        assertThat(extract("abc", s -> s.charAt(0), s -> null).collect(toList()), Matchers.contains('a', null));
+        assertThat(extract("abc", s -> s.charAt(0), s -> null), contains('a', null));
     }
 
 
