@@ -22,11 +22,12 @@ import org.junit.Test;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static no.digipost.DiggCollectors.adapt;
 import static no.digipost.DiggCollectors.toMultimap;
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 public class DiggCollectorsTest {
@@ -48,5 +49,11 @@ public class DiggCollectorsTest {
         assertThat(byNumber.get(1), containsInAnyOrder("one", "uno"));
         assertThat(byNumber.get(2), containsInAnyOrder("two", "dos"));
         assertThat(byNumber.get(5), empty());
+    }
+
+
+    @Test
+    public void adaptACollector() {
+        assertThat(Stream.of("1", "2", "3").collect(adapt(Collectors.<String>toList()).andThen(l -> l.get(0))), is("1"));
     }
 }

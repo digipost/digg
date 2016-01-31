@@ -15,6 +15,7 @@
  */
 package no.digipost;
 
+import no.digipost.collection.AdaptableCollector;
 import no.digipost.tuple.Tuple;
 import no.digipost.tuple.ViewableAsTuple;
 
@@ -27,17 +28,25 @@ import static java.util.Collections.unmodifiableList;
 
 public final class DiggCollectors {
 
-    public static <T1, T2, TV extends ViewableAsTuple<T1, Optional<T2>>> Collector<TV, ?, Map<T1, List<T2>>> toMultimap() {
-        Function<TV, Tuple<T1, Optional<T2>>> asTuple = ViewableAsTuple::asTuple;
+    public static <T, A, R> AdaptableCollector<T, A, R> adapt(Collector<T, A, R> collector) {
+        if (collector instanceof AdaptableCollector) {
+            return (AdaptableCollector<T, A, R>) collector;
+        } else {
+            return AdaptableCollector.of(collector.supplier(), collector.accumulator(), collector.combiner(), collector.finisher(), collector.characteristics());
+        }
+    }
+
+    public static <T1, T2> AdaptableCollector<ViewableAsTuple<T1, Optional<T2>>, ?, Map<T1, List<T2>>> toMultimap() {
+        Function<ViewableAsTuple<T1, Optional<T2>>, Tuple<T1, Optional<T2>>> asTuple = ViewableAsTuple::asTuple;
         return toMultimap(asTuple.andThen(Tuple::first), asTuple.andThen(Tuple::second));
     }
 
-    public static <T, V> Collector<T, ?, Map<T, List<V>>> toMultimap(Function<? super T, Optional<V>> extractor) {
+    public static <T, V> AdaptableCollector<T, ?, Map<T, List<V>>> toMultimap(Function<? super T, Optional<V>> extractor) {
         return toMultimap(Function.identity(), extractor);
     }
 
-    public static <T, K, V> Collector<T, ?, Map<K, List<V>>> toMultimap(Function<? super T, K> keyExtractor, Function<? super T, Optional<V>> extractor) {
-        return Collectors.toMap(keyExtractor, extractor.andThen(DiggOptionals::toList), DiggCollectors::concat);
+    public static <T, K, V> AdaptableCollector<T, ?, Map<K, List<V>>> toMultimap(Function<? super T, K> keyExtractor, Function<? super T, Optional<V>> extractor) {
+        return adapt(Collectors.toMap(keyExtractor, extractor.andThen(DiggOptionals::toList), DiggCollectors::concat));
     }
 
 
