@@ -15,10 +15,10 @@
  */
 package no.digipost;
 
-import com.pholser.junit.quickcheck.ForAll;
+import com.pholser.junit.quickcheck.Property;
+import com.pholser.junit.quickcheck.generator.ValuesOf;
+import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import org.junit.Test;
-import org.junit.contrib.theories.Theories;
-import org.junit.contrib.theories.Theory;
 import org.junit.runner.RunWith;
 
 import java.util.List;
@@ -32,15 +32,15 @@ import static no.digipost.DiggEnumsTest.MyEnum.*;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-@RunWith(Theories.class)
+@RunWith(JUnitQuickcheck.class)
 public class DiggEnumsTest {
 
     enum MyEnum {
         A, AA, ABA, ABC
     }
 
-    @Theory
-    public void convertFromCommaSeparatedListOfEnumNames(@ForAll List<MyEnum> enums) {
+    @Property
+    public void convertFromCommaSeparatedListOfEnumNames(List<@ValuesOf MyEnum> enums) {
         assertThat(fromCommaSeparatedNames(enums.stream().map(Enum::name).collect(joining(",")), MyEnum.class), equalTo(enums.stream()));
         assertThat(fromCommaSeparatedNames(enums.stream().map(Enum::name).collect(joining(",", "  ", "   ")), MyEnum.class), equalTo(enums.stream()));
     }
@@ -56,8 +56,8 @@ public class DiggEnumsTest {
         assertThat(toStringOf(lowerCasedEnumName, joining(": ", "[", "]"), A, ABA, AA), is("[a: aba: aa]"));
     }
 
-    @Theory
-    public void toStringConversionsAreSpecialCasesOfTheGenericBaseCase(@ForAll MyEnum ... enums) {
+    @Property
+    public void toStringConversionsAreSpecialCasesOfTheGenericBaseCase(MyEnum ... enums) {
         assertThat(toCommaSeparatedNames(enums), is(toStringOf(Enum::name, joining(","), enums)));
         assertThat(toNames(": ", enums), is(toStringOf(Enum::name, joining(": "), enums)));
         assertThat(toStringOf(e -> e.name().toLowerCase(), "#", enums), is(toStringOf(e -> e.name().toLowerCase(), joining("#"), enums)));

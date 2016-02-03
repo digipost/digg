@@ -64,21 +64,15 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.junit.contrib</groupId>
-            <artifactId>junit-theories</artifactId>
-            <version>5.0-alpha-3</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>com.pholser</groupId>
             <artifactId>junit-quickcheck-core</artifactId>
-            <version>0.5</version>
+            <version>0.6-beta-1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.pholser</groupId>
             <artifactId>junit-quickcheck-generators</artifactId>
-            <version>0.5</version>
+            <version>0.6-beta-1</version>
             <scope>test</scope>
         </dependency>
         <dependency>

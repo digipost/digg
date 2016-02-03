@@ -15,11 +15,10 @@
  */
 package no.digipost;
 
-import com.pholser.junit.quickcheck.ForAll;
+import com.pholser.junit.quickcheck.Property;
+import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.theories.Theories;
-import org.junit.contrib.theories.Theory;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
@@ -31,14 +30,14 @@ import static no.digipost.DiggBase.*;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
 
-@RunWith(Theories.class)
+@RunWith(JUnitQuickcheck.class)
 public class DiggBaseTest {
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
 
-    @Theory(nullsAccepted = false)
-    public void yieldsSameInstanceOnNonNullReferences(@ForAll String value) throws NullPointerException {
+    @Property
+    public void yieldsSameInstanceOnNonNullReferences(String value) {
         assertThat(nonNull("my value", value), sameInstance(value));
         assertThat(nonNull(value, d -> d), sameInstance(value));
         assertThat(DiggBase.<String, NullPointerException>nonNull("my value", value, NullPointerException::new), sameInstance(value));

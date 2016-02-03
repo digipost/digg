@@ -15,10 +15,9 @@
  */
 package no.digipost.time;
 
-import com.pholser.junit.quickcheck.ForAll;
+import com.pholser.junit.quickcheck.Property;
+import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import org.junit.Test;
-import org.junit.contrib.theories.Theories;
-import org.junit.contrib.theories.Theory;
 import org.junit.runner.RunWith;
 
 import java.time.Duration;
@@ -34,7 +33,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.*;
 
-@RunWith(Theories.class)
+@RunWith(JUnitQuickcheck.class)
 public class ConditionalTimerTest {
 
     @Test
@@ -43,8 +42,8 @@ public class ConditionalTimerTest {
         assertThat(timeFromFirstInspection.getDuration(), is(empty()));
     }
 
-    @Theory
-    public void comparingDurationsForConditionsMet(@ForAll(sampleSize=10) boolean conditionMet, @ForAll long ms) {
+    @Property
+    public void comparingDurationsForConditionsMet(boolean conditionMet, long ms) {
         ControllableClock clock = new ControllableClock(now());
         ConditionalTimer<Object> timer = using(clock).timeWhen(v -> conditionMet);
         Duration duration = Duration.of(ms, MILLIS);

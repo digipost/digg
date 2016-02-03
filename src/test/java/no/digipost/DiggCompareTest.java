@@ -15,9 +15,8 @@
  */
 package no.digipost;
 
-import com.pholser.junit.quickcheck.ForAll;
-import org.junit.contrib.theories.Theories;
-import org.junit.contrib.theories.Theory;
+import com.pholser.junit.quickcheck.Property;
+import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import org.junit.runner.RunWith;
 
 import static no.digipost.DiggCompare.max;
@@ -27,11 +26,11 @@ import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assume.assumeThat;
 
-@RunWith(Theories.class)
+@RunWith(JUnitQuickcheck.class)
 public class DiggCompareTest {
 
-    @Theory
-    public void minAndMax(@ForAll(sampleSize=10) int x, @ForAll(sampleSize=10) int y) {
+    @Property
+    public void minAndMax(int x, int y) {
         assumeThat(x, not(y));
         assertThat(min(x, y), not(max(x, y)));
         assertThat(min(x, y), is(min(y, x)));

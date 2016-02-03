@@ -15,13 +15,12 @@
  */
 package no.digipost.time;
 
-import com.pholser.junit.quickcheck.ForAll;
 import com.pholser.junit.quickcheck.From;
+import com.pholser.junit.quickcheck.Property;
+import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.contrib.theories.Theories;
-import org.junit.contrib.theories.Theory;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
@@ -38,7 +37,7 @@ import static java.time.Period.ofDays;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 
-@RunWith(Theories.class)
+@RunWith(JUnitQuickcheck.class)
 public class TimeSpanTest {
 
     @Rule
@@ -123,8 +122,8 @@ public class TimeSpanTest {
         assertThat(secondSpan.collapse(firstSpan), contains(firstSpan));
     }
 
-    @Theory
-    public void collapsingIsCommutative(@ForAll @From(RandomTimeSpans.class) TimeSpan someSpan, @ForAll @From(RandomTimeSpans.class) TimeSpan someOtherSpan) {
+    @Property
+    public void collapsingIsCommutative(@From(RandomTimeSpans.class) TimeSpan someSpan, @From(RandomTimeSpans.class) TimeSpan someOtherSpan) {
         assertThat(someSpan.collapse(someOtherSpan), equalTo(someOtherSpan.collapse(someSpan)));
     }
 
