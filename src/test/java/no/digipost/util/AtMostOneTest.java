@@ -47,7 +47,7 @@ public class AtMostOneTest {
 
     @Test
     public void picksOutFirstElementInSingleElementList() {
-        assertThat(AtMostOne.from(singleton("a")).get().get(), is("a"));
+        assertThat(AtMostOne.from(singleton("a")).toOptional().get(), is("a"));
     }
 
     @Test
@@ -76,6 +76,6 @@ public class AtMostOneTest {
         AtMostOne<String> atMostOne = AtMostOne.from(elements);
 
         expectedException.expect(AtMostOne.TooManyElements.class);
-        atMostOne.get();
+        atMostOne.toOptional();
     }
 }

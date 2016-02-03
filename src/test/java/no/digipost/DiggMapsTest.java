@@ -33,7 +33,7 @@ public class DiggMapsTest {
         Map<AtomicReference<String>, String> map = new HashMap<>();
         map.put(new AtomicReference<>(), "x");
 
-        assertThat(AtMostOne.from(unMapToKeys(map, AtomicReference::set)).get().get().get(), is("x"));
+        assertThat(AtMostOne.from(unMapToKeys(map, AtomicReference::set)).toOptional().get().get(), is("x"));
     }
 
 
@@ -42,7 +42,7 @@ public class DiggMapsTest {
         Map<String, AtomicReference<String>> map = new HashMap<>();
         map.put("x", new AtomicReference<>());
 
-        assertThat(AtMostOne.from(unMapToValues(map, AtomicReference::set)).get().get().get(), is("x"));
+        assertThat(AtMostOne.from(unMapToValues(map, AtomicReference::set)).toOptional().get().get(), is("x"));
     }
 
     @Test
@@ -50,6 +50,6 @@ public class DiggMapsTest {
         Map<AtomicReference<String>, String> map = new HashMap<>();
         map.put(new AtomicReference<>(), "x");
 
-        assertThat(AtMostOne.from(unMap(map, (k, v) -> k.updateAndGet(old -> v))).get().get(), is("x"));
+        assertThat(AtMostOne.from(unMap(map, (k, v) -> k.updateAndGet(old -> v))).toOptional().get(), is("x"));
     }
 }

@@ -62,7 +62,7 @@ public interface AtMostOne<T> {
      *
      * @return The single element if it exists, or {@link Optional#empty()} if no elements exist.
      */
-    default Optional<T> get() {
+    default Optional<T> toOptional() {
         return orIfExcessiveThrow(TooManyElements::new);
     }
 
