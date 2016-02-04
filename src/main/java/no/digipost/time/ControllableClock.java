@@ -23,7 +23,7 @@ import java.util.concurrent.atomic.AtomicReference;
 /**
  * A controllable {@link Clock}, mainly intended for use in testing.
  */
-public final class ControllableClock extends Clock implements Serializable {
+public final class ControllableClock extends Clock implements TimeControllable, Serializable {
 
     private final AtomicReference<Clock> delegate;
 
@@ -62,18 +62,17 @@ public final class ControllableClock extends Clock implements Serializable {
         return delegate.get().instant();
     }
 
+    @Override
     public void timePasses(Duration duration) {
         delegate.getAndUpdate(previous -> Clock.offset(previous, duration));
     }
 
+    @Override
     public void set(LocalDateTime dateTime) {
         set(dateTime.atZone(getZone()));
     }
 
-    public void set(ZonedDateTime zonedDateTime) {
-        set(zonedDateTime.toInstant());
-    }
-
+    @Override
     public void set(Instant newInstant) {
         delegate.getAndUpdate(previous -> Clock.offset(previous, Duration.between(previous.instant(), newInstant)));
     }
@@ -85,10 +84,12 @@ public final class ControllableClock extends Clock implements Serializable {
         delegate.set(newDelegate);
     }
 
+    @Override
     public void freeze() {
         set(Clock.fixed(delegate.get().instant(), delegate.get().getZone()));
     }
 
+    @Override
     public void setToSystemClock() {
         setToSystemClock(getZone());
     }
