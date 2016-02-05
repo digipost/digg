@@ -75,7 +75,7 @@ public class AtMostOneTest {
         List<String> elements = asList("a", "b");
         AtMostOne<String> atMostOne = AtMostOne.from(elements);
 
-        expectedException.expect(AtMostOne.TooManyElements.class);
+        expectedException.expect(ViewableAsOptional.TooManyElements.class);
         atMostOne.toOptional();
     }
 }

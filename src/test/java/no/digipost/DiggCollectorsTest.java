@@ -15,9 +15,17 @@
  */
 package no.digipost;
 
+import co.unruly.matchers.OptionalMatchers;
+import com.pholser.junit.quickcheck.Property;
+import com.pholser.junit.quickcheck.When;
+import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import no.digipost.tuple.Tuple;
 import no.digipost.tuple.ViewableAsTuple;
+import no.digipost.util.ViewableAsOptional;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
+import org.junit.runner.RunWith;
 
 import java.util.List;
 import java.util.Map;
@@ -25,12 +33,16 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static no.digipost.DiggCollectors.adapt;
-import static no.digipost.DiggCollectors.toMultimap;
+import static co.unruly.matchers.OptionalMatchers.contains;
+import static no.digipost.DiggCollectors.*;
 import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
+@RunWith(JUnitQuickcheck.class)
 public class DiggCollectorsTest {
+
+    @Rule
+    public final ExpectedException expectedException = ExpectedException.none();
 
     interface NumTranslation extends ViewableAsTuple<Integer, Optional<String>> {}
 
@@ -55,5 +67,17 @@ public class DiggCollectorsTest {
     @Test
     public void adaptACollector() {
         assertThat(Stream.of("1", "2", "3").collect(adapt(Collectors.<String>toList()).andThen(l -> l.get(0))), is("1"));
+    }
+
+    @Test
+    public void collectTheValueOfSingleElementStream() {
+        assertThat(Stream.of(42).collect(allowAtMostOne()), contains(is(42)));
+        assertThat(Stream.empty().collect(allowAtMostOne()), OptionalMatchers.empty());
+    }
+
+    @Property
+    public void allowAtMostOneFails(@When(satisfies = " #_.size() > 1") List<?> tooManyElements) {
+        expectedException.expect(ViewableAsOptional.TooManyElements.class);
+        tooManyElements.stream().parallel().collect(allowAtMostOne());
     }
 }

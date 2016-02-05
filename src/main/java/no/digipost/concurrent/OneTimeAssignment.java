@@ -15,6 +15,9 @@
  */
 package no.digipost.concurrent;
 
+import no.digipost.util.ViewableAsOptional;
+
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -31,7 +34,7 @@ import java.util.function.Supplier;
  *
  * @param <V> The type of the object which is referenced.
  */
-public final class OneTimeAssignment<V> {
+public final class OneTimeAssignment<V> implements ViewableAsOptional<V> {
 
     /**
      * Create a new non-assigned instance with a default value.
@@ -89,6 +92,15 @@ public final class OneTimeAssignment<V> {
      */
     public V get() {
         return ref.updateAndGet(v -> v != null ? v : defaultValue.get());
+    }
+
+    /**
+     * Convert this {@code OneTimeAssignment} to an {@link java.util.Optional}. This
+     * method will never throw an exception.
+     */
+    @Override
+    public Optional<V> toOptional() {
+        return Optional.ofNullable(ref.get());
     }
 
 

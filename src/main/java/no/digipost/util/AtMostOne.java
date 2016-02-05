@@ -36,13 +36,7 @@ import static java.util.stream.Collectors.toList;
  *
  * @param <T> The type of the contained object.
  */
-public interface AtMostOne<T> {
-
-    public static final class TooManyElements extends RuntimeException {
-        public TooManyElements() {
-            super("exepcted at most one element, but there were excess ones");
-        }
-    }
+public interface AtMostOne<T> extends ViewableAsOptional<T> {
 
 
     /**
@@ -57,13 +51,14 @@ public interface AtMostOne<T> {
 
     /**
      * Get the at most single contained element, or throw a {@link TooManyElements} exception
-     * if there are excessive elements available. If you need controll over the thrown exception, use
+     * if there are excessive elements available. If you need control over the thrown exception, use
      * {@link #orIfExcessiveThrow(Supplier)}
      *
      * @return The single element if it exists, or {@link Optional#empty()} if no elements exist.
      */
+    @Override
     default Optional<T> toOptional() {
-        return orIfExcessiveThrow(TooManyElements::new);
+        return orIfExcessiveThrow(ViewableAsOptional.TooManyElements::new);
     }
 
 

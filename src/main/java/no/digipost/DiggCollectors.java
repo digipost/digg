@@ -16,6 +16,8 @@
 package no.digipost;
 
 import no.digipost.collection.AdaptableCollector;
+import no.digipost.collection.EnforceAtMostOneElementCollector;
+import no.digipost.concurrent.OneTimeAssignment;
 import no.digipost.tuple.Tuple;
 import no.digipost.tuple.ViewableAsTuple;
 
@@ -57,6 +59,10 @@ public final class DiggCollectors {
         return unmodifiableList(newList);
     }
 
+    public static <T> AdaptableCollector<T, OneTimeAssignment<T>, Optional<T>> allowAtMostOne() {
+        return adapt(new EnforceAtMostOneElementCollector<>());
+    }
 
     public DiggCollectors() {}
+
 }
