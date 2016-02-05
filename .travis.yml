@@ -2,6 +2,12 @@ sudo: false
 cache:
   directories:
   - "$HOME/.m2/repository"
+
+addons:
+  apt:
+    packages:
+    - oracle-java8-installer
+
 env:
   global:
   - secure: s6Vbm+Vm12wkiQxGqu2SKvp76vPGCwNR/3UGwOSUHEGOJZP18s8x1TwlICUin1Pw9lU72/iqIH4XlKy1uD9QfDlAjqAp/R1uFQsT1T7lReQ0zR6yCmK5yuQy3L7Wixp1nN+Xn2D9kB1bOJinJCK1MUtWJFybASpWO1cw7OMU79YePT197Xm39BIdSZKxj5sBY54Jly54dZdqSDno9/5haWgwonVcyD9XcYRkEVnXWlwwAAODtRaEMv2th14pXNd2wzsiXCf/zAnJu3toNViB4aw2AL+MEnK111shtwyx1hq1NDabA2ur1h91XhWRvqbRH4zL088qd6bfXzaHLw4Gb5TiuB7TuOVJtmg+WZCRUESgzyGNJq5bqQ0NFz0uPeyiWw+2S0J5TBvB6tEvHEqgunAEKLiObtcza+uACeebdtjHA11A3POjmqPGUC3WUVcS9Fw/vqKSdes+woEHVEfWntoHOjM7xqrlnDe9xrSgCqb4zRu5AzLbm5L1j6RahhkatCFDLfvXERu5McXjKxLmtXgdfAAOpmz51TIBedoDFfZIYrkm6nDgpMsU1DckHuayXaWehDK5STGkydSL3wSOySW5s1kOBjYAb5mPGKBpTx6kXUwOYt6r27vMn0ciZS0S6KWBKTfFY2v9ncKOI5WUeqgf44w1G/xr57irBzJuPQo=
