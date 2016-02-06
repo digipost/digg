@@ -61,15 +61,15 @@ public final class OneTimeAssignment<V> implements ViewableAsOptional<V> {
      * Create a new non-assigned instance.
      */
     public static final <V> OneTimeAssignment<V> newInstance() {
-        return new OneTimeAssignment<>(() -> null);
+        return new OneTimeAssignment<V>(() -> UNASSIGNED);
     }
 
 
 
-    private final AtomicReference<V> ref = new AtomicReference<>();
-    private final Supplier<? extends V> defaultValue;
+    private final AtomicReference<Object> ref = new AtomicReference<>(UNASSIGNED);
+    private final Supplier<?> defaultValue;
 
-    private OneTimeAssignment(Supplier<? extends V> defaultValue) {
+    private OneTimeAssignment(Supplier<?> defaultValue) {
         this.defaultValue = defaultValue;
     }
 
@@ -80,7 +80,7 @@ public final class OneTimeAssignment<V> implements ViewableAsOptional<V> {
      * @throws AlreadyAssigned if this reference is already assigned a value.
      */
     public void set(V value) {
-        if (!ref.compareAndSet(null, value)) {
+        if (!ref.compareAndSet(UNASSIGNED, value)) {
             throw new AlreadyAssigned(ref.get(), value);
         }
     }
@@ -90,17 +90,21 @@ public final class OneTimeAssignment<V> implements ViewableAsOptional<V> {
      *         {@link #defaultTo(Supplier) initialized with a default value},
      *         the reference is assigned the default value and this is returned.
      */
+    @SuppressWarnings("unchecked")
     public V get() {
-        return ref.updateAndGet(v -> v != null ? v : defaultValue.get());
+        Object maybeAssigned = ref.updateAndGet(v -> v != UNASSIGNED ? v : defaultValue.get());
+        return maybeAssigned != UNASSIGNED ? (V) maybeAssigned : null;
     }
 
     /**
      * Convert this {@code OneTimeAssignment} to an {@link java.util.Optional}. This
-     * method will never throw an exception.
+     * method will never throw an exception. Calling this on an unassigned {@code OneTimeAssignment}
+     * <em>with a default value</em>, will effectively assign to the default value before wrapping it in
+     * an {@code Optional}.
      */
     @Override
     public Optional<V> toOptional() {
-        return Optional.ofNullable(ref.get());
+        return Optional.ofNullable(get());
     }
 
 
@@ -109,5 +113,7 @@ public final class OneTimeAssignment<V> implements ViewableAsOptional<V> {
             super("Already assigned to " + alreadyAssignedValue + ". Can not be reassigned to " + attemptedAssignedValue);
         }
     }
+
+    private static final Object UNASSIGNED = new Object();
 
 }

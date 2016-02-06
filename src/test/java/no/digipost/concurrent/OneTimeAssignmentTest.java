@@ -15,21 +15,27 @@
  */
 package no.digipost.concurrent;
 
+import com.pholser.junit.quickcheck.Property;
+import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.Timeout;
+import org.junit.runner.RunWith;
 
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
 
+@RunWith(JUnitQuickcheck.class)
 public class OneTimeAssignmentTest {
 
     @Rule
@@ -79,6 +85,22 @@ public class OneTimeAssignmentTest {
         } catch (OneTimeAssignment.AlreadyAssigned e) {
             assertThat(x.get(), is("y"));
         }
+    }
+
+    @Test
+    public void setNullTwiceThrowsException() {
+        OneTimeAssignment<String> x = OneTimeAssignment.newInstance();
+        x.set(null);
+        expectedException.expect(OneTimeAssignment.AlreadyAssigned.class);
+        x.set(null);
+    }
+
+    @Property
+    public void assignWhenConvertToOptionalForOneTimeAssignmentWithDefaultValue(Object defaultValue) {
+        OneTimeAssignment<?> assignment = OneTimeAssignment.defaultTo(defaultValue);
+        Optional<?> value = assignment.toOptional();
+        assertThat(assignment.get(), is(defaultValue));
+        assertThat(value, is(ofNullable(defaultValue)));
     }
 
     @Test
