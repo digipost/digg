@@ -8,6 +8,7 @@ or [Commons Lang](https://commons.apache.org/proper/commons-lang/), but to compl
 The term _"digg"_ is Norwegian jargon for tasty stuff, like candy.
 
 
+
 ## Getting Digg
 
 _Digg_ is available in Maven Central Repository, and can thus be acquired using your favorite build/dependency management tool. If you are using Maven, you would include the following in your `pom.xml` file:
@@ -20,7 +21,9 @@ _Digg_ is available in Maven Central Repository, and can thus be acquired using 
 </dependency>
 ```
 
-The latest version can be found at [search.maven.org/#search|ga|1|digg](http://search.maven.org/#search|ga|1|no.digipost%20digg).
+Should the definition above not be updated, replace the version with: [![Maven Central](https://maven-badges.herokuapp.com/maven-central/no.digipost/digg/badge.svg)](https://maven-badges.herokuapp.com/maven-central/no.digipost/digg)
+
+_Digg_ requires Java 8, and has no other dependencies.
 
 
 
@@ -41,3 +44,6 @@ Javadocs are available at [javadoc.io/doc/no.digipost/digg](http://www.javadoc.i
 ## License
 
 Digipost Digg is licensed under [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
+
+
+[![Build Status](https://travis-ci.org/digipost/digg.svg?branch=master)](https://travis-ci.org/digipost/digg)
