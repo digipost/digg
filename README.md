@@ -17,7 +17,7 @@ _Digg_ is available in Maven Central Repository, and can thus be acquired using 
 <dependency>
     <groupId>no.digipost</groupId>
     <artifactId>digg</artifactId>
-    <version>0.2</version>
+    <version>0.3</version>
 </dependency>
 ```
 
