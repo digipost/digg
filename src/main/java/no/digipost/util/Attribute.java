@@ -33,6 +33,8 @@ import static java.util.Optional.ofNullable;
  */
 public final class Attribute<V> implements GetsNamedValue<V>, SetsNamedValue<V>, Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     public final String name;
 
     public Attribute(String name) {

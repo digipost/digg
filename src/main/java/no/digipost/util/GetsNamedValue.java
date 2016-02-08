@@ -41,6 +41,8 @@ public interface GetsNamedValue<V> {
     }
 
     public static class NotFound extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
         public NotFound(GetsNamedValue<?> valueGetter) {
             super(valueGetter.getName() + " was not found!");
         }

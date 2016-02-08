@@ -16,7 +16,6 @@
 package no.digipost.util;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import no.digipost.util.WithName.JustAName;
 import org.junit.Test;
 
 import java.io.ByteArrayInputStream;
@@ -67,19 +66,21 @@ public class JustAStringTest {
         }
     }
 
-}
 
-interface WithName {
+    interface WithName {
 
-    static JustAName of(String name) {
-        return new JustAName(name);
+        static JustAName of(String name) {
+            return new JustAName(name);
+        }
+
+        static JustAName of(String name, String description) {
+            return new JustAName(name, description);
+        }
+
+        String getName();
     }
 
-    static JustAName of(String name, String description) {
-        return new JustAName(name, description);
-    }
-
-    final class JustAName extends JustA<String> implements WithName {
+    static final class JustAName extends JustA<String> implements WithName {
 
         private JustAName(String name) {
             super(name);
@@ -96,5 +97,5 @@ interface WithName {
 
     }
 
-    String getName();
 }
+

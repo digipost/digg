@@ -109,6 +109,8 @@ public final class OneTimeAssignment<V> implements ViewableAsOptional<V> {
 
 
     public static final class AlreadyAssigned extends IllegalStateException {
+        private static final long serialVersionUID = 1L;
+
         private AlreadyAssigned(Object alreadyAssignedValue, Object attemptedAssignedValue) {
             super("Already assigned to " + alreadyAssignedValue + ". Can not be reassigned to " + attemptedAssignedValue);
         }

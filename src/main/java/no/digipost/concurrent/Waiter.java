@@ -65,6 +65,8 @@ public abstract class Waiter {
 
 
     public static class WasInterrupted extends RuntimeException {
+        private static final long serialVersionUID = 1L;
+
         protected WasInterrupted(String message, InterruptedException e) {
             super(message + " " + e.getClass().getSimpleName() + " '" + e.getMessage() + "'", e);
         }

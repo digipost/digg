@@ -31,6 +31,8 @@ public interface ViewableAsOptional<V> {
      */
     class TooManyElements extends RuntimeException {
 
+        private static final long serialVersionUID = 1L;
+
         public TooManyElements(List<? extends Object> objects) {
             this(objects, (Throwable) null);
         }

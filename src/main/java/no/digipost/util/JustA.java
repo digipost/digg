@@ -66,6 +66,8 @@ import java.util.Objects;
  */
 public abstract class JustA<T> implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     protected final T theValue;
 
     private final String description;

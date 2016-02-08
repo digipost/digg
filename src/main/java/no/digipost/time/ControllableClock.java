@@ -25,6 +25,8 @@ import java.util.concurrent.atomic.AtomicReference;
  */
 public final class ControllableClock extends Clock implements TimeControllable, Serializable {
 
+    private static final long serialVersionUID = 1L;
+
     private final AtomicReference<Clock> delegate;
 
     public ControllableClock(Instant fixedNow) {

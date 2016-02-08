@@ -87,6 +87,9 @@ public final class TimeSpan implements Comparable<TimeSpan>, Serializable {
 
     public static final TimeSpan EMPTY_FAR_PAST = TimeSpan.from(MIN).lasting(ZERO);
 
+
+    private static final long serialVersionUID = 1L;
+
     public final Instant start;
     public final Instant end;
     public final Duration duration;

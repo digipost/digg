@@ -26,5 +26,5 @@ import java.util.function.Function;
  */
 @FunctionalInterface
 public interface SerializableFunction<T, R> extends Function<T, R>, Serializable {
-
+    public static final long serialVersionUID = 1L;
 }
