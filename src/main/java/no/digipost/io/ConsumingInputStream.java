@@ -152,7 +152,8 @@ public class ConsumingInputStream extends InputStream {
         private static final long serialVersionUID = 1L;
 
         private ProducerFailed(Throwable cause) {
-            super("Tråden som skriver data for lesing av ConsumingInputStream har feilet. Cause: " + cause.getClass() + ": " + cause.getMessage(), cause);
+            super("The thread which produces data for the " + ConsumingInputStream.class.getSimpleName() +
+                  " to read failed. Cause: " + cause.getClass() + ": " + cause.getMessage(), cause);
         }
     }
 
