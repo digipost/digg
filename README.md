@@ -11,7 +11,7 @@ The term _"digg"_ is Norwegian jargon for tasty stuff, like candy.
 
 ## Getting Digg
 
-_Digg_ is available in Maven Central Repository, and can thus be acquired using your favorite build/dependency management tool. If you are using Maven, you would include the following in your `pom.xml` file:
+_Digg_ is available in [![Maven Central Repository](https://maven-badges.herokuapp.com/maven-central/no.digipost/digg/badge.svg)](https://maven-badges.herokuapp.com/maven-central/no.digipost/digg), and can be acquired using your favorite build/dependency management tool. If you are using Maven, you would include the following in your `pom.xml` file:
 
 ```xml
 <dependency>
@@ -20,8 +20,6 @@ _Digg_ is available in Maven Central Repository, and can thus be acquired using 
     <version>0.3</version>
 </dependency>
 ```
-
-Should the definition above not be updated, replace the version with: [![Maven Central](https://maven-badges.herokuapp.com/maven-central/no.digipost/digg/badge.svg)](https://maven-badges.herokuapp.com/maven-central/no.digipost/digg)
 
 _Digg_ requires Java 8, and has no other dependencies.
 
