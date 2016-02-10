@@ -18,11 +18,33 @@ package no.digipost.util;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static java.util.stream.Collectors.joining;
 
 @FunctionalInterface
 public interface ViewableAsOptional<V> {
+
+    /**
+     * A {@link Supplier} which is also {@link ViewableAsOptional}.
+     *
+     * @param <V> The type of the supplied value
+     */
+    @FunctionalInterface
+    interface Single<V> extends Supplier<V>, ViewableAsOptional<V> {
+
+        /**
+         * Convert this object to an {@link java.util.Optional} by wrapping the
+         * value returned from {@link #get()}.
+         *
+         * @return the value returned from {@link #get()}, wrapped in an {@link Optional}.
+         *         If {@code get()} returns {@code null}, {@link Optional#empty()} is returned.
+         */
+        @Override
+        default Optional<V> toOptional() throws ViewableAsOptional.TooManyElements {
+            return Optional.ofNullable(get());
+        }
+    }
 
     /**
      * An object which was attempted to be viewed as a {@link java.util.Optional}

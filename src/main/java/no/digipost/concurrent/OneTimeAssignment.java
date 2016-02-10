@@ -15,9 +15,8 @@
  */
 package no.digipost.concurrent;
 
-import no.digipost.util.ViewableAsOptional;
+import no.digipost.util.Assignment;
 
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Supplier;
 
@@ -34,7 +33,7 @@ import java.util.function.Supplier;
  *
  * @param <V> The type of the object which is referenced.
  */
-public final class OneTimeAssignment<V> implements ViewableAsOptional<V> {
+public final class OneTimeAssignment<V> implements Assignment<V> {
 
     /**
      * Create a new non-assigned instance with a default value.
@@ -79,6 +78,7 @@ public final class OneTimeAssignment<V> implements ViewableAsOptional<V> {
      * @param value the value to set.
      * @throws AlreadyAssigned if this reference is already assigned a value.
      */
+    @Override
     public void set(V value) {
         if (!ref.compareAndSet(UNASSIGNED, value)) {
             throw new AlreadyAssigned(ref.get(), value);
@@ -90,22 +90,13 @@ public final class OneTimeAssignment<V> implements ViewableAsOptional<V> {
      *         {@link #defaultTo(Supplier) initialized with a default value},
      *         the reference is assigned the default value and this is returned.
      */
+    @Override
     @SuppressWarnings("unchecked")
     public V get() {
         Object maybeAssigned = ref.updateAndGet(v -> v != UNASSIGNED ? v : defaultValue.get());
         return maybeAssigned != UNASSIGNED ? (V) maybeAssigned : null;
     }
 
-    /**
-     * Convert this {@code OneTimeAssignment} to an {@link java.util.Optional}. This
-     * method will never throw an exception. Calling this on an unassigned {@code OneTimeAssignment}
-     * <em>with a default value</em>, will effectively assign to the default value before wrapping it in
-     * an {@code Optional}.
-     */
-    @Override
-    public Optional<V> toOptional() {
-        return Optional.ofNullable(get());
-    }
 
 
     public static final class AlreadyAssigned extends IllegalStateException {
