@@ -15,12 +15,14 @@
  */
 package no.digipost.util;
 
+import no.digipost.DiggCollectors;
 import no.digipost.function.ThrowingRunnable;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Collector;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
@@ -98,6 +100,11 @@ public interface AtMostOne<T> extends ViewableAsOptional<T> {
         return from(list.stream());
     }
 
+    /**
+     * @deprecated If getting the only item in a {@link Stream}, {@link Stream#collect(Collector) collect} the stream
+     *             using {@link DiggCollectors#allowAtMostOne()} instead.
+     */
+    @Deprecated
     public static <T> AtMostOne<T> from(Stream<T> stream) {
         return new AtMostOne<T>() {
 
