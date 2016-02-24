@@ -15,10 +15,17 @@
  */
 package no.digipost;
 
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import static java.util.Spliterator.ORDERED;
+import static java.util.Spliterators.spliterator;
+import static java.util.stream.Collectors.joining;
+import static java.util.stream.StreamSupport.stream;
 
 /**
  * Party people, turn up tha...
@@ -100,6 +107,34 @@ public final class DiggBase {
         } else {
             throw throwIfNull.apply(descriptiveRefKey);
         }
+    }
+
+    /**
+     * The "friendly name" of a class is defined as its {@link Class#getSimpleName() simple name}, with
+     * all enclosing classes prepended and joined with a <tt>'.'</tt> delimiter. This name is typically
+     * useful for logging, naming based on classes, where the fully qualified name would be too verbose
+     * and the simple name is not specific enough.
+     * <p>
+     * Given the following class model:
+     * <pre>
+     * class Base {
+     *     class Nested {}
+     * }
+     * </pre>
+     * The <em>friendly name</em> for the {@code Nested} class is "Base.Nested".
+     *
+     * @param clazz the clazz to get the friendly name of
+     * @return the friendly name
+     */
+    public static String friendlyName(Class<?> clazz) {
+        Deque<Class<?>> classes = new ArrayDeque<>();
+        classes.add(clazz);
+        for (Class<?> enclosing = clazz.getEnclosingClass(); enclosing != null; enclosing = enclosing.getEnclosingClass()) {
+            classes.add(enclosing);
+        }
+        return stream(spliterator(classes.descendingIterator(), classes.size(), ORDERED), false)
+            .map(Class::getSimpleName)
+            .collect(joining("."));
     }
 
     /**

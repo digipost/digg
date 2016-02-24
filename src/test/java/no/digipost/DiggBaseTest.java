@@ -16,6 +16,7 @@
 package no.digipost;
 
 import com.pholser.junit.quickcheck.Property;
+import com.pholser.junit.quickcheck.When;
 import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import org.junit.Rule;
 import org.junit.Test;
@@ -27,8 +28,9 @@ import java.util.Optional;
 import static co.unruly.matchers.StreamMatchers.contains;
 import static co.unruly.matchers.StreamMatchers.empty;
 import static no.digipost.DiggBase.*;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assume.assumeThat;
 
 @RunWith(JUnitQuickcheck.class)
 public class DiggBaseTest {
@@ -76,7 +78,34 @@ public class DiggBaseTest {
         assertThat(extract("abc", s -> s.charAt(0), s -> null), contains('a', null));
     }
 
+    @Property
+    public void friendlyClassNameIsJustTheSimpleName(@When(satisfies = "#_ != null") Object anyInstanceOfNonNestedClass) {
+        Class<?> anyNonNestedClass = anyInstanceOfNonNestedClass.getClass();
+        assumeThat(anyNonNestedClass.getEnclosingClass(), nullValue());
+        assertThat(friendlyName(anyNonNestedClass), is(anyNonNestedClass.getSimpleName()));
+    }
+
+    @Test
+    public void includesNameOfAllClassesUpToTheFirstNonEnclosed() {
+        assertThat(friendlyName(Base.StaticNested.class), is("Base.StaticNested"));
+        assertThat(friendlyName(Base.StaticNested.O.Rama.class), is("Base.StaticNested.O.Rama"));
+        assertThat(friendlyName(Base.Inner.class), is("Base.Inner"));
+
+        class InMethod {}
+        assertThat(friendlyName(InMethod.class), is(getClass().getSimpleName() + ".InMethod"));
+    }
 
 
 
+
+}
+
+
+class Base {
+    static class StaticNested {
+        static class O {
+            static class Rama {}
+        }
+    }
+    class Inner {}
 }
