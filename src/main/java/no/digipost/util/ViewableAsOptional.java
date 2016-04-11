@@ -80,7 +80,7 @@ public interface ViewableAsOptional<V> {
         }
 
         public TooManyElements() {
-            this("Exepcted at most one element, but there were excess ones", null);
+            this("Expected at most one element, but there were excess ones", null);
         }
 
         public TooManyElements(String message, Throwable cause) {
