@@ -15,16 +15,55 @@
  */
 package no.digipost.tuple;
 
+import com.pholser.junit.quickcheck.Property;
+import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
-import static org.hamcrest.Matchers.sameInstance;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
+@RunWith(JUnitQuickcheck.class)
 public class TupleTest {
+
+    @Property
+    public void accessElements(Object first, Object second) {
+        Tuple<?, ?> tuple = Tuple.of(first, second);
+        assertThat(tuple.first(), sameInstance(first));
+        assertThat(tuple.second(), sameInstance(second));
+    }
+
+    @Property
+    public void stringRepresentationIncludesBothElements(Object first, Object second) {
+        Tuple<?, ?> tuple = Tuple.of(first, second);
+        assertThat(tuple.toString(), both(containsString(String.valueOf(first))).and(containsString(String.valueOf(second))));
+    }
 
     @Test
     public void asTupleReturnsSameInstance() {
         Tuple<?, ?> tuple = Tuple.of(1, 2);
         assertThat(tuple.asTuple(), sameInstance(tuple));
     }
+
+    @Test
+    public void mapFirstElement() {
+        assertThat(Tuple.of("1", 2).mapFirst(Integer::parseInt), is(Tuple.of(1, 2)));
+    }
+
+    @Test
+    public void mapSecondElement() {
+        assertThat(Tuple.of(1, "2").mapSecond(Integer::parseInt), is(Tuple.of(1, 2)));
+    }
+
+    @Test
+    public void correctEqualsAndHashCode() {
+        EqualsVerifier.forClass(Tuple.class).verify();
+    }
+
+    @Test
+    public void swapping() {
+        assertThat(Tuple.of("a", 'b').swap(), is(Tuple.of('b', "a")));
+    }
+
 }
