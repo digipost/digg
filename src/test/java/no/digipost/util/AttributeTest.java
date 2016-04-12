@@ -16,6 +16,7 @@
 package no.digipost.util;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
+import no.digipost.tuple.Tuple;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -27,6 +28,7 @@ import java.util.Optional;
 
 import static java.util.Optional.empty;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
 
 public class AttributeTest {
@@ -61,6 +63,22 @@ public class AttributeTest {
     public void correctEqualsAndHashCode() {
         EqualsVerifier.forClass(Attribute.class).verify();
         assertThat(new Attribute<>("x"), is(new Attribute<>("x")));
+    }
+
+    @Test
+    public void changeAttributeName() {
+        Attribute<Long> num = new Attribute<>("num");
+        Attribute<Long> longNum = num.withName("longNum");
+        assertThat(num.name, is("num"));
+        assertThat(longNum.name, is("longNum"));
+        assertThat(num.withName("num"), sameInstance(num));
+    }
+
+    @Test
+    public void coupleWithValue() {
+        Tuple<Attribute<Long>, Long> boundAttribute = new Attribute<Long>("num").withValue(42L);
+        assertThat(boundAttribute.first(), is(new Attribute<>("num")));
+        assertThat(boundAttribute.second(), is(42L));
     }
 
 }

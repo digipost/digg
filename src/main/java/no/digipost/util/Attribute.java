@@ -15,6 +15,8 @@
  */
 package no.digipost.util;
 
+import no.digipost.tuple.Tuple;
+
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.Optional;
@@ -39,6 +41,28 @@ public final class Attribute<V> implements GetsNamedValue<V>, SetsNamedValue<V>,
 
     public Attribute(String name) {
         this.name = name;
+    }
+
+    /**
+     * Create a new attribute of the <em>same type</em> with another name.
+     *
+     * @param anotherName the name for the new attribute
+     * @return the new attribute instance. If the given name is equal to this attribute's name, the same instance is returned.
+     *
+     * @see #getName()
+     */
+    public Attribute<V> withName(String anotherName) {
+        return !Objects.equals(name, anotherName) ? new Attribute<>(anotherName) : this;
+    }
+
+    /**
+     * Bundle an attribute with an associated value in a {@link Tuple}.
+     *
+     * @param value the value to associate with the attribute
+     * @return a tuple containing the attribute and the value.
+     */
+    public Tuple<Attribute<V>, V> withValue(V value) {
+        return Tuple.of(this, value);
     }
 
     @Override
