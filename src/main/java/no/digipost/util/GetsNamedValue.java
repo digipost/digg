@@ -36,15 +36,12 @@ public interface GetsNamedValue<V> {
         return getFrom(getter).orElseThrow(() -> new NotFound(this));
     }
 
-    default String getName() {
-        return toString();
-    }
 
     public static class NotFound extends RuntimeException {
         private static final long serialVersionUID = 1L;
 
         public NotFound(GetsNamedValue<?> valueGetter) {
-            super(valueGetter.getName() + " was not found!");
+            super(valueGetter + " could not resolve to a value.");
         }
     }
 
