@@ -25,13 +25,13 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static no.digipost.jdbc.Mappers.getLong;
-import static no.digipost.jdbc.Mappers.getString;
+import static no.digipost.jdbc.Mappers.*;
 import static no.digipost.util.AttributeMap.Config.ALLOW_NULL_VALUES;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
@@ -39,11 +39,13 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 public class AttributesRowMapperTest {
-    @FunctionalInterface interface WithId { long getId(); }
+    @FunctionalInterface interface WithId { Long getId(); }
+    @FunctionalInterface interface WithTimestamp { Timestamp getInstant(); }
 
     static final Attribute<String> myString = new Attribute<>("myString");
     static final Attribute<Long> myLong = new Attribute<>("myLong");
     static final Attribute<WithId> myReference = new Attribute<>("myReference");
+    static final Attribute<WithTimestamp> myNullableTimestamp = new Attribute<>("myNullableTimestamp");
 
     private final AttributesRowMapper rowMapper = new AttributesRowMapper(
             getString.forAttribute(myString),
@@ -73,6 +75,17 @@ public class AttributesRowMapperTest {
         try (MockResultSet rs = populateResultSet(myReference.withValue(() -> 42L).mapSecond(WithId::getId).map(a -> a.name, Arrays::asList))) {
             AttributeMap attributes = rowMapper.fromResultSet(rs);
             assertThat(attributes.get(myReference).getId(), is(42L));
+            assertThat(attributes.size(), is(1));
+        }
+    }
+
+    @Test
+    public void nullFallthrough() throws SQLException {
+        AttributesRowMapper rowMapper = new AttributesRowMapper(ALLOW_NULL_VALUES,
+                getTimestamp.nullFallthrough().andThen(id -> (WithTimestamp) () -> { throw new AssertionError(id); }).forAttribute(myNullableTimestamp));
+        try (MockResultSet rs = populateResultSet(Tuple.of(myNullableTimestamp.name, asList(new Object[]{null})))) {
+            AttributeMap attributes = rowMapper.fromResultSet(rs);
+            assertThat(attributes.get(myNullableTimestamp), nullValue());
             assertThat(attributes.size(), is(1));
         }
     }

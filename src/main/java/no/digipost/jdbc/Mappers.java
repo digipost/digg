@@ -22,7 +22,6 @@ import java.net.URL;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
-import java.time.Instant;
 
 /**
  * Various predefined mappers used to extract result(s) from a {@link ResultSet}.
@@ -46,7 +45,6 @@ public final class Mappers {
 
     public static final ColumnMapper<Date> getDate = (name, rs) -> rs.getDate(name);
     public static final ColumnMapper<Timestamp> getTimestamp = (name, rs) -> rs.getTimestamp(name);
-    public static final ColumnMapper<Instant> getInstant = getTimestamp.andThen(Timestamp::toInstant);
 
     public static final ColumnMapper<InputStream> getAsciiStream = (name, rs) -> rs.getAsciiStream(name);
     public static final ColumnMapper<InputStream> getBinaryStream = (name, rs) -> rs.getBinaryStream(name);
