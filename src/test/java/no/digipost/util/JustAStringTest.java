@@ -18,13 +18,10 @@ package no.digipost.util;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Test;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-
 import static nl.jqno.equalsverifier.Warning.NULL_FIELDS;
-import static org.hamcrest.Matchers.*;
+import static no.digipost.util.DiggMatchers.isEffectivelySerializable;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertThat;
 
 public class JustAStringTest {
@@ -51,19 +48,7 @@ public class JustAStringTest {
 
     @Test
     public void isSerializable() throws Exception {
-        JustAName original = WithName.of("Mary");
-        ByteArrayOutputStream writtenBytes = new ByteArrayOutputStream();
-        try (
-                ByteArrayOutputStream bytes = writtenBytes;
-                ObjectOutputStream serializer = new ObjectOutputStream(bytes)) {
-
-            serializer.writeObject(original);
-        }
-
-        try (ObjectInputStream unserializer = new ObjectInputStream(new ByteArrayInputStream(writtenBytes.toByteArray()))) {
-            JustAName unserialized = (JustAName) unserializer.readObject();
-            assertThat(unserialized, equalTo(original));
-        }
+        assertThat(WithName.of("Mary"), isEffectivelySerializable());
     }
 
 
