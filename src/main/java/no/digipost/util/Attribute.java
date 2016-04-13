@@ -37,6 +37,9 @@ public final class Attribute<V> implements GetsNamedValue<V>, SetsNamedValue<V>,
 
     private static final long serialVersionUID = 1L;
 
+    /**
+     * The name of this attribute.
+     */
     public final String name;
 
     public Attribute(String name) {
@@ -49,7 +52,7 @@ public final class Attribute<V> implements GetsNamedValue<V>, SetsNamedValue<V>,
      * @param anotherName the name for the new attribute
      * @return the new attribute instance. If the given name is equal to this attribute's name, the same instance is returned.
      *
-     * @see #getName()
+     * @see #name
      */
     public Attribute<V> withName(String anotherName) {
         return !Objects.equals(name, anotherName) ? new Attribute<>(anotherName) : this;
