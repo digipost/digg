@@ -20,10 +20,16 @@ import no.digipost.tuple.ViewableAsTuple;
 
 import java.io.Serializable;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.function.Supplier;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.unmodifiableMap;
+import static java.util.EnumSet.copyOf;
+import static java.util.EnumSet.noneOf;
 
 /**
  * An immutable collection of {@link Attribute attributes}.
@@ -31,22 +37,46 @@ import static java.util.Collections.unmodifiableMap;
 public final class AttributeMap implements Serializable {
 
     /**
+     * Switches to indicate behavior other than default.
+     */
+    public enum Config implements Supplier<AttributeMap.Builder> {
+        ALLOW_NULL_VALUES;
+
+        @Override
+        public Builder get() {
+            return AttributeMap.buildNew(this);
+        }
+
+    }
+
+    /**
      * An empty map with no attributes.
      */
     public static final AttributeMap EMPTY = buildNew().build();
 
 
-    public static <V> AttributeMap.Builder with(ViewableAsTuple<? extends SetsNamedValue<V>, V> attributeWithValue) {
-        return buildNew().and(attributeWithValue);
+    public static <V> AttributeMap.Builder with(ViewableAsTuple<? extends SetsNamedValue<V>, V> attributeWithValue, Config ... configSwitches) {
+        return buildNew(configSwitches).and(attributeWithValue);
     }
 
-    public static <V> AttributeMap.Builder with(SetsNamedValue<V> attribute, V value) {
-        return buildNew().and(attribute, value);
+    public static <V> AttributeMap.Builder with(SetsNamedValue<V> attribute, V value, Config ... configSwitches) {
+        return buildNew(configSwitches).and(attribute, value);
     }
 
-    public static AttributeMap.Builder buildNew() {
-        return new Builder();
+    public static AttributeMap.Builder buildNew(Config ... configSwitches) {
+        return new Builder(configSwitches);
     }
+
+    private static final Serializable NON_EXISTING_VALUE = new Serializable() {
+        private Object readResolve() {
+            return NON_EXISTING_VALUE;
+        }
+
+        @Override
+        public String toString() {
+            return "[non-existing value]";
+        };
+    };
 
 
     /**
@@ -55,6 +85,12 @@ public final class AttributeMap implements Serializable {
     public static class Builder {
 
         private final ConcurrentMap<String, Object> incrementalMap = new ConcurrentHashMap<>();
+        private final Set<Config> configSwitches;
+
+        private Builder(Config ... configSwitches) {
+            this.configSwitches = configSwitches.length == 0 ? noneOf(Config.class) : copyOf(asList(configSwitches));
+        }
+
 
         /**
          * Add an attribute coupled with a value.
@@ -76,7 +112,9 @@ public final class AttributeMap implements Serializable {
          * @return the builder
          */
         public <V> Builder and(SetsNamedValue<V> attribute, V value) {
-            attribute.setOn(incrementalMap, value);
+            if (value != null || configSwitches.contains(Config.ALLOW_NULL_VALUES)) {
+                attribute.setOn((name, v) -> incrementalMap.put(name, v != null ? v : NON_EXISTING_VALUE), value);
+            }
             return this;
         }
 
@@ -121,15 +159,18 @@ public final class AttributeMap implements Serializable {
         this.untypedMap = unmodifiableMap(untypedMap);
     }
 
+
     /**
-     * Retrieve an attribute value.
+     * Retrieve a required attribute value. This method throws an exception
+     * if the attribute value is not present.
      *
      * @param attribute the attribute to retrieve.
      * @return the value
      * @throws GetsNamedValue.NotFound if the attribute is not present.
      */
     public <V> V get(GetsNamedValue<V> attribute) {
-        return attribute.requireFrom(untypedMap);
+        V value = attribute.requireFrom(untypedMap);
+        return value != NON_EXISTING_VALUE ? value : null;
     }
 
     /**
@@ -149,5 +190,19 @@ public final class AttributeMap implements Serializable {
     @Override
     public String toString() {
         return "attributes: " + untypedMap.toString();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof AttributeMap) {
+            AttributeMap that = (AttributeMap) obj;
+            return Objects.equals(this.untypedMap, that.untypedMap);
+        }
+        return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(untypedMap);
     }
 }

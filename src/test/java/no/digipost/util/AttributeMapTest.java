@@ -17,19 +17,27 @@ package no.digipost.util;
 
 import com.pholser.junit.quickcheck.Property;
 import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
+import nl.jqno.equalsverifier.EqualsVerifier;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static org.hamcrest.Matchers.containsString;
-import static org.hamcrest.Matchers.is;
+import static no.digipost.util.AttributeMap.buildNew;
+import static no.digipost.util.AttributeMap.Config.ALLOW_NULL_VALUES;
+import static no.digipost.util.DiggMatchers.isEffectivelySerializable;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 @RunWith(JUnitQuickcheck.class)
 public class AttributeMapTest {
+
+    @Rule
+    public final ExpectedException expectedException = ExpectedException.none();
 
     @Property
     public void attributeMapIsEmptyWhenSizeIsZero(List<String> attributeNames) {
@@ -55,7 +63,7 @@ public class AttributeMapTest {
     @Property
     public void stringRepresentation(Map<String, Integer> anyAttributes) {
         AttributeMap attributes = anyAttributes.entrySet().parallelStream().collect(
-                AttributeMap::buildNew,
+                () -> buildNew(ALLOW_NULL_VALUES),
                 (builder, entry) -> builder.and(new Attribute<>(entry.getKey()), entry.getValue()),
                 AttributeMap.Builder::and).build();
 
@@ -64,10 +72,35 @@ public class AttributeMapTest {
         assertThat(asserts.get(), is(anyAttributes.size()));
     }
 
+
+    @Test
+    public void serializesAttributeWithNullValue() {
+        AttributeMap attributes = AttributeMap.with(new Attribute<String>("a"), null, ALLOW_NULL_VALUES).build();
+        assertThat(attributes.size(), is(1));
+        assertThat(attributes, isEffectivelySerializable());
+    }
+
+    @Property
+    public void isSerializable(Map<String, String> serializableAttributes) {
+        AttributeMap attributes = serializableAttributes.entrySet().parallelStream().collect(
+                () -> buildNew(ALLOW_NULL_VALUES),
+                (builder, entry) -> builder.and(new Attribute<>(entry.getKey()), entry.getValue()),
+                AttributeMap.Builder::and).build();
+        assertThat(attributes, isEffectivelySerializable());
+    }
+
+    @Test
+    public void correctEqualsHashcode() {
+        EqualsVerifier.forClass(AttributeMap.class).verify();
+    }
+
+
+    private final Attribute<Integer> num = new Attribute<>("num");
+    private final Attribute<Integer> anotherNum = new Attribute<>("anotherNum");
+    private final Attribute<String> text = new Attribute<>("text");
+
     @Test
     public void combineTwoBuilders() {
-        Attribute<Integer> num = new Attribute<Integer>("num");
-        Attribute<Integer> anotherNum = new Attribute<Integer>("anotherNum");
         AttributeMap map = AttributeMap.with(num, 42).build();
         AttributeMap combinedMap = AttributeMap.with(anotherNum, 43).and(map).build();
 
@@ -77,6 +110,15 @@ public class AttributeMapTest {
         assertThat(combinedMap.size(), is(2));
         assertThat(combinedMap.get(num), is(42));
         assertThat(combinedMap.get(anotherNum), is(43));
+    }
+
+    @Test
+    public void distinguishNullValueAndNonExistingAttribute() {
+        AttributeMap attributes = AttributeMap.with(text, null, ALLOW_NULL_VALUES).build();
+        assertThat(attributes.get(text), nullValue());
+
+        expectedException.expect(GetsNamedValue.NotFound.class);
+        attributes.get(num);
     }
 
 }
