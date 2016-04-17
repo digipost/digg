@@ -34,17 +34,17 @@ import static java.util.EnumSet.noneOf;
 /**
  * An immutable collection of {@link Attribute attributes}.
  */
-public final class AttributeMap implements Serializable {
+public final class AttributesMap implements Serializable {
 
     /**
      * Switches to indicate behavior other than default.
      */
-    public enum Config implements Supplier<AttributeMap.Builder> {
+    public enum Config implements Supplier<AttributesMap.Builder> {
         ALLOW_NULL_VALUES;
 
         @Override
         public Builder get() {
-            return AttributeMap.buildNew(this);
+            return AttributesMap.buildNew(this);
         }
 
     }
@@ -52,18 +52,18 @@ public final class AttributeMap implements Serializable {
     /**
      * An empty map with no attributes.
      */
-    public static final AttributeMap EMPTY = buildNew().build();
+    public static final AttributesMap EMPTY = buildNew().build();
 
 
-    public static <V> AttributeMap.Builder with(ViewableAsTuple<? extends SetsNamedValue<V>, V> attributeWithValue, Config ... configSwitches) {
+    public static <V> AttributesMap.Builder with(ViewableAsTuple<? extends SetsNamedValue<V>, V> attributeWithValue, Config ... configSwitches) {
         return buildNew(configSwitches).and(attributeWithValue);
     }
 
-    public static <V> AttributeMap.Builder with(SetsNamedValue<V> attribute, V value, Config ... configSwitches) {
+    public static <V> AttributesMap.Builder with(SetsNamedValue<V> attribute, V value, Config ... configSwitches) {
         return buildNew(configSwitches).and(attribute, value);
     }
 
-    public static AttributeMap.Builder buildNew(Config ... configSwitches) {
+    public static AttributesMap.Builder buildNew(Config ... configSwitches) {
         return new Builder(configSwitches);
     }
 
@@ -80,7 +80,7 @@ public final class AttributeMap implements Serializable {
 
 
     /**
-     * Builder to incrementally construct an immutable {@link AttributeMap}.
+     * Builder to incrementally construct an immutable {@link AttributesMap}.
      */
     public static class Builder {
 
@@ -119,33 +119,33 @@ public final class AttributeMap implements Serializable {
         }
 
         /**
-         * Add all attributes from an existing {@link AttributeMap}.
+         * Add all attributes from an existing {@link AttributesMap}.
          *
          * @param otherMap contains the other attributes to add.
          * @return the builder
          */
-        public Builder and(AttributeMap otherMap) {
+        public Builder and(AttributesMap otherMap) {
             incrementalMap.putAll(otherMap.untypedMap);
             return this;
         }
 
         /**
-         * Add all attributes from another {@link AttributeMap.Builder}
+         * Add all attributes from another {@link AttributesMap.Builder}
          *
          * @param otherBuilder contains the other attributes to add
          * @return the builder
          */
-        public Builder and(AttributeMap.Builder otherBuilder) {
+        public Builder and(AttributesMap.Builder otherBuilder) {
             incrementalMap.putAll(otherBuilder.incrementalMap);
             return this;
         }
 
         /**
-         * @return a new immutable {@link AttributeMap} containing the attributes and
+         * @return a new immutable {@link AttributesMap} containing the attributes and
          *         values added to the builder.
          */
-        public AttributeMap build() {
-            return new AttributeMap(incrementalMap);
+        public AttributesMap build() {
+            return new AttributesMap(incrementalMap);
         }
     }
 
@@ -155,7 +155,7 @@ public final class AttributeMap implements Serializable {
 
     private final Map<String, Object> untypedMap;
 
-    private AttributeMap(Map<String, Object> untypedMap) {
+    private AttributesMap(Map<String, Object> untypedMap) {
         this.untypedMap = unmodifiableMap(untypedMap);
     }
 
@@ -194,8 +194,8 @@ public final class AttributeMap implements Serializable {
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof AttributeMap) {
-            AttributeMap that = (AttributeMap) obj;
+        if (obj instanceof AttributesMap) {
+            AttributesMap that = (AttributesMap) obj;
             return Objects.equals(this.untypedMap, that.untypedMap);
         }
         return false;

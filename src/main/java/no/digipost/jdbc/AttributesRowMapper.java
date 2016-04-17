@@ -15,8 +15,8 @@
  */
 package no.digipost.jdbc;
 
-import no.digipost.util.AttributeMap;
-import no.digipost.util.AttributeMap.Builder;
+import no.digipost.util.AttributesMap;
+import no.digipost.util.AttributesMap.Builder;
 
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
@@ -32,34 +32,34 @@ import static java.util.stream.IntStream.rangeClosed;
 import static no.digipost.DiggExceptions.asUnchecked;
 
 /**
- * A {@link RowMapper} producing {@link AttributeMap}s.
+ * A {@link RowMapper} producing {@link AttributesMap}s.
  */
-public class AttributesRowMapper implements RowMapper<AttributeMap> {
+public class AttributesRowMapper implements RowMapper<AttributesMap> {
 
     private final Supplier<Builder> attributeMapBuilderSupplier;
     private final Map<String, ? extends AttributeMapper<?>> mappers;
 
     public AttributesRowMapper(AttributeMapper<?> ... mappers) {
-        this(AttributeMap::buildNew, mappers);
+        this(AttributesMap::buildNew, mappers);
     }
 
-    public AttributesRowMapper(Supplier<AttributeMap.Builder> attributeMapBuilderSupplier, AttributeMapper<?> ... mappers) {
+    public AttributesRowMapper(Supplier<AttributesMap.Builder> attributeMapBuilderSupplier, AttributeMapper<?> ... mappers) {
         this(attributeMapBuilderSupplier, Stream.of(mappers));
     }
 
     public AttributesRowMapper(Stream<AttributeMapper<?>> mappers) {
-        this(AttributeMap::buildNew, mappers);
+        this(AttributesMap::buildNew, mappers);
     }
 
-    public AttributesRowMapper(Supplier<AttributeMap.Builder> attributeMapBuilderSupplier, Stream<AttributeMapper<?>> mappers) {
+    public AttributesRowMapper(Supplier<AttributesMap.Builder> attributeMapBuilderSupplier, Stream<AttributeMapper<?>> mappers) {
         this.attributeMapBuilderSupplier = attributeMapBuilderSupplier;
         this.mappers = mappers.collect(toMap(AttributeMapper::getAttributeName, Function.identity()));
     }
 
 
     @Override
-    public AttributeMap fromResultSet(ResultSet rs, int rowNum) throws SQLException {
-        AttributeMap.Builder attributes = attributeMapBuilderSupplier.get();
+    public AttributesMap fromResultSet(ResultSet rs, int rowNum) throws SQLException {
+        AttributesMap.Builder attributes = attributeMapBuilderSupplier.get();
         for(AttributeMapper<?> mapper : applicableMappers(rs.getMetaData()).collect(toList())) {
             attributes.and(mapper.attributeAndValue(rs));
         }

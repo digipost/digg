@@ -18,7 +18,7 @@ package no.digipost.jdbc;
 import com.mockrunner.mock.jdbc.MockResultSet;
 import no.digipost.tuple.Tuple;
 import no.digipost.util.Attribute;
-import no.digipost.util.AttributeMap;
+import no.digipost.util.AttributesMap;
 import no.digipost.util.GetsNamedValue.NotFound;
 import org.junit.Rule;
 import org.junit.Test;
@@ -32,7 +32,7 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 import static no.digipost.jdbc.Mappers.*;
-import static no.digipost.util.AttributeMap.Config.ALLOW_NULL_VALUES;
+import static no.digipost.util.AttributesMap.Config.ALLOW_NULL_VALUES;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
@@ -55,7 +55,7 @@ public class AttributesRowMapperTest {
     @Test
     public void resultSetWithNoApplicableColumns() throws SQLException {
         try (MockResultSet rs = populateResultSet(Tuple.of("a", asList("valueA1")), Tuple.of("b", asList("valueB1")))) {
-            AttributeMap attributes = rowMapper.fromResultSet(rs);
+            AttributesMap attributes = rowMapper.fromResultSet(rs);
             assertTrue(attributes.isEmpty());
         }
     }
@@ -63,7 +63,7 @@ public class AttributesRowMapperTest {
     @Test
     public void populatesSpecifiedAttributes() throws SQLException {
         try (MockResultSet rs = populateResultSet(myString.withValue("a").map(a -> a.name, Arrays::asList), myLong.withValue(42L).map(a -> a.name, Arrays::asList))) {
-            AttributeMap attributes = rowMapper.fromResultSet(rs);
+            AttributesMap attributes = rowMapper.fromResultSet(rs);
             assertThat(attributes.get(myString), is("a"));
             assertThat(attributes.get(myLong), is(42L));
             assertThat(attributes.size(), is(2));
@@ -73,7 +73,7 @@ public class AttributesRowMapperTest {
     @Test
     public void mapsResultToAnotherType() throws SQLException {
         try (MockResultSet rs = populateResultSet(myReference.withValue(() -> 42L).mapSecond(WithId::getId).map(a -> a.name, Arrays::asList))) {
-            AttributeMap attributes = rowMapper.fromResultSet(rs);
+            AttributesMap attributes = rowMapper.fromResultSet(rs);
             assertThat(attributes.get(myReference).getId(), is(42L));
             assertThat(attributes.size(), is(1));
         }
@@ -84,7 +84,7 @@ public class AttributesRowMapperTest {
         AttributesRowMapper rowMapper = new AttributesRowMapper(ALLOW_NULL_VALUES,
                 getTimestamp.nullFallthrough().andThen(id -> (WithTimestamp) () -> { throw new AssertionError(id); }).forAttribute(myNullableTimestamp));
         try (MockResultSet rs = populateResultSet(Tuple.of(myNullableTimestamp.name, asList(new Object[]{null})))) {
-            AttributeMap attributes = rowMapper.fromResultSet(rs);
+            AttributesMap attributes = rowMapper.fromResultSet(rs);
             assertThat(attributes.get(myNullableTimestamp), nullValue());
             assertThat(attributes.size(), is(1));
         }
@@ -97,7 +97,7 @@ public class AttributesRowMapperTest {
     @Test
     public void doesNotIncludeNullValuesByDefault() throws SQLException {
         try (MockResultSet rs = populateResultSet(myString.withValue(null).map(a -> a.name, Arrays::asList))) {
-            AttributeMap attributes = rowMapper.fromResultSet(rs);
+            AttributesMap attributes = rowMapper.fromResultSet(rs);
             expectedException.expect(NotFound.class);
             attributes.get(myString);
         }
@@ -108,7 +108,7 @@ public class AttributesRowMapperTest {
         AttributesRowMapper rowMapper = new AttributesRowMapper(ALLOW_NULL_VALUES, getString.forAttribute(myString));
 
         try (MockResultSet rs = populateResultSet(myString.withValue(null).map(a -> a.name, Arrays::asList))) {
-            AttributeMap attributes = rowMapper.fromResultSet(rs);
+            AttributesMap attributes = rowMapper.fromResultSet(rs);
             assertThat(attributes.get(myString), nullValue());
         }
     }
@@ -117,9 +117,9 @@ public class AttributesRowMapperTest {
     public void combineMappers() throws SQLException {
         try (MockResultSet rs = populateResultSet(myString.withValue("x").map(a -> a.name, Arrays::asList))) {
             Attribute<Integer> fortyTwo = new Attribute<Integer>("fortyTwo");
-            AttributeMap attributes = rowMapper
-                    .combinedWith((r, n) -> AttributeMap.with(fortyTwo, 42).build())
-                    .andThen(results -> AttributeMap.buildNew().and(results.first()).and(results.second()).build())
+            AttributesMap attributes = rowMapper
+                    .combinedWith((r, n) -> AttributesMap.with(fortyTwo, 42).build())
+                    .andThen(results -> AttributesMap.buildNew().and(results.first()).and(results.second()).build())
                     .fromResultSet(rs);
             assertThat(attributes.get(myString), is("x"));
             assertThat(attributes.get(fortyTwo), is(42));

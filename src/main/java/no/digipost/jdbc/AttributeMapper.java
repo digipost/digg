@@ -17,14 +17,14 @@ package no.digipost.jdbc;
 
 import no.digipost.tuple.Tuple;
 import no.digipost.util.Attribute;
-import no.digipost.util.AttributeMap;
+import no.digipost.util.AttributesMap;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
 /**
  * An attribute mapper associates a {@link ColumnMapper} with an {@link Attribute}, and
- * is used internally by an {@link AttributesRowMapper} to produce an {@link AttributeMap} where
+ * is used internally by an {@link AttributesRowMapper} to produce an {@link AttributesMap} where
  * the values can be accessed in a type-safe manner.
  * <p>
  * An {@link AttributeMapper} is constructed from an existing {@code ColumnMapper} by calling
