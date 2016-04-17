@@ -116,9 +116,13 @@ public class AttributesRowMapperTest {
     @Test
     public void combineMappers() throws SQLException {
         try (MockResultSet rs = populateResultSet(myString.withValue("x").map(a -> a.name, Arrays::asList))) {
-            Tuple<AttributeMap, Integer> attributes = rowMapper.combinedWith((r, n) -> 42).fromResultSet(rs);
-            assertThat(attributes.first().get(myString), is("x"));
-            assertThat(attributes.second(), is(42));
+            Attribute<Integer> fortyTwo = new Attribute<Integer>("fortyTwo");
+            AttributeMap attributes = rowMapper
+                    .combinedWith((r, n) -> AttributeMap.with(fortyTwo, 42).build())
+                    .andThen(results -> AttributeMap.buildNew().and(results.first()).and(results.second()).build())
+                    .fromResultSet(rs);
+            assertThat(attributes.get(myString), is("x"));
+            assertThat(attributes.get(fortyTwo), is(42));
         }
     }
 

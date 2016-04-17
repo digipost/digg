@@ -20,7 +20,7 @@ import no.digipost.tuple.Tuple;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.function.BiFunction;
+import java.util.function.Function;
 
 /**
  * Defines how to map a {@link java.sql.ResultSet} to an object.
@@ -44,17 +44,6 @@ public interface RowMapper<R> {
         return fromResultSet(resultSet, resultSet.getRow());
     }
 
-    /**
-     * Create a new row mapper which first runs this mapper and then the given mapper, and
-     * combines the two results.
-     *
-     * @param otherMapper the mapper to run in addition to this.
-     * @param combiner function which combines the results from the two mappers into one result.
-     * @return the new mapper
-     */
-    default <S, C> RowMapper<C> combinedWith(RowMapper<S> otherMapper, BiFunction<? super R, ? super S, C> combiner) {
-        return (rs, n) -> combiner.apply(this.fromResultSet(rs, n), otherMapper.fromResultSet(rs, n));
-    }
 
     /**
      * Create a new row mapper which first runs this mapper and then the given mapper, and
@@ -64,7 +53,21 @@ public interface RowMapper<R> {
      * @return the new mapper
      */
     default <S> RowMapper<Tuple<R, S>> combinedWith(RowMapper<S> otherMapper) {
-        return combinedWith(otherMapper, Tuple::of);
+        return (rs, n) -> Tuple.of(this.fromResultSet(rs, n), otherMapper.fromResultSet(rs, n));
+    }
+
+    /**
+     * Create a new mapper which takes the result of this mapper and applies
+     * the given {@link Function} to yield another result.
+     *
+     * @param <S> the output type of the given {@code resultMapper} function,
+     *            which also become the type of the result produced by the new
+     *            row mapper.
+     * @param resultMapper the function to apply to the result
+     * @return the new row mapper
+     */
+    default <S> RowMapper<S> andThen(Function<? super R, S> resultMapper) {
+        return (rs, n) -> resultMapper.apply(fromResultSet(rs, n));
     }
 
 }
