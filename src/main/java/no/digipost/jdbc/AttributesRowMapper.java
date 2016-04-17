@@ -61,7 +61,7 @@ public class AttributesRowMapper implements RowMapper<AttributeMap> {
     public AttributeMap fromResultSet(ResultSet rs, int rowNum) throws SQLException {
         AttributeMap.Builder attributes = attributeMapBuilderSupplier.get();
         for(AttributeMapper<?> mapper : applicableMappers(rs.getMetaData()).collect(toList())) {
-            attributes.and(mapper.map(rs));
+            attributes.and(mapper.attributeAndValue(rs));
         }
         return attributes.build();
     }

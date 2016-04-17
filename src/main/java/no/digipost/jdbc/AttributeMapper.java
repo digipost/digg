@@ -30,11 +30,12 @@ import java.sql.SQLException;
  * An {@link AttributeMapper} is constructed from an existing {@code ColumnMapper} by calling
  * {@link ColumnMapper#forAttribute(Attribute) .forAttribute(..)}.
  * <p>
- * Usually, instances are directly given to a constructor of an {@link AttributesRowMapper}.
+ * Usually, instances are directly given to a constructor of an {@link AttributesRowMapper}, but can
+ * also be used as a standalone {@link RowMapper}.
  *
  * @param <R> The type of the {@code Attribute} and the result yielded from the {@code ColumnMapper}
  */
-public final class AttributeMapper<R> {
+public final class AttributeMapper<R> implements RowMapper<R> {
     private final Attribute<R> attribute;
     private final ColumnMapper<R> mapper;
 
@@ -43,8 +44,23 @@ public final class AttributeMapper<R> {
         this.mapper = mapper;
     }
 
-    Tuple<Attribute<R>, R> map(ResultSet resultSet) throws SQLException {
-        return attribute.withValue(mapper.map(attribute.name, resultSet));
+    /**
+     * For the current row of the given {@link ResultSet}, map the specific column(s) this {@code AttributeMapper} is set to handle.
+     * The mapper does not move the cursor of the {@code ResultSet}.
+     *
+     * @param resultSet the {@link ResultSet} to retrieve necessary data from in order to yield
+     *                  the result of type {@code R}.
+     * @param rowNum the current row of the {@code ResultSet} cursor. Not used by this mapper.
+     * @return the result
+     */
+    @Override
+    public R fromResultSet(ResultSet resultSet, int rowNum) throws SQLException {
+        return mapper.map(attribute.name, resultSet);
+    }
+
+
+    Tuple<Attribute<R>, R> attributeAndValue(ResultSet resultSet) throws SQLException {
+        return attribute.withValue(fromResultSet(resultSet));
     }
 
     String getAttributeName() {
