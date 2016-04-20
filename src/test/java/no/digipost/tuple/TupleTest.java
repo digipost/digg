@@ -17,7 +17,6 @@ package no.digipost.tuple;
 
 import com.pholser.junit.quickcheck.Property;
 import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
-import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -54,11 +53,6 @@ public class TupleTest {
     @Test
     public void mapSecondElement() {
         assertThat(Tuple.of(1, "2").mapSecond(Integer::parseInt), is(Tuple.of(1, 2)));
-    }
-
-    @Test
-    public void correctEqualsAndHashCode() {
-        EqualsVerifier.forClass(Tuple.class).verify();
     }
 
     @Test

@@ -15,8 +15,9 @@
  */
 package no.digipost.tuple;
 
-import java.util.Objects;
 import java.util.function.Function;
+
+import static no.digipost.tuple.XTuple.TERMINATOR;
 
 /**
  * A tuple is a simple composition of two arbitrary values (objects). A tuple
@@ -28,26 +29,24 @@ import java.util.function.Function;
  * @param <T1> The type of the first value
  * @param <T2> The type of the second value
  */
-public final class Tuple<T1, T2> implements ViewableAsTuple<T1, T2> {
+public interface Tuple<T1, T2> extends ViewableAsTuple<T1, T2> {
 
-    public static final <T1, T2> Tuple<T1, T2> of(T1 first, T2 second) {
-        return new Tuple<>(first, second);
+    static <T1, T2> Tuple<T1, T2> of(T1 first, T2 second) {
+        return new XTuple<>(first, second, TERMINATOR, null);
     }
 
-    private final T1 first;
-    private final T2 second;
-
-    private Tuple(T1 first, T2 second) {
-        this.first = first;
-        this.second = second;
-    }
 
     /**
      * @return the first value
      */
-    public T1 first() {
-        return first;
-    }
+    T1 first();
+
+
+    /**
+     * @return the second value
+     */
+    T2 second();
+
 
     /**
      * Create a new tuple by applying a function to the first element, and putting the
@@ -56,16 +55,8 @@ public final class Tuple<T1, T2> implements ViewableAsTuple<T1, T2> {
      * @param mapper the function to apply to the first element
      * @return the new tuple
      */
-    public <S1> Tuple<S1, T2> mapFirst(Function<? super T1, ? extends S1> mapper) {
-        return map(mapper, Function.identity());
-    }
+    <S1> Tuple<S1, T2> mapFirst(Function<? super T1, ? extends S1> mapper);
 
-    /**
-     * @return the second value
-     */
-    public T2 second() {
-        return second;
-    }
 
     /**
      * Create a new tuple by applying a function to the second element, and putting the
@@ -74,9 +65,7 @@ public final class Tuple<T1, T2> implements ViewableAsTuple<T1, T2> {
      * @param mapper the function to apply to the second element
      * @return the new tuple
      */
-    public <S2> Tuple<T1, S2> mapSecond(Function<? super T2, ? extends S2> mapper) {
-        return map(Function.identity(), mapper);
-    }
+    <S2> Tuple<T1, S2> mapSecond(Function<? super T2, ? extends S2> mapper);
 
 
     /**
@@ -87,45 +76,21 @@ public final class Tuple<T1, T2> implements ViewableAsTuple<T1, T2> {
      * @param secondMapper the function to apply to the second element
      * @return the new tuple
      */
-    public <S1, S2> Tuple<S1, S2> map(Function<? super T1, ? extends S1> firstMapper, Function<? super T2, ? extends S2> secondMapper) {
-        return Tuple.of(firstMapper.apply(first), secondMapper.apply(second));
-    }
-
+    <S1, S2> Tuple<S1, S2> map(Function<? super T1, ? extends S1> firstMapper, Function<? super T2, ? extends S2> secondMapper);
 
 
     /**
      * @return a new tuple with the same elements in swapped positions.
      */
-    public Tuple<T2, T1> swap() {
-        return Tuple.of(second, first);
+    default Tuple<T2, T1> swap() {
+        return Tuple.of(second(), first());
     }
+
 
     /**
      * @return this tuple instance.
      */
     @Override
-    public Tuple<T1, T2> asTuple() {
-        return this;
-    }
-
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof Tuple) {
-            Tuple<?, ?> that = (Tuple<?, ?>) obj;
-            return Objects.equals(this.first, that.first) &&
-                   Objects.equals(this.second, that.second);
-        }
-        return false;
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(first, second);
-    }
-
-    @Override
-    public String toString() {
-        return "[" + first + ", " + second + "]";
-    }
+    Tuple<T1, T2> asTuple();
 
 }
