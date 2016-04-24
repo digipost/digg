@@ -15,11 +15,14 @@
  */
 package no.digipost.jdbc;
 
+import no.digipost.function.QuadFunction;
 import no.digipost.function.ThrowingFunction;
+import no.digipost.function.TriFunction;
 import no.digipost.tuple.Tuple;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 /**
@@ -52,7 +55,7 @@ public interface RowMapper<R> {
      * @param otherMapper the mapper to run in addition to this.
      * @return the new mapper
      */
-    default <S> RowMapper<Tuple<R, S>> combinedWith(RowMapper<S> otherMapper) {
+    default <S> RowMapper.Tupled<R, S> combinedWith(RowMapper<S> otherMapper) {
         return (rs, n) -> Tuple.of(this.fromResultSet(rs, n), otherMapper.fromResultSet(rs, n));
     }
 
@@ -69,5 +72,79 @@ public interface RowMapper<R> {
     default <S> RowMapper<S> andThen(Function<? super R, S> resultMapper) {
         return (rs, n) -> resultMapper.apply(fromResultSet(rs, n));
     }
+
+
+
+    interface Tupled<T, U> extends RowMapper<Tuple<T, U>> {
+
+        @Override
+        default <V> RowMapper.Tripled<T, U, V> combinedWith(RowMapper<V> otherMapper) {
+            return (rs, n) -> Tuple.of(this.fromResultSet(rs, n), otherMapper.fromResultSet(rs, n));
+        }
+
+        /**
+         * Create a new mapper which takes the two results of this mapper and applies
+         * the given {@link BiFunction} to yield another result.
+         *
+         * @param <S> the output type of the given {@code resultMapper} function,
+         *            which also become the type of the result produced by the new
+         *            row mapper.
+         * @param resultMapper the function to apply to the result
+         * @return the new row mapper
+         */
+        default <S> RowMapper<S> andThen(BiFunction<? super T, ? super U, S> resultMapper) {
+            return andThen(tu -> resultMapper.apply(tu.first(), tu.second()));
+        }
+
+    }
+
+    interface Tripled<T, U, V> extends RowMapper.Tupled<Tuple<T, U>, V> {
+
+        @Override
+        default <W> RowMapper.Quadrupled<T, U, V, W> combinedWith(RowMapper<W> otherMapper) {
+            return (rs, n) -> Tuple.of(this.fromResultSet(rs, n), otherMapper.fromResultSet(rs, n));
+        }
+
+        /**
+         * Create a new mapper which takes the three results of this mapper and applies
+         * the given {@link TriFunction} to yield another result.
+         *
+         * @param <S> the output type of the given {@code resultMapper} function,
+         *            which also become the type of the result produced by the new
+         *            row mapper.
+         * @param resultMapper the function to apply to the result
+         * @return the new row mapper
+         */
+        default <S> RowMapper<S> andThen(TriFunction<? super T, ? super U, ? super V, S> resultMapper) {
+            return andThen(tuv -> {
+                Tuple<T, U> tu = tuv.first();
+                return resultMapper.apply(tu.first(), tu.second(), tuv.second());
+            });
+        }
+
+    }
+
+    interface Quadrupled<T, U, V, W> extends RowMapper.Tripled<Tuple<T, U>, V, W> {
+
+        /**
+         * Create a new mapper which takes the four results of this mapper and applies
+         * the given {@link QuadFunction} to yield another result.
+         *
+         * @param <S> the output type of the given {@code resultMapper} function,
+         *            which also become the type of the result produced by the new
+         *            row mapper.
+         * @param resultMapper the function to apply to the result
+         * @return the new row mapper
+         */
+        default <S> RowMapper<S> andThen(QuadFunction<? super T, ? super U, ? super V, ? super W, S> mapper) {
+            return andThen(tuvw -> {
+                Tuple<Tuple<T, U>, V> tuv = tuvw.first();
+                Tuple<T, U> tu = tuv.first();
+                return mapper.apply(tu.first(), tu.second(), tuv.second(), tuvw.second());
+            });
+        }
+
+    }
+
 
 }
