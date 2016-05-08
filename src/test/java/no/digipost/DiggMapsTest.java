@@ -15,13 +15,13 @@
  */
 package no.digipost;
 
-import no.digipost.util.AtMostOne;
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static no.digipost.DiggCollectors.allowAtMostOne;
 import static no.digipost.DiggMaps.*;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
@@ -33,16 +33,15 @@ public class DiggMapsTest {
         Map<AtomicReference<String>, String> map = new HashMap<>();
         map.put(new AtomicReference<>(), "x");
 
-        assertThat(AtMostOne.from(unMapToKeys(map, AtomicReference::set)).toOptional().get().get(), is("x"));
+        assertThat(unMapToKeys(map, AtomicReference::set).collect(allowAtMostOne()).get().get(), is("x"));
     }
-
 
     @Test
     public void unMapBySettingKeyOnValue() {
         Map<String, AtomicReference<String>> map = new HashMap<>();
         map.put("x", new AtomicReference<>());
 
-        assertThat(AtMostOne.from(unMapToValues(map, AtomicReference::set)).toOptional().get().get(), is("x"));
+        assertThat(unMapToValues(map, AtomicReference::set).collect(allowAtMostOne()).get().get(), is("x"));
     }
 
     @Test
@@ -50,6 +49,6 @@ public class DiggMapsTest {
         Map<AtomicReference<String>, String> map = new HashMap<>();
         map.put(new AtomicReference<>(), "x");
 
-        assertThat(AtMostOne.from(unMap(map, (k, v) -> k.updateAndGet(old -> v))).toOptional().get(), is("x"));
+        assertThat(unMap(map, (k, v) -> k.updateAndGet(old -> v)).collect(allowAtMostOne()).get(), is("x"));
     }
 }
