@@ -246,7 +246,6 @@
                         <configuration>
                             <failOnWarning>true</failOnWarning>
                             <usedDependencies>
-                                <usedDependency>com.pholser:junit-quickcheck-generators</usedDependency>
                                 <usedDependency>org.slf4j:slf4j-simple</usedDependency>
                             </usedDependencies>
                         </configuration>
