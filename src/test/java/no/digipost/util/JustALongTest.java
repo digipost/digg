@@ -28,7 +28,7 @@ public class JustALongTest {
 
     @Test
     public void correctEqualsAndHashCode() {
-        EqualsVerifier.forClass(JustAnId.class).withRedefinedSuperclass().suppress(NULL_FIELDS).verify();
+        EqualsVerifier.forClass(JustAnId.class).withRedefinedSuperclass().withOnlyTheseFields("theLong").suppress(NULL_FIELDS).verify();
     }
 
     @Test

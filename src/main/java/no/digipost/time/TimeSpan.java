@@ -171,14 +171,16 @@ public final class TimeSpan implements Comparable<TimeSpan>, Serializable {
     public boolean equals(Object o) {
         if (o instanceof TimeSpan) {
             TimeSpan other = (TimeSpan) o;
-            return Objects.equals(this.start, other.start) && Objects.equals(this.end, other.end);
+            return Objects.equals(this.start, other.start) &&
+                   Objects.equals(this.end, other.end) &&
+                   Objects.equals(this.duration, other.duration);
         }
         return false;
     }
 
     @Override
     public int hashCode() {
-        return hash(start, end);
+        return hash(start, end, duration);
     }
 
     @Override

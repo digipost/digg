@@ -28,7 +28,7 @@ public class JustAStringTest {
 
     @Test
     public void correctEqualsAndHashCode() {
-        EqualsVerifier.forClass(JustAName.class).withRedefinedSuperclass().suppress(NULL_FIELDS).verify();
+        EqualsVerifier.forClass(JustAName.class).withRedefinedSuperclass().withOnlyTheseFields("theValue").suppress(NULL_FIELDS).verify();
     }
 
     @Test
