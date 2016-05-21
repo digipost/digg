@@ -27,10 +27,13 @@ import org.junit.rules.ExpectedException;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Arrays;
+import java.util.Optional;
 
 import static java.util.Arrays.asList;
+import static java.util.function.Function.identity;
 import static no.digipost.jdbc.Mappers.*;
 import static no.digipost.jdbc.ResultSetMock.mockResult;
+import static no.digipost.jdbc.ResultSetMock.mockSingleRowResult;
 import static no.digipost.util.AttributesMap.Config.ALLOW_NULL_VALUES;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
@@ -45,6 +48,7 @@ public class AttributesRowMapperTest {
     static final Attribute<Long> myLong = new Attribute<>("myLong");
     static final Attribute<WithId> myReference = new Attribute<>("myReference");
     static final Attribute<WithTimestamp> myNullableTimestamp = new Attribute<>("myNullableTimestamp");
+    static final Attribute<Optional<WithTimestamp>> myOptionalTimestamp = new Attribute<>("myNullableTimestamp");
 
     private final AttributesRowMapper rowMapper = new AttributesRowMapper(
             getString.forAttribute(myString),
@@ -61,12 +65,17 @@ public class AttributesRowMapperTest {
 
     @Test
     public void populatesSpecifiedAttributes() throws SQLException {
-        try (MockResultSet rs = mockResult(myString.withValue("a").map(a -> a.name, Arrays::asList), myLong.withValue(42L).map(a -> a.name, Arrays::asList))) {
+        try (MockResultSet rs = mockSingleRowResult(myString.withValue("a").map(a -> a.name, identity()), myLong.withValue(42L).map(a -> a.name, identity()))) {
             AttributesMap attributes = rowMapper.fromResultSet(rs);
             assertThat(attributes.get(myString), is("a"));
             assertThat(attributes.get(myLong), is(42L));
             assertThat(attributes.size(), is(2));
         }
+    }
+
+    @Test
+    public void populatesNon() {
+
     }
 
     @Test
@@ -82,9 +91,20 @@ public class AttributesRowMapperTest {
     public void nullFallthrough() throws SQLException {
         AttributesRowMapper rowMapper = new AttributesRowMapper(ALLOW_NULL_VALUES,
                 getTimestamp.nullFallthrough().andThen(id -> (WithTimestamp) () -> { throw new AssertionError(id); }).forAttribute(myNullableTimestamp));
-        try (MockResultSet rs = mockResult(Tuple.of(myNullableTimestamp.name, asList(new Object[]{null})))) {
+        try (MockResultSet rs = mockSingleRowResult(Tuple.of(myNullableTimestamp.name, null))) {
             AttributesMap attributes = rowMapper.fromResultSet(rs);
             assertThat(attributes.get(myNullableTimestamp), nullValue());
+            assertThat(attributes.size(), is(1));
+        }
+    }
+
+    @Test
+    public void nullableColumnMapper() throws SQLException {
+        AttributesRowMapper rowMapper = new AttributesRowMapper(
+                getNullableTimestamp.andThen(id -> (WithTimestamp) () -> id).forAttribute(myOptionalTimestamp));
+        try (MockResultSet rs = mockSingleRowResult(Tuple.of(myNullableTimestamp.name, null))) {
+            AttributesMap attributes = rowMapper.fromResultSet(rs);
+            assertThat(attributes.get(myOptionalTimestamp), is(Optional.empty()));
             assertThat(attributes.size(), is(1));
         }
     }

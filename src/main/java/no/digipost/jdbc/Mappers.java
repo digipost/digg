@@ -23,6 +23,8 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 
+import static java.util.Optional.ofNullable;
+
 /**
  * Various predefined mappers used to extract result(s) from a {@link ResultSet}.
  *
@@ -31,24 +33,69 @@ import java.sql.Timestamp;
  */
 public final class Mappers {
 
-    public static final ColumnMapper<Boolean> getBoolean = (name, rs) -> rs.getBoolean(name);
-    public static final ColumnMapper<Byte> getByte = (name, rs) -> rs.getByte(name);
-    public static final ColumnMapper<byte[]> getBytes = (name, rs) -> rs.getBytes(name);
-    public static final ColumnMapper<Integer> getInt = (name, rs) -> rs.getInt(name);
-    public static final ColumnMapper<Long> getLong = (name, rs) -> rs.getLong(name);
-    public static final ColumnMapper<Float> getFloat = (name, rs) -> rs.getFloat(name);
-    public static final ColumnMapper<Double> getDouble = (name, rs) -> rs.getDouble(name);
-    public static final ColumnMapper<BigDecimal> getBigDecimal = (name, rs) -> rs.getBigDecimal(name);
+    /** @see ResultSet#getBoolean(String) */
+    public static final BasicColumnMapper<Boolean> getBoolean = (name, rs) -> rs.getBoolean(name);
 
-    public static final ColumnMapper<String> getString = (name, rs) -> rs.getString(name);
-    public static final ColumnMapper<URL> getURL = (name, rs) -> rs.getURL(name);
+    /** @see ResultSet#getByte(String) */
+    public static final BasicColumnMapper<Byte> getByte = (name, rs) -> rs.getByte(name);
 
-    public static final ColumnMapper<Date> getDate = (name, rs) -> rs.getDate(name);
-    public static final ColumnMapper<Timestamp> getTimestamp = (name, rs) -> rs.getTimestamp(name);
+    /** @see ResultSet#getInt(String) */
+    public static final BasicColumnMapper<Integer> getInt = (name, rs) -> rs.getInt(name);
 
-    public static final ColumnMapper<InputStream> getAsciiStream = (name, rs) -> rs.getAsciiStream(name);
-    public static final ColumnMapper<InputStream> getBinaryStream = (name, rs) -> rs.getBinaryStream(name);
-    public static final ColumnMapper<Reader> getCharacterStream = (name, rs) -> rs.getCharacterStream(name);
+    /** @see ResultSet#getLong(String) */
+    public static final BasicColumnMapper<Long> getLong = (name, rs) -> rs.getLong(name);
+
+    /** @see ResultSet#getFloat(String) */
+    public static final BasicColumnMapper<Float> getFloat = (name, rs) -> rs.getFloat(name);
+
+    /** @see ResultSet#getDouble(String) */
+    public static final BasicColumnMapper<Double> getDouble = (name, rs) -> rs.getDouble(name);
+
+
+    /** @see ResultSet#getBigDecimal(String) */
+    public static final BasicColumnMapper<BigDecimal> getBigDecimal = (name, rs) -> rs.getBigDecimal(name);
+    /** @see ResultSet#getBigDecimal(String) */
+    public static final NullableColumnMapper<BigDecimal> getNullableBigDecimal = (name, rs) -> ofNullable(rs.getBigDecimal(name));
+
+    /** @see ResultSet#getBytes(String) */
+    public static final BasicColumnMapper<byte[]> getBytes = (name, rs) -> rs.getBytes(name);
+    /** @see ResultSet#getBytes(String) */
+    public static final NullableColumnMapper<byte[]> getNullableBytes = (name, rs) -> ofNullable(rs.getBytes(name));
+
+    /** @see ResultSet#getString(String) */
+    public static final BasicColumnMapper<String> getString = (name, rs) -> rs.getString(name);
+    /** @see ResultSet#getString(String) */
+    public static final NullableColumnMapper<String> getNullableString = (name, rs) -> ofNullable(rs.getString(name));
+
+    /** @see ResultSet#getURL(String) */
+    public static final BasicColumnMapper<URL> getURL = (name, rs) -> rs.getURL(name);
+    /** @see ResultSet#getURL(String) */
+    public static final NullableColumnMapper<URL> getNullableURL = (name, rs) -> ofNullable(rs.getURL(name));
+
+    /** @see ResultSet#getDate(String) */
+    public static final BasicColumnMapper<Date> getDate = (name, rs) -> rs.getDate(name);
+    /** @see ResultSet#getDate(String) */
+    public static final NullableColumnMapper<Date> getNullableDate = (name, rs) -> ofNullable(rs.getDate(name));
+
+    /** @see ResultSet#getTimestamp(String) */
+    public static final BasicColumnMapper<Timestamp> getTimestamp = (name, rs) -> rs.getTimestamp(name);
+    /** @see ResultSet#getTimestamp(String) */
+    public static final NullableColumnMapper<Timestamp> getNullableTimestamp = (name, rs) -> ofNullable(rs.getTimestamp(name));
+
+    /** @see ResultSet#getAsciiStream(String) */
+    public static final BasicColumnMapper<InputStream> getAsciiStream = (name, rs) -> rs.getAsciiStream(name);
+    /** @see ResultSet#getAsciiStream(String) */
+    public static final NullableColumnMapper<InputStream> getNullableAsciiStream = (name, rs) -> ofNullable(rs.getAsciiStream(name));
+
+    /** @see ResultSet#getBinaryStream(String) */
+    public static final BasicColumnMapper<InputStream> getBinaryStream = (name, rs) -> rs.getBinaryStream(name);
+    /** @see ResultSet#getBinaryStream(String) */
+    public static final NullableColumnMapper<InputStream> getNullableBinaryStream = (name, rs) -> ofNullable(rs.getBinaryStream(name));
+
+    /** @see ResultSet#getCharacterStream(String) */
+    public static final BasicColumnMapper<Reader> getCharacterStream = (name, rs) -> rs.getCharacterStream(name);
+    /** @see ResultSet#getCharacterStream(String) */
+    public static final NullableColumnMapper<Reader> getNullableCharacterStream = (name, rs) -> ofNullable(rs.getCharacterStream(name));
 
 
     private Mappers() {}
