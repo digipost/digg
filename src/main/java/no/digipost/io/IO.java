@@ -15,32 +15,33 @@
  */
 package no.digipost.io;
 
+import no.digipost.DiggIO;
 import no.digipost.function.ThrowingConsumer;
 import no.digipost.function.ThrowingFunction;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import static no.digipost.DiggExceptions.asUnchecked;
-
+/**
+ * @deprecated use {@link DiggIO} instead.
+ */
+@Deprecated
 public final class IO {
 
+    /**
+     * @deprecated use {@link DiggIO#autoClosing(ThrowingConsumer)} instead.
+     */
+    @Deprecated
     public static <T extends AutoCloseable> Consumer<T> autoClosing(ThrowingConsumer<T, ? extends Exception> consumer) {
-        return t1 ->
-            autoClosing((T t2) -> {
-                consumer.accept(t2);
-                return null;
-            }).apply(t1);
+        return DiggIO.autoClosing(consumer);
     }
 
+    /**
+     * @deprecated use {@link DiggIO#autoClosing(ThrowingFunction)} instead.
+     */
+    @Deprecated
     public static <T extends AutoCloseable, R> Function<T, R> autoClosing(ThrowingFunction<T, R, ? extends Exception> function) {
-        return closeable -> {
-            try (T managed = closeable) {
-                return function.apply(managed);
-            } catch (Exception e) {
-                throw asUnchecked(e);
-            }
-        };
+        return DiggIO.autoClosing(function);
     }
 
     private IO() {}

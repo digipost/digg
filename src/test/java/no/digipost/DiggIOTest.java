@@ -13,29 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost.io;
+package no.digipost;
 
 import no.digipost.function.ThrowingConsumer;
 import org.junit.Test;
 
 import java.util.function.Consumer;
 
+import static no.digipost.DiggIO.autoClosing;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
-public class IOTest {
+public class DiggIOTest {
 
     @Test
     public void closesResourceAfterSuccess() throws Exception {
         AutoCloseable resource = mock(AutoCloseable.class);
-        IO.autoClosing(r -> {}).accept(resource);
+        autoClosing(r -> {}).accept(resource);
         verify(resource, times(1)).close();
     }
 
     @Test
     public void closesResourceAfterFailure() throws Exception {
         AutoCloseable resource = mock(AutoCloseable.class);
-        Consumer<AutoCloseable> autoClosingConsumer = IO.autoClosing((ThrowingConsumer<AutoCloseable, Exception>) r -> { throw new Exception(); });
+        Consumer<AutoCloseable> autoClosingConsumer = autoClosing((ThrowingConsumer<AutoCloseable, Exception>) r -> { throw new Exception(); });
         try {
             autoClosingConsumer.accept(resource);
         } catch (RuntimeException e) {
