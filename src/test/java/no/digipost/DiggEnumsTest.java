@@ -42,7 +42,7 @@ public class DiggEnumsTest {
     @Property
     public void convertFromCommaSeparatedListOfEnumNames(List<@ValuesOf MyEnum> enums) {
         assertThat(fromCommaSeparatedNames(enums.stream().map(Enum::name).collect(joining(",")), MyEnum.class), equalTo(enums.stream()));
-        assertThat(fromCommaSeparatedNames(enums.stream().map(Enum::name).collect(joining(",", "  ", "   ")), MyEnum.class), equalTo(enums.stream()));
+        assertThat(fromCommaSeparatedNames(enums.stream().map(Enum::name).collect(joining(" , ", "  ", "   ")), MyEnum.class), equalTo(enums.stream()));
     }
 
     @Test
