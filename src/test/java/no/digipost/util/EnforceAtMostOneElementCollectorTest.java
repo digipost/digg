@@ -32,7 +32,7 @@ public class EnforceAtMostOneElementCollectorTest {
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
 
-    private final BinaryOperator<OneTimeAssignment<String>> combiner = new EnforceAtMostOneElementCollector<String>().combiner();
+    private final BinaryOperator<OneTimeAssignment<String>> combiner = new EnforceAtMostOneElementCollector<String>(ViewableAsOptional.TooManyElements::new).combiner();
 
     @Test
     public void combinerThrowsException() {

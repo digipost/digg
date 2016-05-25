@@ -20,8 +20,10 @@ import no.digipost.collection.EnforceAtMostOneElementCollector;
 import no.digipost.concurrent.OneTimeAssignment;
 import no.digipost.tuple.Tuple;
 import no.digipost.tuple.ViewableAsTuple;
+import no.digipost.util.ViewableAsOptional;
 
 import java.util.*;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -60,7 +62,7 @@ public final class DiggCollectors {
 
 
     /**
-     * This is a collector for accessing the <em>expected only</em> element of a {@link Stream}, as
+     * This is a collector for accessing the <em>expected singular only</em> element of a {@link Stream}, as
      * it will throw an exception if more than one element is processed. This should be used in
      * preference of the {@link Stream#findFirst()} or {@link Stream#findAny()} when it is imperative
      * that the stream indeed yields a maximum of one single element, and any more elements is
@@ -69,7 +71,21 @@ public final class DiggCollectors {
      * @return the collector
      */
     public static <T> AdaptableCollector<T, OneTimeAssignment<T>, Optional<T>> allowAtMostOne() {
-        return adapt(new EnforceAtMostOneElementCollector<>());
+        return allowAtMostOneOrElseThrow(ViewableAsOptional.TooManyElements::new);
+    }
+
+    /**
+     * This is a collector for accessing the <em>expected singular only</em> element of a {@link Stream}, as
+     * it will throw the exception yielded from the given function if more than one element is processed.
+     *
+     * @param the function will be given the first element yielded from the stream as its first argument
+     *                     and the unexpected excess one as the second, which may be used to construct an
+     *                     exception to be thrown.
+     * @return the collector
+     * @see #allowAtMostOne()
+     */
+    public static <T> AdaptableCollector<T, OneTimeAssignment<T>, Optional<T>> allowAtMostOneOrElseThrow(BiFunction<? super T, ? super T, ? extends RuntimeException> exceptionOnExcessiveElements) {
+        return adapt(new EnforceAtMostOneElementCollector<>(exceptionOnExcessiveElements));
     }
 
 

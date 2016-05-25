@@ -80,4 +80,14 @@ public class DiggCollectorsTest {
         expectedException.expect(ViewableAsOptional.TooManyElements.class);
         tooManyElements.stream().parallel().collect(allowAtMostOne());
     }
+
+    @Property
+    public void allowAtMostOneFailsWithCustomException(@When(satisfies = " #_.size() > 1") List<?> tooManyElements) {
+        expectedException.expect(IllegalStateException.class);
+        tooManyElements.stream().collect(allowAtMostOneOrElseThrow((first, excess) -> {
+            assertThat(first, is(tooManyElements.get(0)));
+            assertThat(excess, is(tooManyElements.get(1)));
+            return new IllegalStateException();
+        }));
+    }
 }
