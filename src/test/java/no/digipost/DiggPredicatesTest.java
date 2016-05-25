@@ -31,7 +31,7 @@ import static org.junit.Assert.assertThat;
 public class DiggPredicatesTest {
 
     @Property
-    public void yieldsTrueOnGivenInvocationNumber(@InRange(minInt=0, maxInt=1024) int invocationNum) {
+    public void yieldsTrueOnGivenInvocationNumber(@InRange(minInt=1, maxInt=1024) int invocationNum) {
         Predicate<Integer> isNthEvenNumber = nth(invocationNum, t -> t % 2 == 0);
         Integer nthEvenNumber = Stream.iterate(1, i -> i + 1).limit(invocationNum * 2).filter(isNthEvenNumber).findFirst().get();
         assertThat(nthEvenNumber, is(invocationNum * 2));
