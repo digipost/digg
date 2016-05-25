@@ -22,6 +22,7 @@ import java.net.URL;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.time.Instant;
 
 import static java.util.Optional.ofNullable;
 
@@ -81,6 +82,17 @@ public final class Mappers {
     public static final BasicColumnMapper<Timestamp> getTimestamp = (name, rs) -> rs.getTimestamp(name);
     /** @see ResultSet#getTimestamp(String) */
     public static final NullableColumnMapper<Timestamp> getNullableTimestamp = (name, rs) -> ofNullable(rs.getTimestamp(name));
+
+    /**
+     * Combination of {@link #getTimestamp} and a conversion to an {@link Instant} using {@link Timestamp#toInstant()}.
+     */
+    public static final BasicColumnMapper<Instant> getInstant = getTimestamp.andThen(Timestamp::toInstant);
+    /**
+     * Combination of {@link #getNullableTimestamp} and a conversion to an {@link Instant}
+     * using {@link Timestamp#toInstant()}.
+     */
+    public static final NullableColumnMapper<Instant> getNullableInstant = getNullableTimestamp.andThen(Timestamp::toInstant);
+
 
     /** @see ResultSet#getAsciiStream(String) */
     public static final BasicColumnMapper<InputStream> getAsciiStream = (name, rs) -> rs.getAsciiStream(name);
