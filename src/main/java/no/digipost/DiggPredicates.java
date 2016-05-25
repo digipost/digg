@@ -29,11 +29,16 @@ public final class DiggPredicates {
      * reference, but used inline when processing a number of elements,
      * with {@link java.util.Stream#filter streams}.
      *
-     * @param n the nth {@code true}-yielding invocation
-     * @param predicate the predicate
-     * @return the new predicate
+     * @param n the nth {@code true}-yielding invocation, {@code 1} indicates first,
+     *          {@code 2} second, and so forth. {@code 0} or less will throw an
+     *          {@code IllegalArgumentException}.
+     * @param predicate the predicate.
+     * @return the new predicate.
      */
     public static <T> Predicate<T> nth(long n, Predicate<T> predicate) {
+        if (n <= 0) {
+            throw new IllegalArgumentException(n + " is not a valid number for n. It must be 1 or greater");
+        }
         AtomicLong foundMatches = new AtomicLong();
         return t -> predicate.test(t) && foundMatches.incrementAndGet() == n;
     }
