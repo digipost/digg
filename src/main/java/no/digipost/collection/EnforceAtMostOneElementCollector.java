@@ -22,10 +22,7 @@ import no.digipost.util.ViewableAsOptional;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.BiConsumer;
-import java.util.function.BinaryOperator;
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.function.*;
 import java.util.stream.Collector;
 
 import static java.util.Collections.unmodifiableSet;
@@ -34,6 +31,12 @@ public class EnforceAtMostOneElementCollector<T> implements Collector<T, OneTime
 
     private static final Set<Characteristics> CHARACTERISTICS = unmodifiableSet(EnumSet.of(Characteristics.CONCURRENT));
 
+    private final BiFunction<? super T, ? super T, ? extends RuntimeException> exceptionOnExcessiveElements;
+
+    public EnforceAtMostOneElementCollector(BiFunction<? super T, ? super T, ? extends RuntimeException> exceptionOnExcessiveElements) {
+        this.exceptionOnExcessiveElements = exceptionOnExcessiveElements;
+    }
+
     @Override
     public Supplier<OneTimeAssignment<T>> supplier() {
         return OneTimeAssignment::newInstance;
@@ -41,7 +44,7 @@ public class EnforceAtMostOneElementCollector<T> implements Collector<T, OneTime
 
     @Override
     public BiConsumer<OneTimeAssignment<T>, T> accumulator() {
-        return EnforceAtMostOneElementCollector::trySet;
+        return this::trySet;
     }
 
     @Override
@@ -67,11 +70,13 @@ public class EnforceAtMostOneElementCollector<T> implements Collector<T, OneTime
 
 
 
-    private static <T> void trySet(OneTimeAssignment<T> ref, T value) {
+    private void trySet(OneTimeAssignment<T> ref, T value) {
         try {
             ref.set(value);
         } catch (AlreadyAssigned e) {
-            throw new ViewableAsOptional.TooManyElements(ref.get(), value, e);
+            RuntimeException tooManyElements = exceptionOnExcessiveElements.apply(ref.get(), value);
+            tooManyElements.addSuppressed(e);
+            throw tooManyElements;
         }
     }
 
