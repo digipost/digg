@@ -23,7 +23,9 @@ import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Optional;
 
+import static java.util.Optional.empty;
 import static java.util.Optional.ofNullable;
 
 /**
@@ -37,20 +39,80 @@ public final class Mappers {
     /** @see ResultSet#getBoolean(String) */
     public static final BasicColumnMapper<Boolean> getBoolean = (name, rs) -> rs.getBoolean(name);
 
+    /** @see ResultSet#getBoolean(String) */
+    public static final NullableColumnMapper<Boolean> getNullableBoolean = (name, rs) -> {
+        boolean value = rs.getBoolean(name);
+        if (rs.wasNull()) {
+            return empty();
+        } else {
+            return Optional.of(value);
+        }
+    };
+
     /** @see ResultSet#getByte(String) */
     public static final BasicColumnMapper<Byte> getByte = (name, rs) -> rs.getByte(name);
+
+    /** @see ResultSet#getByte(String) */
+    public static final NullableColumnMapper<Byte> getNullableByte = (name, rs) -> {
+        byte value = rs.getByte(name);
+        if (rs.wasNull()) {
+            return empty();
+        } else {
+            return Optional.of(value);
+        }
+    };
 
     /** @see ResultSet#getInt(String) */
     public static final BasicColumnMapper<Integer> getInt = (name, rs) -> rs.getInt(name);
 
+    /** @see ResultSet#getInt(String) */
+    public static final NullableColumnMapper<Integer> getNullableInt = (name, rs) -> {
+        int value = rs.getInt(name);
+        if (rs.wasNull()) {
+            return empty();
+        } else {
+            return Optional.of(value);
+        }
+    };
+
     /** @see ResultSet#getLong(String) */
     public static final BasicColumnMapper<Long> getLong = (name, rs) -> rs.getLong(name);
+
+    /** @see ResultSet#getLong(String) */
+    public static final NullableColumnMapper<Long> getNullableLong = (name, rs) -> {
+        long value = rs.getLong(name);
+        if (rs.wasNull()) {
+            return empty();
+        } else {
+            return Optional.of(value);
+        }
+    };
 
     /** @see ResultSet#getFloat(String) */
     public static final BasicColumnMapper<Float> getFloat = (name, rs) -> rs.getFloat(name);
 
+    /** @see ResultSet#getFloat(String) */
+    public static final NullableColumnMapper<Float> getNullableFloat = (name, rs) -> {
+        float value = rs.getFloat(name);
+        if (rs.wasNull()) {
+            return empty();
+        } else {
+            return Optional.of(value);
+        }
+    };
+
     /** @see ResultSet#getDouble(String) */
     public static final BasicColumnMapper<Double> getDouble = (name, rs) -> rs.getDouble(name);
+
+    /** @see ResultSet#getDouble(String) */
+    public static final NullableColumnMapper<Double> getNullableDouble = (name, rs) -> {
+        double value = rs.getDouble(name);
+        if (rs.wasNull()) {
+            return empty();
+        } else {
+            return Optional.of(value);
+        }
+    };
 
 
     /** @see ResultSet#getBigDecimal(String) */
