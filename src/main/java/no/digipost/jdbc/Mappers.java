@@ -42,11 +42,7 @@ public final class Mappers {
     /** @see ResultSet#getBoolean(String) */
     public static final NullableColumnMapper<Boolean> getNullableBoolean = (name, rs) -> {
         boolean value = rs.getBoolean(name);
-        if (rs.wasNull()) {
-            return empty();
-        } else {
-            return Optional.of(value);
-        }
+        return rs.wasNull() ? empty() : Optional.of(value);
     };
 
     /** @see ResultSet#getByte(String) */
@@ -55,11 +51,16 @@ public final class Mappers {
     /** @see ResultSet#getByte(String) */
     public static final NullableColumnMapper<Byte> getNullableByte = (name, rs) -> {
         byte value = rs.getByte(name);
-        if (rs.wasNull()) {
-            return empty();
-        } else {
-            return Optional.of(value);
-        }
+        return rs.wasNull() ? empty() : Optional.of(value);
+    };
+
+    /** @see ResultSet#getShort(String) */
+    public static final BasicColumnMapper<Short> getShort = (name, rs) -> rs.getShort(name);
+
+    /** @see ResultSet#getShort(String) */
+    public static final NullableColumnMapper<Short> getNullableShort = (name, rs) -> {
+        short value = rs.getShort(name);
+        return rs.wasNull() ? empty() : Optional.of(value);
     };
 
     /** @see ResultSet#getInt(String) */
@@ -68,11 +69,7 @@ public final class Mappers {
     /** @see ResultSet#getInt(String) */
     public static final NullableColumnMapper<Integer> getNullableInt = (name, rs) -> {
         int value = rs.getInt(name);
-        if (rs.wasNull()) {
-            return empty();
-        } else {
-            return Optional.of(value);
-        }
+        return rs.wasNull() ? empty() : Optional.of(value);
     };
 
     /** @see ResultSet#getLong(String) */
@@ -81,11 +78,7 @@ public final class Mappers {
     /** @see ResultSet#getLong(String) */
     public static final NullableColumnMapper<Long> getNullableLong = (name, rs) -> {
         long value = rs.getLong(name);
-        if (rs.wasNull()) {
-            return empty();
-        } else {
-            return Optional.of(value);
-        }
+        return rs.wasNull() ? empty() : Optional.of(value);
     };
 
     /** @see ResultSet#getFloat(String) */
@@ -94,11 +87,7 @@ public final class Mappers {
     /** @see ResultSet#getFloat(String) */
     public static final NullableColumnMapper<Float> getNullableFloat = (name, rs) -> {
         float value = rs.getFloat(name);
-        if (rs.wasNull()) {
-            return empty();
-        } else {
-            return Optional.of(value);
-        }
+        return rs.wasNull() ? empty() : Optional.of(value);
     };
 
     /** @see ResultSet#getDouble(String) */
@@ -107,11 +96,7 @@ public final class Mappers {
     /** @see ResultSet#getDouble(String) */
     public static final NullableColumnMapper<Double> getNullableDouble = (name, rs) -> {
         double value = rs.getDouble(name);
-        if (rs.wasNull()) {
-            return empty();
-        } else {
-            return Optional.of(value);
-        }
+        return rs.wasNull() ? empty() : Optional.of(value);
     };
 
 

@@ -24,7 +24,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.util.Arrays.asList;
+
 final class ResultSetMock {
+
+    public static final MockResultSet mockSingleColumnResult(String column, Object ... result) throws SQLException {
+        return mockResult(Tuple.of(column, asList(result)));
+    }
 
     @SafeVarargs
     public static final MockResultSet mockSingleRowResult(Tuple<String, Object> ... columns) throws SQLException {
