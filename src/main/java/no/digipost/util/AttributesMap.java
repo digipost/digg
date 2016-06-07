@@ -187,6 +187,10 @@ public final class AttributesMap implements Serializable {
         return untypedMap.isEmpty();
     }
 
+    public Map<String, Object> asUntypedMap() {
+        return untypedMap;
+    }
+
     @Override
     public String toString() {
         return untypedMap.isEmpty() ? "no attributes" : "attributes: " + untypedMap.toString();
