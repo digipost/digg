@@ -187,7 +187,25 @@ public final class AttributesMap implements Serializable {
         return untypedMap.isEmpty();
     }
 
-    public Map<String, Object> asUntypedMap() {
+
+    /**
+     * @return the names of the attributes contained in this map.
+     */
+    public Set<String> getNames() {
+        return untypedMap.keySet();
+    }
+
+    /**
+     * Get an untyped <em>unmodifiable</em> {@link Map} view of this {@code AttributesMap}, where the keys are the
+     * {@link Attribute#name attributes' names}. The use-case for this
+     * is to be able to iterate the contents, though this means you will loose the type information for the values
+     * (they are all typed as {@link Object}). The {@link Builder} ensures that all the values are indeed of the
+     * expected type for each key, but since each type is arbitrary it is not possible to pass this information
+     * for iteration.
+     *
+     * @return the untyped map.
+     */
+    public Map<String, ?> asUntypedMap() {
         return untypedMap;
     }
 

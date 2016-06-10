@@ -34,7 +34,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 
 @RunWith(JUnitQuickcheck.class)
-public class AttributeMapTest {
+public class AttributesMapTest {
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -119,6 +119,15 @@ public class AttributeMapTest {
 
         expectedException.expect(GetsNamedValue.NotFound.class);
         attributes.get(num);
+    }
+
+    @Test
+    public void getAsUntypedMap() {
+        Map<String, ?> map = AttributesMap.with(num, 42).and(anotherNum, 43).and(text, "Hello!").build().asUntypedMap();
+        assertThat(map.get(num.name), is(42));
+        assertThat(map.get(anotherNum.name), is(43));
+        assertThat(map.get(text.name), is("Hello!"));
+        assertThat(map.size(), is(3));
     }
 
 }
