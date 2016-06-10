@@ -189,7 +189,7 @@ public final class AttributesMap implements Serializable {
 
     @Override
     public String toString() {
-        return "attributes: " + untypedMap.toString();
+        return untypedMap.isEmpty() ? "no attributes" : "attributes: " + untypedMap.toString();
     }
 
     @Override
