@@ -13,7 +13,7 @@
     </parent>
 
     <artifactId>digg</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.0-ATTRIBUTESMAP_EXPOSED-SNAPSHOT</version>
     <name>Digipost Digg</name>
     <description>Some stellar general purpose utils.</description>
     <url>https://github.com/digipost/digg/</url>
