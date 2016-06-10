@@ -34,6 +34,7 @@ import static java.util.Collections.unmodifiableList;
 /**
  * Various {@link java.util.stream.Collector} implementations.
  */
+@SuppressWarnings("deprecation")
 public final class DiggCollectors {
 
     /**
@@ -97,7 +98,9 @@ public final class DiggCollectors {
      * @return the {@link AdaptableCollector}
      *
      * @see AdaptableCollector
+     * @deprecated Use {@link Collectors#collectingAndThen(Collector, Function)} instead.
      */
+    @Deprecated
     public static <T, A, R> AdaptableCollector<T, A, R> adapt(Collector<T, A, R> collector) {
         if (collector instanceof AdaptableCollector) {
             return (AdaptableCollector<T, A, R>) collector;

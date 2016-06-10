@@ -65,6 +65,7 @@ public class DiggCollectorsTest {
 
 
     @Test
+    @SuppressWarnings("deprecation")
     public void adaptACollector() {
         assertThat(Stream.of("1", "2", "3").collect(adapt(Collectors.<String>toList()).andThen(l -> l.get(0))), is("1"));
     }

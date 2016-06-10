@@ -21,6 +21,7 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.unmodifiableSet;
@@ -30,9 +31,14 @@ import static java.util.stream.Collectors.toSet;
 /**
  * A {@link Collector} which offers some means for adapting it into new Collectors,
  * in particular the ability to {@link #andThen(Function) map the result}.
+ *
+ * @deprecated The functionality offered here can already be achieved by JDK classes.
+ *             Use {@link Collectors#collectingAndThen(Collector, Function)} instead.
  */
+@Deprecated
 public final class AdaptableCollector<T, A, R> implements Collector<T, A, R> {
 
+    @Deprecated
     public static <T, A, R> AdaptableCollector<T, A, R> of(Supplier<A> supplier,
                                                           BiConsumer<A, T> accumulator,
                                                           BinaryOperator<A> combiner,
@@ -41,6 +47,7 @@ public final class AdaptableCollector<T, A, R> implements Collector<T, A, R> {
         return new AdaptableCollector<>(supplier, accumulator, combiner, finisher, characteristics.stream());
     }
 
+    @Deprecated
     public static <T, A, R> AdaptableCollector<T, A, R> of(Supplier<A> supplier,
                                                            BiConsumer<A, T> accumulator,
                                                            BinaryOperator<A> combiner,
@@ -79,7 +86,9 @@ public final class AdaptableCollector<T, A, R> implements Collector<T, A, R> {
      * @param resultMapper the function used to map the collector's result
      *
      * @return a new Collector
+     * @deprecated Use {@link Collectors#collectingAndThen(Collector, Function)} instead.
      */
+    @Deprecated
     public <M> AdaptableCollector<T, A, M> andThen(Function<? super R, M> resultMapper) {
         return new AdaptableCollector<>(supplier, accumulator, combiner, finisher.andThen(resultMapper), characteristics.stream().filter(c -> c != IDENTITY_FINISH));
     }
