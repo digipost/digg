@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collector;
+import java.util.stream.Stream;
 
 import static java.util.Collections.unmodifiableList;
 import static java.util.stream.Collectors.toCollection;
@@ -28,6 +29,20 @@ import static java.util.stream.Collectors.toCollection;
  * Utilities for working with {@link Optional}s.
  */
 public final class DiggOptionals {
+
+    /**
+     * Convert {@link Optional}s to a {@link Stream} consisting of only the
+     * {@link Optional#isPresent() present} optionals.
+     *
+     * @param <T> The type of the given {@code Optional}s and returned {@code Stream}.
+     * @param optionals The {@code Optional}s to convert to a {@code Stream}.
+     *
+     * @return a {@code Stream} containing the present {@code Optional}s
+     */
+    @SafeVarargs
+    public static <T> Stream<T> toStream(Optional<T> ... optionals) {
+        return Stream.of(optionals).filter(Optional::isPresent).map(Optional::get);
+    }
 
     /**
      * Unwrap an {@link Optional} into a zero or one element {@link Collections#unmodifiableList(List) unmodifiable} list.

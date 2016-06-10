@@ -15,6 +15,7 @@
  */
 package no.digipost;
 
+import co.unruly.matchers.StreamMatchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -23,8 +24,10 @@ import java.util.List;
 import java.util.Optional;
 
 import static no.digipost.DiggOptionals.toList;
+import static no.digipost.DiggOptionals.toStream;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
+//import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertThat;
 
 public class DiggOptionalsTest {
@@ -52,5 +55,11 @@ public class DiggOptionalsTest {
 
         expectedException.expect(UnsupportedOperationException.class);
         list.clear();
+    }
+
+    @Test
+    public void convertPresentOptionalsToStream() {
+        assertThat(toStream(Optional.empty(), Optional.empty()), StreamMatchers.empty());
+        assertThat(toStream(Optional.empty(), Optional.of(1), Optional.of(2), Optional.empty()), StreamMatchers.contains(1, 2));
     }
 }
