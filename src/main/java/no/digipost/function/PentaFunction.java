@@ -18,22 +18,27 @@ package no.digipost.function;
 import java.util.function.Function;
 
 /**
- * Represents a function that accepts three arguments and produces a result.
- * This is a three-arity extension to the functional interfaces {@link Function}
+ * Represents a function that accepts five arguments and produces a result.
+ * This is a five-arity extension to the functional interfaces {@link Function}
  * and {@link java.util.function.BiFunction BiFunction} from the JDK.
  *
  * @param <T> the type of the first argument to the function
  * @param <U> the type of the second argument to the function
  * @param <V> the type of the third argument to the function
+ * @param <W> the type of the fourth argument to the function
+ * @param <X> the type of the fifth argument to the function
  * @param <R> the type of the result of the function
+ *
+ * @see QuadFunction
  */
 @FunctionalInterface
-public interface TriFunction<T, U, V, R> {
+public interface PentaFunction<T, U, V, W, X, R> {
 
-    R apply(T t, U u, V v);
+    R apply(T t, U u, V v, W w, X x);
 
-    default <S> TriFunction<T, U, V, S> andThen(Function<? super R, S> after) {
-        return (t, u, v) -> after.apply(apply(t, u, v));
+    default <S> PentaFunction<T, U, V, W, X, S> andThen(Function<? super R, S> after) {
+        return (t, u, v, w, x) -> after.apply(apply(t, u, v, w, x));
     }
 
 }
+

@@ -17,6 +17,7 @@ package no.digipost.jdbc;
 
 import com.mockrunner.mock.jdbc.MockResultSet;
 import no.digipost.tuple.Quadruple;
+import no.digipost.tuple.Quintuple;
 import no.digipost.tuple.Triple;
 import no.digipost.tuple.Tuple;
 import no.digipost.util.Attribute;
@@ -40,6 +41,7 @@ public class RowMapperTest {
         final int age;
         final Instant memberSince;
         final double profileCompleteness;
+        final boolean active;
 
         User(String name, int age) {
             this(name, age, Instant.now());
@@ -50,26 +52,35 @@ public class RowMapperTest {
         }
 
         User(String name, int age, Instant memberSince, double profileCompleteness) {
+            this(name, age, memberSince, profileCompleteness, false);
+        }
+
+        User(String name, int age, Instant memberSince, double profileCompleteness, boolean active) {
             this.name = name;
             this.age = age;
             this.memberSince = memberSince;
             this.profileCompleteness = profileCompleteness;
+            this.active = active;
         }
     }
 
     final Attribute<String> name = new Attribute<>("name");
     final Attribute<Integer> age = new Attribute<>("age");
-    final Attribute<Instant> memeberSince = new Attribute<>("member_since");
+    final Attribute<Instant> memberSince = new Attribute<>("member_since");
     final Attribute<Double> profileCompleteness = new Attribute<>("profile_completeness");
+    final Attribute<Boolean> active = new Attribute<>("active");
 
     final RowMapper.Tupled<String, Integer> twoColumns =
             getString.forAttribute(name).combinedWith(getInt.forAttribute(age));
 
     final RowMapper.Tripled<String, Integer, Instant> threeColumns = twoColumns.combinedWith(
-            getTimestamp.andThen(Timestamp::toInstant).forAttribute(memeberSince));
+            getTimestamp.andThen(Timestamp::toInstant).forAttribute(memberSince));
 
-    final RowMapper.Quadrupled<String, Integer, Instant, Double> mapper = threeColumns.combinedWith(
+    final RowMapper.Quadrupled<String, Integer, Instant, Double> fourColumns = threeColumns.combinedWith(
             getDouble.forAttribute(profileCompleteness));
+
+    final RowMapper.Quintupled<String, Integer, Instant, Double, Boolean> fiveColumns = fourColumns.combinedWith(
+            getBoolean.forAttribute(active));
 
     @Test
     public void combineTwoMappers() throws SQLException {
@@ -96,12 +107,25 @@ public class RowMapperTest {
     @Test
     public void combineAndFlattenFourMappers() throws SQLException {
         try (MockResultSet rs = mockSingleRow()) {
-            Quadruple<String, Integer, Instant, Double> row = mapper.andThen(Quadruple::flatten).fromResultSet(rs);
-            User user = mapper.andThen((name, age, memberSince, profileCompleteness) -> new User(name, age, memberSince, profileCompleteness)).fromResultSet(rs);
+            Quadruple<String, Integer, Instant, Double> row = fourColumns.andThen(Quadruple::flatten).fromResultSet(rs);
+            User user = fourColumns.andThen((name, age, memberSince, profileCompleteness) -> new User(name, age, memberSince, profileCompleteness)).fromResultSet(rs);
             assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
             assertThat(row.second(), both(is(user.age)).and(is(30)));
             assertThat(row.third(), both(is(user.memberSince)).and(is(EPOCH)));
             assertThat(row.fourth(), both(is(user.profileCompleteness)).and(is(0.5)));
+        }
+    }
+
+    @Test
+    public void combineAndFlattenFiveMappers() throws SQLException {
+        try (MockResultSet rs = mockSingleRow()) {
+            Quintuple<String, Integer, Instant, Double, Boolean> row = fiveColumns.andThen(Quintuple::flatten).fromResultSet(rs);
+            User user = fiveColumns.andThen((name, age, memberSince, profileCompleteness, active) -> new User(name, age, memberSince, profileCompleteness, active)).fromResultSet(rs);
+            assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
+            assertThat(row.second(), both(is(user.age)).and(is(30)));
+            assertThat(row.third(), both(is(user.memberSince)).and(is(EPOCH)));
+            assertThat(row.fourth(), both(is(user.profileCompleteness)).and(is(0.5)));
+            assertThat(row.fifth(), both(is(user.active)).and(is(true)));
         }
     }
 
@@ -110,7 +134,8 @@ public class RowMapperTest {
         return mockSingleRowResult(
                 Tuple.of(name.name, "John Doe"),
                 Tuple.of(age.name, 30),
-                Tuple.of(memeberSince.name, Timestamp.from(EPOCH)),
-                Tuple.of(profileCompleteness.name, 0.5));
+                Tuple.of(memberSince.name, Timestamp.from(EPOCH)),
+                Tuple.of(profileCompleteness.name, 0.5),
+                Tuple.of(active.name, true));
     }
 }

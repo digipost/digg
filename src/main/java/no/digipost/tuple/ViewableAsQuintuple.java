@@ -16,19 +16,20 @@
 package no.digipost.tuple;
 
 /**
- * A type which may be viewed as a composite of four values, i.e. a {@link Quadruple}.
+ * A type which may be viewed as a composite of five values, i.e. a {@link Quintuple}.
  *
  * @param <T1> The type of the first value.
  * @param <T2> The type of the second value.
  * @param <T3> The type of the third value.
  * @param <T4> The type of the fourth value.
+ * @param <T5> The type of the fifth value.
  */
 @FunctionalInterface
-public interface ViewableAsQuadruple<T1, T2, T3, T4> {
+public interface ViewableAsQuintuple<T1, T2, T3, T4, T5> {
 
     /**
-     * @return The {@link Quadruple} view of this object.
+     * @return The {@link Quintuple} view of this object.
      */
-    Quadruple<T1, T2, T3, T4> asQuadruple();
+    Quintuple<T1, T2, T3, T4, T5> asQuintuple();
 
 }
