@@ -16,7 +16,9 @@
 package no.digipost;
 
 import no.digipost.collection.AdaptableCollector;
+import no.digipost.collection.ConflictingElementEncountered;
 import no.digipost.collection.EnforceAtMostOneElementCollector;
+import no.digipost.collection.EnforceDistinctFirstTupleElementCollector;
 import no.digipost.concurrent.OneTimeAssignment;
 import no.digipost.tuple.Tuple;
 import no.digipost.tuple.ViewableAsTuple;
@@ -36,6 +38,48 @@ import static java.util.Collections.unmodifiableList;
  */
 @SuppressWarnings("deprecation")
 public final class DiggCollectors {
+
+    /**
+     * A <em>multituple</em> is similar to a <em>multimap</em> in that it consists of one {@link Tuple#first() first} value and a List of
+     * values as the {@link Tuple#second() second} value,
+     * and this collector will collect {@link ViewableAsTuple tuples} <strong><em>where it is expected that all the first tuple-elements
+     * are equal</em></strong>, and re-arrange them by putting the distinct first element into a new Tuple, and collate each of the second
+     * elements into a new List which is set as the second element of the new Tuple. If non-distinct values of the first elements of the
+     * tuples are collected, a {@link ConflictingElementEncountered} is thrown.
+     *
+     * @param <T1> The type of the first tuple element, which will also become the type of the first element of the resulting {@code Tuple}.
+     * @param <T2> The type of the second tuple element, which will become the {@code List<T2>} type of the second element of the
+     *             resulting {@code Tuple}.
+     *
+     * @return the multituple collector.
+     */
+    public static <T1, T2> Collector<ViewableAsTuple<T1, Optional<T2>>, ?, Optional<Tuple<T1, List<T2>>>> toMultituple() {
+        return toMultitupleOrThrowIfNonDistinct((alreadyCollected, conflicting) -> new ConflictingElementEncountered(alreadyCollected, conflicting,
+                "the first element '" + conflicting.first() + "' of " + conflicting + " differs from the already collected first element '" + alreadyCollected.first() + "'"));
+    }
+
+    /**
+     * A <em>multituple</em> is similar to a <em>multimap</em> in that it consists of one {@link Tuple#first() first} value and a List of
+     * values as the {@link Tuple#second() second} value,
+     * and this collector will collect {@link ViewableAsTuple tuples} <strong><em>where it is expected that all the first tuple-elements
+     * are equal</em></strong>, and re-arrange them by putting the distinct first element into a new Tuple, and collate each of the second
+     * elements into a new List which is set as the second element of the new Tuple. If non-distinct values of the first elements of the
+     * tuples are collected, the exception returned from the given {@code exceptionOnNonDistinctFirstElement} function is thrown.
+     *
+     * @param <T1> The type of the first tuple element, which will also become the type of the first element of the resulting {@code Tuple}.
+     * @param <T2> The type of the second tuple element, which will become the {@code List<T2>} type of the second element of the
+     *             resulting {@code Tuple}.
+     * @param exceptionOnNonDistinctFirstElement the function will be given the already collected multituple as its first argument and the
+     *                                           unexpected conflicting tuple with non-distinct {@link Tuple#first() first} value as the second,
+     *                                           which may be used to construct an exception to be thrown.
+     *
+     * @return the multituple collector.
+     */
+    public static <T1, T2> Collector<ViewableAsTuple<T1, Optional<T2>>, ?, Optional<Tuple<T1, List<T2>>>> toMultitupleOrThrowIfNonDistinct(
+            BiFunction<? super Tuple<T1, List<T2>>, ? super Tuple<T1, Optional<T2>>, ? extends RuntimeException> exceptionOnNonDistinctFirstElement) {
+
+        return new EnforceDistinctFirstTupleElementCollector<T1, T2>(exceptionOnNonDistinctFirstElement);
+    }
 
     /**
      * A multimap maps from keys to lists, and this collector will arrange {@link ViewableAsTuple tuples}
@@ -79,9 +123,9 @@ public final class DiggCollectors {
      * This is a collector for accessing the <em>expected singular only</em> element of a {@link Stream}, as
      * it will throw the exception yielded from the given function if more than one element is processed.
      *
-     * @param the function will be given the first element yielded from the stream as its first argument
-     *                     and the unexpected excess one as the second, which may be used to construct an
-     *                     exception to be thrown.
+     * @param exceptionOnExcessiveElements the function will be given the first element yielded from the stream
+     *                                     as its first argument and the unexpected excess one as the second,
+     *                                     which may be used to construct an exception to be thrown.
      * @return the collector
      * @see #allowAtMostOne()
      */

@@ -19,6 +19,7 @@ import co.unruly.matchers.OptionalMatchers;
 import com.pholser.junit.quickcheck.Property;
 import com.pholser.junit.quickcheck.When;
 import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
+import no.digipost.collection.ConflictingElementEncountered;
 import no.digipost.tuple.Tuple;
 import no.digipost.tuple.ViewableAsTuple;
 import no.digipost.util.ViewableAsOptional;
@@ -47,7 +48,7 @@ public class DiggCollectorsTest {
     interface NumTranslation extends ViewableAsTuple<Integer, Optional<String>> {}
 
     @Test
-    public void collateTuplesIntoMap() {
+    public void collectTuplesIntoMap() {
         NumTranslation oneInEnglish = () -> Tuple.of(1, Optional.of("one"));
         NumTranslation twoInEnglish = () -> Tuple.of(2, Optional.of("two"));
         NumTranslation twoInSpanish = () -> Tuple.of(2, Optional.of("dos"));
@@ -61,6 +62,37 @@ public class DiggCollectorsTest {
         assertThat(byNumber.get(1), containsInAnyOrder("one", "uno"));
         assertThat(byNumber.get(2), containsInAnyOrder("two", "dos"));
         assertThat(byNumber.get(5), empty());
+    }
+
+    @Test
+    public void collectMultitupleFromTuplesWithEqualFirstElement() {
+        NumTranslation oneInEnglish = () -> Tuple.of(1, Optional.of("one"));
+        NumTranslation oneInSpanish = () -> Tuple.of(1, Optional.of("uno"));
+        NumTranslation oneInEsperanto = () -> Tuple.of(1, Optional.of("unu"));
+        NumTranslation missingOne = () -> Tuple.of(1, Optional.empty());
+
+        Stream<NumTranslation> translations = Stream.<NumTranslation>builder().add(oneInEnglish).add(oneInSpanish).add(missingOne).add(oneInEsperanto).build();
+        Tuple<Integer, List<String>> collectedTranslations = translations.collect(toMultituple()).get();
+        assertThat(collectedTranslations.first(), is(1));
+        assertThat(collectedTranslations.second(), containsInAnyOrder("one", "uno", "unu"));
+    }
+
+    @Test
+    public void collectNoTuplesYieldsEmptyOptional() {
+        Optional<Tuple<Integer, List<String>>> noTuple = Stream.<Tuple<Integer, Optional<String>>>empty().collect(toMultituple());
+        assertThat(noTuple, OptionalMatchers.empty());
+    }
+
+    @Test
+    public void collectMultitupleFromTuplesWithNonDistinctFirstElementIsErroneous() {
+        NumTranslation oneInEnglish = () -> Tuple.of(1, Optional.of("one"));
+        NumTranslation missingOne = () -> Tuple.of(1, Optional.empty());
+        NumTranslation oneInEsperanto = () -> Tuple.of(1, Optional.of("unu"));
+        NumTranslation twoInEnglish = () -> Tuple.of(2, Optional.of("two"));
+
+        Stream<NumTranslation> translations = Stream.<NumTranslation>builder().add(oneInEnglish).add(missingOne).add(oneInEsperanto).add(twoInEnglish).build();
+        expectedException.expect(ConflictingElementEncountered.class);
+        translations.collect(toMultituple());
     }
 
 
