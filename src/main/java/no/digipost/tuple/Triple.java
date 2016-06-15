@@ -31,7 +31,7 @@ import static no.digipost.tuple.XTuple.TERMINATOR;
 public interface Triple<T1, T2, T3> extends ViewableAsTriple<T1, T2, T3> {
 
     static <T1, T2, T3> Triple<T1, T2, T3> of(T1 first, T2 second, T3 third) {
-        return new XTuple<>(first, second, third, TERMINATOR);
+        return new XTuple<>(first, second, third, TERMINATOR, null);
     }
 
     static <T1, T2, T3> Triple<T1, T2, T3> flatten(Tuple<Tuple<T1, T2>, T3> nestedTuple) {

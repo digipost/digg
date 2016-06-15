@@ -16,6 +16,7 @@
 package no.digipost.jdbc;
 
 import no.digipost.function.QuadFunction;
+import no.digipost.function.PentaFunction;
 import no.digipost.function.ThrowingFunction;
 import no.digipost.function.TriFunction;
 import no.digipost.tuple.Tuple;
@@ -126,6 +127,11 @@ public interface RowMapper<R> {
 
     interface Quadrupled<T, U, V, W> extends RowMapper.Tripled<Tuple<T, U>, V, W> {
 
+        @Override
+        default <X> RowMapper.Quintupled<T, U, V, W, X> combinedWith(RowMapper<X> otherMapper) {
+            return (rs, n) -> Tuple.of(this.fromResultSet(rs, n), otherMapper.fromResultSet(rs, n));
+        }
+
         /**
          * Create a new mapper which takes the four results of this mapper and applies
          * the given {@link QuadFunction} to yield another result.
@@ -136,11 +142,35 @@ public interface RowMapper<R> {
          * @param resultMapper the function to apply to the result
          * @return the new row mapper
          */
-        default <S> RowMapper<S> andThen(QuadFunction<? super T, ? super U, ? super V, ? super W, S> mapper) {
+        default <S> RowMapper<S> andThen(QuadFunction<? super T, ? super U, ? super V, ? super W, S> resultMapper) {
             return andThen(tuvw -> {
                 Tuple<Tuple<T, U>, V> tuv = tuvw.first();
                 Tuple<T, U> tu = tuv.first();
-                return mapper.apply(tu.first(), tu.second(), tuv.second(), tuvw.second());
+                return resultMapper.apply(tu.first(), tu.second(), tuv.second(), tuvw.second());
+            });
+        }
+
+    }
+
+
+    interface Quintupled<T, U, V, W, X> extends RowMapper.Quadrupled<Tuple<T, U>, V, W, X> {
+
+        /**
+         * Create a new mapper which takes the five results of this mapper and applies
+         * the given {@link PentaFunction} to yield another result.
+         *
+         * @param <S> the output type of the given {@code resultMapper} function,
+         *            which also become the type of the result produced by the new
+         *            row mapper.
+         * @param resultMapper the function to apply to the result
+         * @return the new row mapper
+         */
+        default <S> RowMapper<S> andThen(PentaFunction<? super T, ? super U, ? super V, ? super W, ? super X, S> resultMapper) {
+            return andThen(tuvwx -> {
+                Tuple<Tuple<Tuple<T, U>, V>, W> tuvw = tuvwx.first();
+                Tuple<Tuple<T, U>, V> tuv = tuvw.first();
+                Tuple<T, U> tu = tuv.first();
+                return resultMapper.apply(tu.first(), tu.second(), tuv.second(), tuvw.second(), tuvwx.second());
             });
         }
 

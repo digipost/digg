@@ -17,6 +17,8 @@ package no.digipost.tuple;
 
 import java.util.function.Function;
 
+import static no.digipost.tuple.XTuple.TERMINATOR;
+
 /**
  * A quadruple is a simple composition of four arbitrary values (objects). A quadruple
  * captures no semantics of the four values, and they are only referred to as
@@ -30,7 +32,7 @@ import java.util.function.Function;
 public interface Quadruple<T1, T2, T3, T4> extends ViewableAsQuadruple<T1, T2, T3, T4> {
 
     static <T1, T2, T3, T4> Quadruple<T1, T2, T3, T4> of(T1 first, T2 second, T3 third, T4 fourth) {
-        return new XTuple<>(first, second, third, fourth);
+        return new XTuple<>(first, second, third, fourth, TERMINATOR);
     }
 
     static <T1, T2, T3, T4> Quadruple<T1, T2, T3, T4> flatten(Tuple<Tuple<Tuple<T1, T2>, T3>, T4> nestedTuple) {
