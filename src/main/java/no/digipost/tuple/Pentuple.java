@@ -17,6 +17,8 @@ package no.digipost.tuple;
 
 import java.util.function.Function;
 
+import static no.digipost.tuple.XTuple.TERMINATOR;
+
 /**
  * A pentuple is a simple composition of five arbitrary values (objects). A pentuple
  * captures no semantics of the five values, and they are only referred to as
@@ -31,11 +33,15 @@ import java.util.function.Function;
 public interface Pentuple<T1, T2, T3, T4, T5> extends ViewableAsPentuple<T1, T2, T3, T4, T5> {
 
     static <T1, T2, T3, T4, T5> Pentuple<T1, T2, T3, T4, T5> of(T1 first, T2 second, T3 third, T4 fourth, T5 fifth) {
-        return new XTuple<>(first, second, third, fourth, fifth);
+        return new XTuple<>(first, second, third, fourth, fifth, TERMINATOR);
     }
 
     static <T1, T2, T3, T4, T5> Pentuple<T1, T2, T3, T4, T5> flatten(Tuple<Tuple<Tuple<Tuple<T1, T2>, T3>, T4>, T5> nestedTuple) {
-        return Pentuple.of(nestedTuple.first().first().first().first(), nestedTuple.first().first().first().second(), nestedTuple.first().first().second(), nestedTuple.first().second(), nestedTuple.second());
+        return Pentuple.of(nestedTuple.first().first().first().first(),
+                           nestedTuple.first().first().first().second(),
+                           nestedTuple.first().first().second(),
+                           nestedTuple.first().second(),
+                           nestedTuple.second());
     }
 
     /**

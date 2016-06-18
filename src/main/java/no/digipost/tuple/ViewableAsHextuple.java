@@ -15,20 +15,22 @@
  */
 package no.digipost.tuple;
 
-import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Test;
+/**
+ * A type which may be viewed as a composite of six values, i.e. a {@link Hextuple}.
+ *
+ * @param <T1> The type of the first value.
+ * @param <T2> The type of the second value.
+ * @param <T3> The type of the third value.
+ * @param <T4> The type of the fourth value.
+ * @param <T5> The type of the fifth value.
+ * @param <T6> The type of the sixth value.
+ */
+@FunctionalInterface
+public interface ViewableAsHextuple<T1, T2, T3, T4, T5, T6> {
 
-import static no.digipost.util.DiggMatchers.isEffectivelySerializable;
-import static org.junit.Assert.assertThat;
+    /**
+     * @return The {@link Hextuple} view of this object.
+     */
+    Hextuple<T1, T2, T3, T4, T5, T6> asHextuple();
 
-public class XTupleTest {
-    @Test
-    public void correctEqualsAndHashCode() {
-        EqualsVerifier.forClass(XTuple.class).verify();
-    }
-
-    @Test
-    public void isSerializable() {
-        assertThat(new XTuple<>("x", 2, XTuple.TERMINATOR, null, null, null), isEffectivelySerializable());
-    }
 }

@@ -31,11 +31,13 @@ import static no.digipost.tuple.XTuple.TERMINATOR;
 public interface Triple<T1, T2, T3> extends ViewableAsTriple<T1, T2, T3> {
 
     static <T1, T2, T3> Triple<T1, T2, T3> of(T1 first, T2 second, T3 third) {
-        return new XTuple<>(first, second, third, TERMINATOR, null);
+        return new XTuple<>(first, second, third, TERMINATOR, null, null);
     }
 
     static <T1, T2, T3> Triple<T1, T2, T3> flatten(Tuple<Tuple<T1, T2>, T3> nestedTuple) {
-        return Triple.of(nestedTuple.first().first(), nestedTuple.first().second(), nestedTuple.second());
+        return Triple.of(nestedTuple.first().first(),
+                         nestedTuple.first().second(),
+                         nestedTuple.second());
     }
 
     /**

@@ -15,20 +15,25 @@
  */
 package no.digipost.tuple;
 
-import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Test;
 
-import static no.digipost.util.DiggMatchers.isEffectivelySerializable;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-public class XTupleTest {
+public class HextupleTest {
+
     @Test
-    public void correctEqualsAndHashCode() {
-        EqualsVerifier.forClass(XTuple.class).verify();
+    public void flattenNested6ElementTuple() {
+        Tuple<Tuple<Tuple<Tuple<Tuple<Integer, Integer>, Integer>, Integer>, Integer>, Integer> oneTwoThreeFourFiveSix =
+                Tuple.of(Tuple.of(Tuple.of(Tuple.of(Tuple.of(1, 2), 3), 4), 5), 6);
+        assertThat(Hextuple.flatten(oneTwoThreeFourFiveSix), is(Hextuple.of(1, 2, 3, 4, 5, 6)));
     }
 
     @Test
-    public void isSerializable() {
-        assertThat(new XTuple<>("x", 2, XTuple.TERMINATOR, null, null, null), isEffectivelySerializable());
+    public void mapSixthElement() {
+        Hextuple<Integer, Integer, Integer, Integer, Integer, Integer> sixthIs7 = Hextuple.of(1, 2, 3, 4, 5, 6).mapSixth(n -> n + 1);
+        assertThat(sixthIs7, is(Hextuple.of(1, 2, 3, 4, 5, 7)));
+        assertThat(sixthIs7.sixth(), is(7));
     }
+
 }

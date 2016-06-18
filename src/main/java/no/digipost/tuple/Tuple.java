@@ -32,7 +32,7 @@ import static no.digipost.tuple.XTuple.TERMINATOR;
 public interface Tuple<T1, T2> extends ViewableAsTuple<T1, T2> {
 
     static <T1, T2> Tuple<T1, T2> of(T1 first, T2 second) {
-        return new XTuple<>(first, second, TERMINATOR, null, null);
+        return new XTuple<>(first, second, TERMINATOR, null, null, null);
     }
 
 
