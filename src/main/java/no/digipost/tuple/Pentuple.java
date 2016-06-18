@@ -126,10 +126,10 @@ public interface Pentuple<T1, T2, T3, T4, T5> extends ViewableAsPentuple<T1, T2,
      * @return the new pentuple
      */
     <S1, S2, S3, S4, S5> Pentuple<S1, S2, S3, S4, S5> map(Function<? super T1, ? extends S1> firstMapper,
-                                                           Function<? super T2, ? extends S2> secondMapper,
-                                                           Function<? super T3, ? extends S3> thirdMapper,
-                                                           Function<? super T4, ? extends S4> fourthMapper,
-                                                           Function<? super T5, ? extends S5> fifthMapper);
+                                                          Function<? super T2, ? extends S2> secondMapper,
+                                                          Function<? super T3, ? extends S3> thirdMapper,
+                                                          Function<? super T4, ? extends S4> fourthMapper,
+                                                          Function<? super T5, ? extends S5> fifthMapper);
 
 
     /**
