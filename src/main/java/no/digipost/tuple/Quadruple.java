@@ -32,7 +32,7 @@ import static no.digipost.tuple.XTuple.TERMINATOR;
 public interface Quadruple<T1, T2, T3, T4> extends ViewableAsQuadruple<T1, T2, T3, T4> {
 
     static <T1, T2, T3, T4> Quadruple<T1, T2, T3, T4> of(T1 first, T2 second, T3 third, T4 fourth) {
-        return new XTuple<>(first, second, third, fourth, TERMINATOR, null);
+        return new XTuple<>(first, second, third, fourth, TERMINATOR, null, null, null, null, null);
     }
 
     static <T1, T2, T3, T4> Quadruple<T1, T2, T3, T4> flatten(Tuple<Tuple<Tuple<T1, T2>, T3>, T4> nestedTuple) {

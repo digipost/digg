@@ -33,7 +33,7 @@ import static no.digipost.tuple.XTuple.TERMINATOR;
 public interface Pentuple<T1, T2, T3, T4, T5> extends ViewableAsPentuple<T1, T2, T3, T4, T5> {
 
     static <T1, T2, T3, T4, T5> Pentuple<T1, T2, T3, T4, T5> of(T1 first, T2 second, T3 third, T4 fourth, T5 fifth) {
-        return new XTuple<>(first, second, third, fourth, fifth, TERMINATOR);
+        return new XTuple<>(first, second, third, fourth, fifth, TERMINATOR, null, null, null, null);
     }
 
     static <T1, T2, T3, T4, T5> Pentuple<T1, T2, T3, T4, T5> flatten(Tuple<Tuple<Tuple<Tuple<T1, T2>, T3>, T4>, T5> nestedTuple) {

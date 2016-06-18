@@ -29,6 +29,6 @@ public class XTupleTest {
 
     @Test
     public void isSerializable() {
-        assertThat(new XTuple<>("x", 2, XTuple.TERMINATOR, null, null, null), isEffectivelySerializable());
+        assertThat(new XTuple<>("x", 2, XTuple.TERMINATOR, null, null, null, null, null, null, null), isEffectivelySerializable());
     }
 }

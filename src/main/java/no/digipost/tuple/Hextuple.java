@@ -17,6 +17,8 @@ package no.digipost.tuple;
 
 import java.util.function.Function;
 
+import static no.digipost.tuple.XTuple.TERMINATOR;
+
 /**
  * A hextuple is a simple composition of five arbitrary values (objects). A hextuple
  * captures no semantics of the five values, and they are only referred to as
@@ -32,7 +34,7 @@ import java.util.function.Function;
 public interface Hextuple<T1, T2, T3, T4, T5, T6> extends ViewableAsHextuple<T1, T2, T3, T4, T5, T6> {
 
     static <T1, T2, T3, T4, T5, T6> Hextuple<T1, T2, T3, T4, T5, T6> of(T1 first, T2 second, T3 third, T4 fourth, T5 fifth, T6 sixth) {
-        return new XTuple<>(first, second, third, fourth, fifth, sixth);
+        return new XTuple<>(first, second, third, fourth, fifth, sixth, TERMINATOR, null, null, null);
     }
 
     static <T1, T2, T3, T4, T5, T6> Hextuple<T1, T2, T3, T4, T5, T6> flatten(Tuple<Tuple<Tuple<Tuple<Tuple<T1, T2>, T3>, T4>, T5>, T6> nestedTuple) {
