@@ -20,18 +20,18 @@ import org.junit.Test;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-public class QuintupleTest {
+public class PentupleTest {
 
     @Test
     public void flattenNested5ElementTuple() {
         Tuple<Tuple<Tuple<Tuple<Integer, Integer>, Integer>, Integer>, Integer> oneTwoThreeFourFive = Tuple.of(Tuple.of(Tuple.of(Tuple.of(1, 2), 3), 4), 5);
-        assertThat(Quintuple.flatten(oneTwoThreeFourFive), is(Quintuple.of(1, 2, 3, 4, 5)));
+        assertThat(Pentuple.flatten(oneTwoThreeFourFive), is(Pentuple.of(1, 2, 3, 4, 5)));
     }
 
     @Test
     public void mapFifthElement() {
-        Quintuple<Integer, Integer, Integer, Integer, Integer> fifthIs6 = Quintuple.of(1, 2, 3, 4, 5).mapFifth(n -> n + 1);
-        assertThat(fifthIs6, is(Quintuple.of(1, 2, 3, 4, 6)));
+        Pentuple<Integer, Integer, Integer, Integer, Integer> fifthIs6 = Pentuple.of(1, 2, 3, 4, 5).mapFifth(n -> n + 1);
+        assertThat(fifthIs6, is(Pentuple.of(1, 2, 3, 4, 6)));
         assertThat(fifthIs6.fifth(), is(6));
     }
 

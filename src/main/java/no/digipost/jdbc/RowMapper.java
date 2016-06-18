@@ -128,7 +128,7 @@ public interface RowMapper<R> {
     interface Quadrupled<T, U, V, W> extends RowMapper.Tripled<Tuple<T, U>, V, W> {
 
         @Override
-        default <X> RowMapper.Quintupled<T, U, V, W, X> combinedWith(RowMapper<X> otherMapper) {
+        default <X> RowMapper.Pentupled<T, U, V, W, X> combinedWith(RowMapper<X> otherMapper) {
             return (rs, n) -> Tuple.of(this.fromResultSet(rs, n), otherMapper.fromResultSet(rs, n));
         }
 
@@ -153,7 +153,7 @@ public interface RowMapper<R> {
     }
 
 
-    interface Quintupled<T, U, V, W, X> extends RowMapper.Quadrupled<Tuple<T, U>, V, W, X> {
+    interface Pentupled<T, U, V, W, X> extends RowMapper.Quadrupled<Tuple<T, U>, V, W, X> {
 
         /**
          * Create a new mapper which takes the five results of this mapper and applies

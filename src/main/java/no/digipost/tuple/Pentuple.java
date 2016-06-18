@@ -18,7 +18,7 @@ package no.digipost.tuple;
 import java.util.function.Function;
 
 /**
- * A quintuple is a simple composition of five arbitrary values (objects). A quintuple
+ * A pentuple is a simple composition of five arbitrary values (objects). A pentuple
  * captures no semantics of the five values, and they are only referred to as
  * "the first", "the second", "the third", "the fourth", and "the fifth" value.
  *
@@ -28,14 +28,14 @@ import java.util.function.Function;
  * @param <T4> The type of the fourth value
  * @param <T5> The type of the fifth value
  */
-public interface Quintuple<T1, T2, T3, T4, T5> extends ViewableAsQuintuple<T1, T2, T3, T4, T5> {
+public interface Pentuple<T1, T2, T3, T4, T5> extends ViewableAsPentuple<T1, T2, T3, T4, T5> {
 
-    static <T1, T2, T3, T4, T5> Quintuple<T1, T2, T3, T4, T5> of(T1 first, T2 second, T3 third, T4 fourth, T5 fifth) {
+    static <T1, T2, T3, T4, T5> Pentuple<T1, T2, T3, T4, T5> of(T1 first, T2 second, T3 third, T4 fourth, T5 fifth) {
         return new XTuple<>(first, second, third, fourth, fifth);
     }
 
-    static <T1, T2, T3, T4, T5> Quintuple<T1, T2, T3, T4, T5> flatten(Tuple<Tuple<Tuple<Tuple<T1, T2>, T3>, T4>, T5> nestedTuple) {
-        return Quintuple.of(nestedTuple.first().first().first().first(), nestedTuple.first().first().first().second(), nestedTuple.first().first().second(), nestedTuple.first().second(), nestedTuple.second());
+    static <T1, T2, T3, T4, T5> Pentuple<T1, T2, T3, T4, T5> flatten(Tuple<Tuple<Tuple<Tuple<T1, T2>, T3>, T4>, T5> nestedTuple) {
+        return Pentuple.of(nestedTuple.first().first().first().first(), nestedTuple.first().first().first().second(), nestedTuple.first().first().second(), nestedTuple.first().second(), nestedTuple.second());
     }
 
     /**
@@ -65,67 +65,67 @@ public interface Quintuple<T1, T2, T3, T4, T5> extends ViewableAsQuintuple<T1, T
 
 
     /**
-     * Create a new quintuple by applying a function to the first element, and putting the
-     * result as the first element of the new quintuple.
+     * Create a new pentuple by applying a function to the first element, and putting the
+     * result as the first element of the new pentuple.
      *
      * @param mapper the function to apply to the first element
-     * @return the new quintuple
+     * @return the new pentuple
      */
-    <S1> Quintuple<S1, T2, T3, T4, T5> mapFirst(Function<? super T1, ? extends S1> mapper);
+    <S1> Pentuple<S1, T2, T3, T4, T5> mapFirst(Function<? super T1, ? extends S1> mapper);
 
 
     /**
-     * Create a new quintuple by applying a function to the second element, and putting the
-     * result as the second element of the new quintuple.
+     * Create a new pentuple by applying a function to the second element, and putting the
+     * result as the second element of the new pentuple.
      *
      * @param mapper the function to apply to the second element
-     * @return the new quintuple
+     * @return the new pentuple
      */
-    <S2> Quintuple<T1, S2, T3, T4, T5> mapSecond(Function<? super T2, ? extends S2> mapper);
+    <S2> Pentuple<T1, S2, T3, T4, T5> mapSecond(Function<? super T2, ? extends S2> mapper);
 
 
     /**
-     * Create a new quintuple by applying a function to the third element, and putting the
-     * result as the third element of the new quintuple.
+     * Create a new pentuple by applying a function to the third element, and putting the
+     * result as the third element of the new pentuple.
      *
      * @param mapper the function to apply to the third element
-     * @return the new quintuple
+     * @return the new pentuple
      */
-    <S3> Quintuple<T1, T2, S3, T4, T5> mapThird(Function<? super T3, ? extends S3> mapper);
+    <S3> Pentuple<T1, T2, S3, T4, T5> mapThird(Function<? super T3, ? extends S3> mapper);
 
 
     /**
-     * Create a new quintuple by applying a function to the fourth element, and putting the
-     * result as the fourth element of the new quintuple.
+     * Create a new pentuple by applying a function to the fourth element, and putting the
+     * result as the fourth element of the new pentuple.
      *
      * @param mapper the function to apply to the fourth element
-     * @return the new quintuple
+     * @return the new pentuple
      */
-    <S4> Quintuple<T1, T2, T3, S4, T5> mapFourth(Function<? super T4, ? extends S4> mapper);
+    <S4> Pentuple<T1, T2, T3, S4, T5> mapFourth(Function<? super T4, ? extends S4> mapper);
 
 
     /**
-     * Create a new quintuple by applying a function to the fifth element, and putting the
-     * result as the fifth element of the new quintuple.
+     * Create a new pentuple by applying a function to the fifth element, and putting the
+     * result as the fifth element of the new pentuple.
      *
      * @param mapper the function to apply to the fifth element
-     * @return the new quintuple
+     * @return the new pentuple
      */
-    <S5> Quintuple<T1, T2, T3, T4, S5> mapFifth(Function<? super T5, ? extends S5> mapper);
+    <S5> Pentuple<T1, T2, T3, T4, S5> mapFifth(Function<? super T5, ? extends S5> mapper);
 
 
     /**
-     * Create a new quintuple by applying a function to each element, and putting the
-     * results into a new quintuple.
+     * Create a new pentuple by applying a function to each element, and putting the
+     * results into a new pentuple.
      *
      * @param firstMapper  the function to apply to the first element
      * @param secondMapper the function to apply to the second element
      * @param thirdMapper  the function to apply to the third element
      * @param fourthMapper the function to apply to the fourth element
      * @param fifthMapper  the function to apply to the fifth element
-     * @return the new quintuple
+     * @return the new pentuple
      */
-    <S1, S2, S3, S4, S5> Quintuple<S1, S2, S3, S4, S5> map(Function<? super T1, ? extends S1> firstMapper,
+    <S1, S2, S3, S4, S5> Pentuple<S1, S2, S3, S4, S5> map(Function<? super T1, ? extends S1> firstMapper,
                                                            Function<? super T2, ? extends S2> secondMapper,
                                                            Function<? super T3, ? extends S3> thirdMapper,
                                                            Function<? super T4, ? extends S4> fourthMapper,
@@ -133,9 +133,9 @@ public interface Quintuple<T1, T2, T3, T4, T5> extends ViewableAsQuintuple<T1, T
 
 
     /**
-     * @return this quintuple instance
+     * @return this pentuple instance
      */
     @Override
-    Quintuple<T1, T2, T3, T4, T5> asQuintuple();
+    Pentuple<T1, T2, T3, T4, T5> asPentuple();
 
 }

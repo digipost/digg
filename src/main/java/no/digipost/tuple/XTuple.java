@@ -20,7 +20,7 @@ import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.function.Function;
 
-final class XTuple<T1, T2, T3, T4, T5> implements Tuple<T1, T2>, Triple<T1, T2, T3>, Quadruple<T1, T2, T3, T4>, Quintuple<T1, T2, T3, T4, T5>, Serializable {
+final class XTuple<T1, T2, T3, T4, T5> implements Tuple<T1, T2>, Triple<T1, T2, T3>, Quadruple<T1, T2, T3, T4>, Pentuple<T1, T2, T3, T4, T5>, Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -134,7 +134,7 @@ final class XTuple<T1, T2, T3, T4, T5> implements Tuple<T1, T2>, Triple<T1, T2, 
 
 
     @Override
-    public Quintuple<T1, T2, T3, T4, T5> asQuintuple() {
+    public Pentuple<T1, T2, T3, T4, T5> asPentuple() {
         return this;
     }
 

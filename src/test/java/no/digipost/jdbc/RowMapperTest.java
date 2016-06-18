@@ -17,7 +17,7 @@ package no.digipost.jdbc;
 
 import com.mockrunner.mock.jdbc.MockResultSet;
 import no.digipost.tuple.Quadruple;
-import no.digipost.tuple.Quintuple;
+import no.digipost.tuple.Pentuple;
 import no.digipost.tuple.Triple;
 import no.digipost.tuple.Tuple;
 import no.digipost.util.Attribute;
@@ -79,7 +79,7 @@ public class RowMapperTest {
     final RowMapper.Quadrupled<String, Integer, Instant, Double> fourColumns = threeColumns.combinedWith(
             getDouble.forAttribute(profileCompleteness));
 
-    final RowMapper.Quintupled<String, Integer, Instant, Double, Boolean> fiveColumns = fourColumns.combinedWith(
+    final RowMapper.Pentupled<String, Integer, Instant, Double, Boolean> fiveColumns = fourColumns.combinedWith(
             getBoolean.forAttribute(active));
 
     @Test
@@ -119,7 +119,7 @@ public class RowMapperTest {
     @Test
     public void combineAndFlattenFiveMappers() throws SQLException {
         try (MockResultSet rs = mockSingleRow()) {
-            Quintuple<String, Integer, Instant, Double, Boolean> row = fiveColumns.andThen(Quintuple::flatten).fromResultSet(rs);
+            Pentuple<String, Integer, Instant, Double, Boolean> row = fiveColumns.andThen(Pentuple::flatten).fromResultSet(rs);
             User user = fiveColumns.andThen((name, age, memberSince, profileCompleteness, active) -> new User(name, age, memberSince, profileCompleteness, active)).fromResultSet(rs);
             assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
             assertThat(row.second(), both(is(user.age)).and(is(30)));
