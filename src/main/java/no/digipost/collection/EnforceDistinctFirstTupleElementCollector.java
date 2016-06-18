@@ -36,7 +36,6 @@ public class EnforceDistinctFirstTupleElementCollector<T1, T2> implements Collec
 
     public EnforceDistinctFirstTupleElementCollector(BiFunction<? super Tuple<T1, List<T2>>, ? super Tuple<T1, Optional<T2>>, ? extends RuntimeException> exceptionOnNonDistinctFirstElement) {
         this.exceptionOnNonDistinctFirstElement = exceptionOnNonDistinctFirstElement;
-
     }
 
     @Override

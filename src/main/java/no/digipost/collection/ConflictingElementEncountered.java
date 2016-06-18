@@ -17,6 +17,10 @@ package no.digipost.collection;
 
 import static no.digipost.DiggExceptions.exceptionNameAndMessage;
 
+/**
+ * This exception indicates that an element was encountered which conflicts with
+ * what was expected for an operation to complete successfully.
+ */
 public class ConflictingElementEncountered extends RuntimeException {
 
     private static final long serialVersionUID = 1L;
