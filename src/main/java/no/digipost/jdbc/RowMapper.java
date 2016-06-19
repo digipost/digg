@@ -210,6 +210,132 @@ public interface RowMapper<R> {
             });
         }
 
+        @Override
+        default <A> Septupled<T, U, V, W, X, Z, A> combinedWith(RowMapper<A> otherMapper) {
+            return (rs, n) -> Tuple.of(this.fromResultSet(rs, n), otherMapper.fromResultSet(rs, n));
+        }
+
+    }
+
+    interface Septupled<T, U, V, W, X, Z, A> extends RowMapper.Hextupled<Tuple<T, U>, V, W, X, Z, A> {
+
+        /**
+         * Create a new mapper which takes the seven results of this mapper and applies
+         * the given {@link SeptiFunction} to yield another result.
+         *
+         * @param <S> the output type of the given {@code resultMapper} function,
+         *            which also become the type of the result produced by the new
+         *            row mapper.
+         * @param resultMapper the function to apply to the result
+         * @return the new row mapper
+         */
+        default <S> RowMapper<S> andThen(SeptiFunction<? super T, ? super U, ? super V, ? super W, ? super X, ? super Z, ? super A, S> resultMapper) {
+            return andThen(tuvwxza -> {
+                Tuple<Tuple<Tuple<Tuple<Tuple<T, U>, V>, W>, X>, Z> tuvwxz = tuvwxza.first();
+                Tuple<Tuple<Tuple<Tuple<T, U>, V>, W>, X> tuvwx = tuvwxz.first();
+                Tuple<Tuple<Tuple<T, U>, V>, W> tuvw = tuvwx.first();
+                Tuple<Tuple<T, U>, V> tuv = tuvw.first();
+                Tuple<T, U> tu = tuv.first();
+                return resultMapper.apply(tu.first(), tu.second(), tuv.second(), tuvw.second(), tuvwx.second(), tuvwxz.second(), tuvwxza.second());
+            });
+        }
+
+        @Override
+        default <B> Octupled<T, U, V, W, X, Z, A, B> combinedWith(RowMapper<B> otherMapper) {
+            return (rs, n) -> Tuple.of(this.fromResultSet(rs, n), otherMapper.fromResultSet(rs, n));
+        }
+
+    }
+
+    interface Octupled<T, U, V, W, X, Z, A, B> extends RowMapper.Septupled<Tuple<T, U>, V, W, X, Z, A, B> {
+
+        /**
+         * Create a new mapper which takes the eight results of this mapper and applies
+         * the given {@link OctoFunction} to yield another result.
+         *
+         * @param <S> the output type of the given {@code resultMapper} function,
+         *            which also become the type of the result produced by the new
+         *            row mapper.
+         * @param resultMapper the function to apply to the result
+         * @return the new row mapper
+         */
+        default <S> RowMapper<S> andThen(OctoFunction<? super T, ? super U, ? super V, ? super W, ? super X, ? super Z, ? super A, ? super B, S> resultMapper) {
+            return andThen(tuvwxzab -> {
+                Tuple<Tuple<Tuple<Tuple<Tuple<Tuple<T, U>, V>, W>, X>, Z>, A> tuvwxza = tuvwxzab.first();
+                Tuple<Tuple<Tuple<Tuple<Tuple<T, U>, V>, W>, X>, Z> tuvwxz = tuvwxza.first();
+                Tuple<Tuple<Tuple<Tuple<T, U>, V>, W>, X> tuvwx = tuvwxz.first();
+                Tuple<Tuple<Tuple<T, U>, V>, W> tuvw = tuvwx.first();
+                Tuple<Tuple<T, U>, V> tuv = tuvw.first();
+                Tuple<T, U> tu = tuv.first();
+                return resultMapper.apply(tu.first(), tu.second(), tuv.second(), tuvw.second(), tuvwx.second(), tuvwxz.second(), tuvwxza.second(), tuvwxzab.second());
+            });
+        }
+
+        @Override
+        default <C> Nonupled<T, U, V, W, X, Z, A, B, C> combinedWith(RowMapper<C> otherMapper) {
+            return (rs, n) -> Tuple.of(this.fromResultSet(rs, n), otherMapper.fromResultSet(rs, n));
+        }
+
+    }
+
+    interface Nonupled<T, U, V, W, X, Z, A, B, C> extends RowMapper.Octupled<Tuple<T, U>, V, W, X, Z, A, B, C> {
+
+        /**
+         * Create a new mapper which takes the nine results of this mapper and applies
+         * the given {@link NonaFunction} to yield another result.
+         *
+         * @param <S> the output type of the given {@code resultMapper} function,
+         *            which also become the type of the result produced by the new
+         *            row mapper.
+         * @param resultMapper the function to apply to the result
+         * @return the new row mapper
+         */
+        default <S> RowMapper<S> andThen(NonaFunction<? super T, ? super U, ? super V, ? super W, ? super X, ? super Z, ? super A, ? super B, ? super C, S> resultMapper) {
+            return andThen(tuvwxzabc -> {
+                Tuple<Tuple<Tuple<Tuple<Tuple<Tuple<Tuple<T, U>, V>, W>, X>, Z>, A>, B> tuvwxzab = tuvwxzabc.first();
+                Tuple<Tuple<Tuple<Tuple<Tuple<Tuple<T, U>, V>, W>, X>, Z>, A> tuvwxza = tuvwxzab.first();
+                Tuple<Tuple<Tuple<Tuple<Tuple<T, U>, V>, W>, X>, Z> tuvwxz = tuvwxza.first();
+                Tuple<Tuple<Tuple<Tuple<T, U>, V>, W>, X> tuvwx = tuvwxz.first();
+                Tuple<Tuple<Tuple<T, U>, V>, W> tuvw = tuvwx.first();
+                Tuple<Tuple<T, U>, V> tuv = tuvw.first();
+                Tuple<T, U> tu = tuv.first();
+                return resultMapper.apply(tu.first(), tu.second(), tuv.second(), tuvw.second(), tuvwx.second(), tuvwxz.second(), tuvwxza.second(), tuvwxzab.second(), tuvwxzabc.second());
+            });
+        }
+
+        @Override
+        default <D> Decupled<T, U, V, W, X, Z, A, B, C, D> combinedWith(RowMapper<D> otherMapper) {
+            return (rs, n) -> Tuple.of(this.fromResultSet(rs, n), otherMapper.fromResultSet(rs, n));
+        }
+
+    }
+
+    interface Decupled<T, U, V, W, X, Z, A, B, C, D> extends RowMapper.Nonupled<Tuple<T, U>, V, W, X, Z, A, B, C, D> {
+
+        /**
+         * Create a new mapper which takes the ten results of this mapper and applies
+         * the given {@link DecaFunction} to yield another result.
+         *
+         * @param <S> the output type of the given {@code resultMapper} function,
+         *            which also become the type of the result produced by the new
+         *            row mapper.
+         * @param resultMapper the function to apply to the result
+         * @return the new row mapper
+         */
+        default <S> RowMapper<S> andThen(DecaFunction<? super T, ? super U, ? super V, ? super W, ? super X, ? super Z, ? super A, ? super B, ? super C, ? super D, S> resultMapper) {
+            return andThen(tuvwxzabcd -> {
+                Tuple<Tuple<Tuple<Tuple<Tuple<Tuple<Tuple<Tuple<T, U>, V>, W>, X>, Z>, A>, B>, C> tuvwxzabc = tuvwxzabcd.first();
+                Tuple<Tuple<Tuple<Tuple<Tuple<Tuple<Tuple<T, U>, V>, W>, X>, Z>, A>, B> tuvwxzab = tuvwxzabc.first();
+                Tuple<Tuple<Tuple<Tuple<Tuple<Tuple<T, U>, V>, W>, X>, Z>, A> tuvwxza = tuvwxzab.first();
+                Tuple<Tuple<Tuple<Tuple<Tuple<T, U>, V>, W>, X>, Z> tuvwxz = tuvwxza.first();
+                Tuple<Tuple<Tuple<Tuple<T, U>, V>, W>, X> tuvwx = tuvwxz.first();
+                Tuple<Tuple<Tuple<T, U>, V>, W> tuvw = tuvwx.first();
+                Tuple<Tuple<T, U>, V> tuv = tuvw.first();
+                Tuple<T, U> tu = tuv.first();
+                return resultMapper.apply(tu.first(), tu.second(), tuv.second(), tuvw.second(), tuvwx.second(), tuvwxz.second(), tuvwxza.second(), tuvwxzab.second(), tuvwxzabc.second(), tuvwxzabcd.second());
+            });
+        }
+
     }
 
 

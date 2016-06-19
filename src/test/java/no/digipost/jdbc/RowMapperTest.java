@@ -22,6 +22,8 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.io.File;
+import java.math.BigDecimal;
+import java.net.URL;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
@@ -44,6 +46,10 @@ public class RowMapperTest {
         final double profileCompleteness;
         final boolean active;
         final Optional<File> avatar;
+        final BigDecimal credit;
+        final Optional<URL> homepage;
+        final Optional<String> petName;
+        final float levelOfAwesome;
 
         User(String name, int age) {
             this(name, age, Instant.now());
@@ -62,12 +68,32 @@ public class RowMapperTest {
         }
 
         User(String name, int age, Instant memberSince, double profileCompleteness, boolean active, Optional<File> avatar) {
+            this(name, age, memberSince, profileCompleteness, active, avatar, BigDecimal.ZERO);
+        }
+
+        User(String name, int age, Instant memberSince, double profileCompleteness, boolean active, Optional<File> avatar, BigDecimal credit) {
+            this(name, age, memberSince, profileCompleteness, active, avatar, credit, Optional.empty());
+        }
+
+        User(String name, int age, Instant memberSince, double profileCompleteness, boolean active, Optional<File> avatar, BigDecimal credit, Optional<URL> homepage) {
+            this(name, age, memberSince, profileCompleteness, active, avatar, credit, homepage, Optional.empty());
+        }
+
+        User(String name, int age, Instant memberSince, double profileCompleteness, boolean active, Optional<File> avatar, BigDecimal credit, Optional<URL> homepage, Optional<String> petName) {
+            this(name, age, memberSince, profileCompleteness, active, avatar, credit, homepage, petName, -1);
+        }
+
+        User(String name, int age, Instant memberSince, double profileCompleteness, boolean active, Optional<File> avatar, BigDecimal credit, Optional<URL> homepage, Optional<String> petName, float levelOfAwesome) {
             this.name = name;
             this.age = age;
             this.memberSince = memberSince;
             this.profileCompleteness = profileCompleteness;
             this.active = active;
             this.avatar = avatar;
+            this.credit = credit;
+            this.homepage = homepage;
+            this.petName = petName;
+            this.levelOfAwesome = levelOfAwesome;
         }
     }
 
@@ -77,6 +103,10 @@ public class RowMapperTest {
     final Attribute<Double> profileCompleteness = new Attribute<>("profile_completeness");
     final Attribute<Boolean> active = new Attribute<>("active");
     final Attribute<Optional<File>> avatar = new Attribute<>("avatar");
+    final Attribute<BigDecimal> credit = new Attribute<>("credit");
+    final Attribute<Optional<URL>> homepage = new Attribute<>("homepage");
+    final Attribute<Optional<String>> petName = new Attribute<>("pet_name");
+    final Attribute<Float> levelOfAwesome = new Attribute<>("level_of_awesome");
 
     final RowMapper.Tupled<String, Integer> twoColumns =
             getString.forAttribute(name).combinedWith(getInt.forAttribute(age));
@@ -93,6 +123,18 @@ public class RowMapperTest {
     final RowMapper.Hextupled<String, Integer, Instant, Double, Boolean, Optional<File>> sixColumns = fiveColumns.combinedWith(
             getNullableString.andThen(File::new).forAttribute(avatar));
 
+    final RowMapper.Septupled<String, Integer, Instant, Double, Boolean, Optional<File>, BigDecimal> sevenColumns = sixColumns.combinedWith(
+            getBigDecimal.forAttribute(credit));
+
+    final RowMapper.Octupled<String, Integer, Instant, Double, Boolean, Optional<File>, BigDecimal, Optional<URL>> eightColumns = sevenColumns.combinedWith(
+            getNullableURL.forAttribute(homepage));
+
+    final RowMapper.Nonupled<String, Integer, Instant, Double, Boolean, Optional<File>, BigDecimal, Optional<URL>, Optional<String>> nineColumns = eightColumns.combinedWith(
+            getNullableString.forAttribute(petName));
+
+    final RowMapper.Decupled<String, Integer, Instant, Double, Boolean, Optional<File>, BigDecimal, Optional<URL>, Optional<String>, Float> tenColumns = nineColumns.combinedWith(
+            getFloat.forAttribute(levelOfAwesome));
+
 
     private ResultSetMock rs;
 
@@ -104,7 +146,11 @@ public class RowMapperTest {
                 Tuple.of(memberSince.name, Timestamp.from(EPOCH)),
                 Tuple.of(profileCompleteness.name, 0.5),
                 Tuple.of(active.name, true),
-                Tuple.of(avatar.name, "johndoe.png"));
+                Tuple.of(avatar.name, "johndoe.png"),
+                Tuple.of(credit.name, new BigDecimal("100.00")),
+                Tuple.of(homepage.name, "http://example.com"),
+                Tuple.of(petName.name, "Snowball"),
+                Tuple.of(levelOfAwesome.name, 1.0f));
     }
 
     @Test
@@ -162,6 +208,69 @@ public class RowMapperTest {
         assertThat(row.fifth(), both(is(user.active)).and(is(true)));
         assertThat(row.sixth(), both(is(user.avatar)).and(contains(new File("johndoe.png"))));
     }
+
+    @Test
+    public void combineAndFlattenSevenMappers() throws SQLException {
+        Septuple<String, Integer, Instant, Double, Boolean, Optional<File>, BigDecimal> row = sevenColumns.andThen(Septuple::flatten).fromResultSet(rs);
+        User user = sevenColumns.andThen((n, a, ms, pc, act, av, c) -> new User(n, a, ms, pc, act, av, c)).fromResultSet(rs);
+
+        assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
+        assertThat(row.second(), both(is(user.age)).and(is(30)));
+        assertThat(row.third(), both(is(user.memberSince)).and(is(EPOCH)));
+        assertThat(row.fourth(), both(is(user.profileCompleteness)).and(is(0.5)));
+        assertThat(row.fifth(), both(is(user.active)).and(is(true)));
+        assertThat(row.sixth(), both(is(user.avatar)).and(contains(new File("johndoe.png"))));
+        assertThat(row.seventh(), both(is(user.credit)).and(is(new BigDecimal("100.00"))));
+    }
+
+    @Test
+    public void combineAndFlattenEightMappers() throws Exception {
+        Octuple<String, Integer, Instant, Double, Boolean, Optional<File>, BigDecimal, Optional<URL>> row = eightColumns.andThen(Octuple::flatten).fromResultSet(rs);
+        User user = eightColumns.andThen((n, a, ms, pc, act, av, c, u) -> new User(n, a, ms, pc, act, av, c, u)).fromResultSet(rs);
+
+        assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
+        assertThat(row.second(), both(is(user.age)).and(is(30)));
+        assertThat(row.third(), both(is(user.memberSince)).and(is(EPOCH)));
+        assertThat(row.fourth(), both(is(user.profileCompleteness)).and(is(0.5)));
+        assertThat(row.fifth(), both(is(user.active)).and(is(true)));
+        assertThat(row.sixth(), both(is(user.avatar)).and(contains(new File("johndoe.png"))));
+        assertThat(row.seventh(), both(is(user.credit)).and(is(new BigDecimal("100.00"))));
+        assertThat(row.eighth(), both(is(user.homepage)).and(contains(new URL("http://example.com"))));
+    }
+
+    @Test
+    public void combineAndFlattenNineMappers() throws Exception {
+        Nonuple<String, Integer, Instant, Double, Boolean, Optional<File>, BigDecimal, Optional<URL>, Optional<String>> row = nineColumns.andThen(Nonuple::flatten).fromResultSet(rs);
+        User user = nineColumns.andThen((n, a, ms, pc, act, av, c, u, pn) -> new User(n, a, ms, pc, act, av, c, u, pn)).fromResultSet(rs);
+
+        assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
+        assertThat(row.second(), both(is(user.age)).and(is(30)));
+        assertThat(row.third(), both(is(user.memberSince)).and(is(EPOCH)));
+        assertThat(row.fourth(), both(is(user.profileCompleteness)).and(is(0.5)));
+        assertThat(row.fifth(), both(is(user.active)).and(is(true)));
+        assertThat(row.sixth(), both(is(user.avatar)).and(contains(new File("johndoe.png"))));
+        assertThat(row.seventh(), both(is(user.credit)).and(is(new BigDecimal("100.00"))));
+        assertThat(row.eighth(), both(is(user.homepage)).and(contains(new URL("http://example.com"))));
+        assertThat(row.ninth(), both(is(user.petName)).and(contains("Snowball")));
+    }
+
+    @Test
+    public void combineAndFlattenTenMappers() throws Exception {
+        Decuple<String, Integer, Instant, Double, Boolean, Optional<File>, BigDecimal, Optional<URL>, Optional<String>, Float> row = tenColumns.andThen(Decuple::flatten).fromResultSet(rs);
+        User user = tenColumns.andThen((n, a, ms, pc, act, av, c, u, pn, awe) -> new User(n, a, ms, pc, act, av, c, u, pn, awe)).fromResultSet(rs);
+
+        assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
+        assertThat(row.second(), both(is(user.age)).and(is(30)));
+        assertThat(row.third(), both(is(user.memberSince)).and(is(EPOCH)));
+        assertThat(row.fourth(), both(is(user.profileCompleteness)).and(is(0.5)));
+        assertThat(row.fifth(), both(is(user.active)).and(is(true)));
+        assertThat(row.sixth(), both(is(user.avatar)).and(contains(new File("johndoe.png"))));
+        assertThat(row.seventh(), both(is(user.credit)).and(is(new BigDecimal("100.00"))));
+        assertThat(row.eighth(), both(is(user.homepage)).and(contains(new URL("http://example.com"))));
+        assertThat(row.ninth(), both(is(user.petName)).and(contains("Snowball")));
+        assertThat(row.tenth(), both(is(user.levelOfAwesome)).and(is(1.0f)));
+    }
+
 
 
     @After
