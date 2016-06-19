@@ -29,6 +29,8 @@ final class XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> implements Tuple<T1,
                                                                        Hextuple<T1, T2, T3, T4, T5, T6>,
                                                                        Septuple<T1, T2, T3, T4, T5, T6, T7>,
                                                                        Octuple<T1, T2, T3, T4, T5, T6, T7, T8>,
+                                                                       Nonuple<T1, T2, T3, T4, T5, T6, T7, T8, T9>,
+                                                                       Decuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10>,
                                                                        Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -111,10 +113,12 @@ final class XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> implements Tuple<T1,
         return _8;
     }
 
+    @Override
     public T9 ninth() {
         return _9;
     }
 
+    @Override
     public T10 tenth() {
         return _10;
     }
@@ -160,10 +164,12 @@ final class XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> implements Tuple<T1,
         return map(identity(), identity(), identity(), identity(), identity(), identity(), identity(), mapper);
     }
 
+    @Override
     public <S9> XTuple<T1, T2, T3, T4, T5, T6, T7, T8, S9, T10> mapNinth(Function<? super T9, ? extends S9> mapper) {
         return map(identity(), identity(), identity(), identity(), identity(), identity(), identity(), identity(), mapper);
     }
 
+    @Override
     public <S10> XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, S10> mapTenth(Function<? super T10, ? extends S10> mapper) {
         return map(identity(), identity(), identity(), identity(), identity(), identity(), identity(), identity(), identity(), mapper);
     }
@@ -232,6 +238,7 @@ final class XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> implements Tuple<T1,
         return map(firstMapper, secondMapper, thirdMapper, fourthMapper, fifthMapper, sixthMapper, seventhMapper, eightMapper, identity());
     }
 
+    @Override
     public <S1, S2, S3, S4, S5, S6, S7, S8, S9> XTuple<S1, S2, S3, S4, S5, S6, S7, S8, S9, T10> map(Function<? super T1, ? extends S1> firstMapper,
                                                                                                     Function<? super T2, ? extends S2> secondMapper,
                                                                                                     Function<? super T3, ? extends S3> thirdMapper,
@@ -244,6 +251,7 @@ final class XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> implements Tuple<T1,
         return map(firstMapper, secondMapper, thirdMapper, fourthMapper, fifthMapper, sixthMapper, seventhMapper, eightMapper, ninthMapper, identity());
     }
 
+    @Override
     public <S1, S2, S3, S4, S5, S6, S7, S8, S9, S10> XTuple<S1, S2, S3, S4, S5, S6, S7, S8, S9, S10> map(Function<? super T1, ? extends S1> firstMapper,
                                                                                                          Function<? super T2, ? extends S2> secondMapper,
                                                                                                          Function<? super T3, ? extends S3> thirdMapper,
@@ -267,10 +275,12 @@ final class XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> implements Tuple<T1,
     }
 
 
+    @Override
     public XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asDecuple() {
         return this;
     }
 
+    @Override
     public XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asNonuple() {
         return this;
     }
