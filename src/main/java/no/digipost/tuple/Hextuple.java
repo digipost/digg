@@ -20,8 +20,8 @@ import java.util.function.Function;
 import static no.digipost.tuple.XTuple.TERMINATOR;
 
 /**
- * A hextuple is a simple composition of five arbitrary values (objects). A hextuple
- * captures no semantics of the five values, and they are only referred to as
+ * A hextuple is a simple composition of six arbitrary values (objects). A hextuple
+ * captures no semantics of the six values, and they are only referred to as
  * "the first", "the second", "the third", "the fourth", "the fifth", and "the sixth" value.
  *
  * @param <T1> The type of the first value
@@ -72,7 +72,7 @@ public interface Hextuple<T1, T2, T3, T4, T5, T6> extends ViewableAsHextuple<T1,
     T5 fifth();
 
     /**
-     * @return the fifth value
+     * @return the sixth value
      */
     T6 sixth();
 
