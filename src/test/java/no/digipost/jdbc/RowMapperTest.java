@@ -15,18 +15,19 @@
  */
 package no.digipost.jdbc;
 
-import com.mockrunner.mock.jdbc.MockResultSet;
-import no.digipost.tuple.Quadruple;
-import no.digipost.tuple.Pentuple;
-import no.digipost.tuple.Triple;
-import no.digipost.tuple.Tuple;
+import no.digipost.tuple.*;
 import no.digipost.util.Attribute;
+import org.junit.After;
+import org.junit.Before;
 import org.junit.Test;
 
+import java.io.File;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.util.Optional;
 
+import static co.unruly.matchers.OptionalMatchers.contains;
 import static java.time.Instant.EPOCH;
 import static no.digipost.jdbc.Mappers.*;
 import static no.digipost.jdbc.ResultSetMock.mockSingleRowResult;
@@ -42,6 +43,7 @@ public class RowMapperTest {
         final Instant memberSince;
         final double profileCompleteness;
         final boolean active;
+        final Optional<File> avatar;
 
         User(String name, int age) {
             this(name, age, Instant.now());
@@ -56,11 +58,16 @@ public class RowMapperTest {
         }
 
         User(String name, int age, Instant memberSince, double profileCompleteness, boolean active) {
+            this(name, age, memberSince, profileCompleteness, active, Optional.empty());
+        }
+
+        User(String name, int age, Instant memberSince, double profileCompleteness, boolean active, Optional<File> avatar) {
             this.name = name;
             this.age = age;
             this.memberSince = memberSince;
             this.profileCompleteness = profileCompleteness;
             this.active = active;
+            this.avatar = avatar;
         }
     }
 
@@ -69,6 +76,7 @@ public class RowMapperTest {
     final Attribute<Instant> memberSince = new Attribute<>("member_since");
     final Attribute<Double> profileCompleteness = new Attribute<>("profile_completeness");
     final Attribute<Boolean> active = new Attribute<>("active");
+    final Attribute<Optional<File>> avatar = new Attribute<>("avatar");
 
     final RowMapper.Tupled<String, Integer> twoColumns =
             getString.forAttribute(name).combinedWith(getInt.forAttribute(age));
@@ -82,60 +90,82 @@ public class RowMapperTest {
     final RowMapper.Pentupled<String, Integer, Instant, Double, Boolean> fiveColumns = fourColumns.combinedWith(
             getBoolean.forAttribute(active));
 
+    final RowMapper.Hextupled<String, Integer, Instant, Double, Boolean, Optional<File>> sixColumns = fiveColumns.combinedWith(
+            getNullableString.andThen(File::new).forAttribute(avatar));
+
+
+    private ResultSetMock rs;
+
+    @Before
+    public void mockDatabaseResultSet() {
+        rs = mockSingleRowResult(
+                Tuple.of(name.name, "John Doe"),
+                Tuple.of(age.name, 30),
+                Tuple.of(memberSince.name, Timestamp.from(EPOCH)),
+                Tuple.of(profileCompleteness.name, 0.5),
+                Tuple.of(active.name, true),
+                Tuple.of(avatar.name, "johndoe.png"));
+    }
+
     @Test
     public void combineTwoMappers() throws SQLException {
-        try (MockResultSet rs = mockSingleRow()) {
-            Tuple<String, Integer> row = twoColumns.fromResultSet(rs);
-            User user = twoColumns.andThen(User::new).fromResultSet(rs);
-            assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
-            assertThat(row.second(), both(is(user.age)).and(is(30)));
-        }
+        Tuple<String, Integer> row = twoColumns.fromResultSet(rs);
+        User user = twoColumns.andThen(User::new).fromResultSet(rs);
+
+        assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
+        assertThat(row.second(), both(is(user.age)).and(is(30)));
     }
 
     @Test
     public void combineAndFlattenThreeMappers() throws SQLException {
-        try (MockResultSet rs = mockSingleRow()) {
-            Triple<String, Integer, Instant> row = threeColumns.andThen(Triple::flatten).fromResultSet(rs);
-            User user = threeColumns.andThen((name, age, memberSince) -> new User(name, age, memberSince)).fromResultSet(rs);
-            assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
-            assertThat(row.second(), both(is(user.age)).and(is(30)));
-            assertThat(row.third(), both(is(user.memberSince)).and(is(EPOCH)));
-        }
+        Triple<String, Integer, Instant> row = threeColumns.andThen(Triple::flatten).fromResultSet(rs);
+        User user = threeColumns.andThen((n, a, ms) -> new User(n, a, ms)).fromResultSet(rs);
+
+        assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
+        assertThat(row.second(), both(is(user.age)).and(is(30)));
+        assertThat(row.third(), both(is(user.memberSince)).and(is(EPOCH)));
     }
 
 
     @Test
     public void combineAndFlattenFourMappers() throws SQLException {
-        try (MockResultSet rs = mockSingleRow()) {
-            Quadruple<String, Integer, Instant, Double> row = fourColumns.andThen(Quadruple::flatten).fromResultSet(rs);
-            User user = fourColumns.andThen((name, age, memberSince, profileCompleteness) -> new User(name, age, memberSince, profileCompleteness)).fromResultSet(rs);
-            assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
-            assertThat(row.second(), both(is(user.age)).and(is(30)));
-            assertThat(row.third(), both(is(user.memberSince)).and(is(EPOCH)));
-            assertThat(row.fourth(), both(is(user.profileCompleteness)).and(is(0.5)));
-        }
+        Quadruple<String, Integer, Instant, Double> row = fourColumns.andThen(Quadruple::flatten).fromResultSet(rs);
+        User user = fourColumns.andThen((n, a, ms, pc) -> new User(n, a, ms, pc)).fromResultSet(rs);
+
+        assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
+        assertThat(row.second(), both(is(user.age)).and(is(30)));
+        assertThat(row.third(), both(is(user.memberSince)).and(is(EPOCH)));
+        assertThat(row.fourth(), both(is(user.profileCompleteness)).and(is(0.5)));
     }
 
     @Test
     public void combineAndFlattenFiveMappers() throws SQLException {
-        try (MockResultSet rs = mockSingleRow()) {
-            Pentuple<String, Integer, Instant, Double, Boolean> row = fiveColumns.andThen(Pentuple::flatten).fromResultSet(rs);
-            User user = fiveColumns.andThen((name, age, memberSince, profileCompleteness, active) -> new User(name, age, memberSince, profileCompleteness, active)).fromResultSet(rs);
-            assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
-            assertThat(row.second(), both(is(user.age)).and(is(30)));
-            assertThat(row.third(), both(is(user.memberSince)).and(is(EPOCH)));
-            assertThat(row.fourth(), both(is(user.profileCompleteness)).and(is(0.5)));
-            assertThat(row.fifth(), both(is(user.active)).and(is(true)));
-        }
+        Pentuple<String, Integer, Instant, Double, Boolean> row = fiveColumns.andThen(Pentuple::flatten).fromResultSet(rs);
+        User user = fiveColumns.andThen((n, a, ms, pc, act) -> new User(n, a, ms, pc, act)).fromResultSet(rs);
+
+        assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
+        assertThat(row.second(), both(is(user.age)).and(is(30)));
+        assertThat(row.third(), both(is(user.memberSince)).and(is(EPOCH)));
+        assertThat(row.fourth(), both(is(user.profileCompleteness)).and(is(0.5)));
+        assertThat(row.fifth(), both(is(user.active)).and(is(true)));
+    }
+
+    @Test
+    public void combineAndFlattenSixMappers() throws SQLException {
+        Hextuple<String, Integer, Instant, Double, Boolean, Optional<File>> row = sixColumns.andThen(Hextuple::flatten).fromResultSet(rs);
+        User user = sixColumns.andThen((n, a, ms, pc, act, av) -> new User(n, a, ms, pc, act, av)).fromResultSet(rs);
+
+        assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
+        assertThat(row.second(), both(is(user.age)).and(is(30)));
+        assertThat(row.third(), both(is(user.memberSince)).and(is(EPOCH)));
+        assertThat(row.fourth(), both(is(user.profileCompleteness)).and(is(0.5)));
+        assertThat(row.fifth(), both(is(user.active)).and(is(true)));
+        assertThat(row.sixth(), both(is(user.avatar)).and(contains(new File("johndoe.png"))));
     }
 
 
-    private MockResultSet mockSingleRow() throws SQLException {
-        return mockSingleRowResult(
-                Tuple.of(name.name, "John Doe"),
-                Tuple.of(age.name, 30),
-                Tuple.of(memberSince.name, Timestamp.from(EPOCH)),
-                Tuple.of(profileCompleteness.name, 0.5),
-                Tuple.of(active.name, true));
+    @After
+    public void closeDatabaseResultMock() {
+        rs.close();
     }
 }

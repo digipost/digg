@@ -18,35 +18,50 @@ package no.digipost.jdbc;
 import com.mockrunner.mock.jdbc.MockResultSet;
 import no.digipost.tuple.Tuple;
 
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static no.digipost.DiggExceptions.getUnchecked;
+import static no.digipost.DiggExceptions.runUnchecked;
 
-final class ResultSetMock {
+final class ResultSetMock extends MockResultSet {
 
-    public static final MockResultSet mockSingleColumnResult(String column, Object ... result) throws SQLException {
+    public static final ResultSetMock mockSingleColumnResult(String column, Object ... result) {
         return mockResult(Tuple.of(column, asList(result)));
     }
 
     @SafeVarargs
-    public static final MockResultSet mockSingleRowResult(Tuple<String, Object> ... columns) throws SQLException {
+    public static final ResultSetMock mockSingleRowResult(Tuple<String, Object> ... columns) {
         return mockResultSet(Stream.of(columns).map(c -> c.mapSecond(Arrays::asList)));
     }
 
     @SafeVarargs
-    public static final MockResultSet mockResult(Tuple<String, List<Object>> ... columns) throws SQLException {
+    public static final ResultSetMock mockResult(Tuple<String, List<Object>> ... columns) {
         return mockResultSet(Stream.of(columns));
     }
 
-    public static final MockResultSet mockResultSet(Stream<Tuple<String, List<Object>>> columns) throws SQLException {
-        MockResultSet rs = new MockResultSet("mock-" + LocalDate.now());
-        columns.forEach(column -> rs.addColumn(column.first(), column.second()));
-        rs.next();
-        return rs;
+    public static final ResultSetMock mockResultSet(Stream<Tuple<String, List<Object>>> columns) {
+        return getUnchecked(() -> {
+            ResultSetMock rs = new ResultSetMock("mock-" + LocalDate.now());
+            columns.forEach(column -> rs.addColumn(column.first(), column.second()));
+            rs.next();
+            return rs;
+        });
     }
+
+
+
+    private ResultSetMock(String id) {
+        super(id);
+    }
+
+    @Override
+    public void close() {
+        runUnchecked(super::close);
+    }
+
 
 }
