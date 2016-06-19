@@ -27,6 +27,7 @@ final class XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> implements Tuple<T1,
                                                                        Quadruple<T1, T2, T3, T4>,
                                                                        Pentuple<T1, T2, T3, T4, T5>,
                                                                        Hextuple<T1, T2, T3, T4, T5, T6>,
+                                                                       Septuple<T1, T2, T3, T4, T5, T6, T7>,
                                                                        Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -99,6 +100,7 @@ final class XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> implements Tuple<T1,
         return _6;
     }
 
+    @Override
     public T7 seventh() {
         return _7;
     }
@@ -146,6 +148,7 @@ final class XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> implements Tuple<T1,
         return map(identity(), identity(), identity(), identity(), identity(), mapper);
     }
 
+    @Override
     public <S7> XTuple<T1, T2, T3, T4, T5, T6, S7, T8, T9, T10> mapSeventh(Function<? super T7, ? extends S7> mapper) {
         return map(identity(), identity(), identity(), identity(), identity(), identity(), mapper);
     }
@@ -203,6 +206,7 @@ final class XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> implements Tuple<T1,
         return map(firstMapper, secondMapper, thirdMapper, fourthMapper, fifthMapper, sixthMapper, identity());
     }
 
+    @Override
     public <S1, S2, S3, S4, S5, S6, S7> XTuple<S1, S2, S3, S4, S5, S6, S7, T8, T9, T10> map(Function<? super T1, ? extends S1> firstMapper,
                                                                                             Function<? super T2, ? extends S2> secondMapper,
                                                                                             Function<? super T3, ? extends S3> thirdMapper,
@@ -259,28 +263,45 @@ final class XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> implements Tuple<T1,
     }
 
 
-    @Override
-    public Hextuple<T1, T2, T3, T4, T5, T6> asHextuple() {
+    public XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asDecuple() {
+        return this;
+    }
+
+    public XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asNonuple() {
+        return this;
+    }
+
+    public XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asOctuple() {
         return this;
     }
 
     @Override
-    public Pentuple<T1, T2, T3, T4, T5> asPentuple() {
+    public XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asSeptuple() {
         return this;
     }
 
     @Override
-    public Quadruple<T1, T2, T3, T4> asQuadruple() {
+    public XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asHextuple() {
         return this;
     }
 
     @Override
-    public Triple<T1, T2, T3> asTriple() {
+    public XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asPentuple() {
         return this;
     }
 
     @Override
-    public Tuple<T1, T2> asTuple() {
+    public XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asQuadruple() {
+        return this;
+    }
+
+    @Override
+    public XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asTriple() {
+        return this;
+    }
+
+    @Override
+    public XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asTuple() {
         return this;
     }
 
