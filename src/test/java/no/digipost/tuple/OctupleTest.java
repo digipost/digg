@@ -20,20 +20,20 @@ import org.junit.Test;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
-public class SeptupleTest {
+public class OctupleTest {
 
     @Test
-    public void flattenNested7ElementTuple() {
-        Tuple<Tuple<Tuple<Tuple<Tuple<Tuple<Integer, Integer>, Integer>, Integer>, Integer>, Integer>, Integer> _1234567 =
-                Tuple.of(Tuple.of(Tuple.of(Tuple.of(Tuple.of(Tuple.of(1, 2), 3), 4), 5), 6), 7);
-        assertThat(Septuple.flatten(_1234567), is(Septuple.of(1, 2, 3, 4, 5, 6, 7)));
+    public void flattenNested8ElementTuple() {
+        Tuple<Tuple<Tuple<Tuple<Tuple<Tuple<Tuple<Integer, Integer>, Integer>, Integer>, Integer>, Integer>, Integer>, Integer> _12345678 =
+                Tuple.of(Tuple.of(Tuple.of(Tuple.of(Tuple.of(Tuple.of(Tuple.of(1, 2), 3), 4), 5), 6), 7), 8);
+        assertThat(Octuple.flatten(_12345678), is(Octuple.of(1, 2, 3, 4, 5, 6, 7, 8)));
     }
 
     @Test
-    public void mapSeventhElement() {
-        Septuple<Integer, Integer, Integer, Integer, Integer, Integer, Integer> seventhIs8 = Septuple.of(1, 2, 3, 4, 5, 6, 7).mapSeventh(n -> n + 1);
-        assertThat(seventhIs8, is(Septuple.of(1, 2, 3, 4, 5, 6, 8)));
-        assertThat(seventhIs8.seventh(), is(8));
+    public void mapEighthElement() {
+        Octuple<Integer, Integer, Integer, Integer, Integer, Integer, Integer, Integer> eighthIs9 = Octuple.of(1, 2, 3, 4, 5, 6, 7, 8).mapEighth(n -> n + 1);
+        assertThat(eighthIs9, is(Octuple.of(1, 2, 3, 4, 5, 6, 7, 9)));
+        assertThat(eighthIs9.eighth(), is(9));
     }
 
 }

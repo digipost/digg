@@ -28,6 +28,7 @@ final class XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> implements Tuple<T1,
                                                                        Pentuple<T1, T2, T3, T4, T5>,
                                                                        Hextuple<T1, T2, T3, T4, T5, T6>,
                                                                        Septuple<T1, T2, T3, T4, T5, T6, T7>,
+                                                                       Octuple<T1, T2, T3, T4, T5, T6, T7, T8>,
                                                                        Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -105,7 +106,8 @@ final class XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> implements Tuple<T1,
         return _7;
     }
 
-    public T8 eight() {
+    @Override
+    public T8 eighth() {
         return _8;
     }
 
@@ -153,7 +155,8 @@ final class XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> implements Tuple<T1,
         return map(identity(), identity(), identity(), identity(), identity(), identity(), mapper);
     }
 
-    public <S8> XTuple<T1, T2, T3, T4, T5, T6, T7, S8, T9, T10> mapEight(Function<? super T8, ? extends S8> mapper) {
+    @Override
+    public <S8> XTuple<T1, T2, T3, T4, T5, T6, T7, S8, T9, T10> mapEighth(Function<? super T8, ? extends S8> mapper) {
         return map(identity(), identity(), identity(), identity(), identity(), identity(), identity(), mapper);
     }
 
@@ -217,6 +220,7 @@ final class XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> implements Tuple<T1,
         return map(firstMapper, secondMapper, thirdMapper, fourthMapper, fifthMapper, sixthMapper, seventhMapper, identity());
     }
 
+    @Override
     public <S1, S2, S3, S4, S5, S6, S7, S8> XTuple<S1, S2, S3, S4, S5, S6, S7, S8, T9, T10> map(Function<? super T1, ? extends S1> firstMapper,
                                                                                                 Function<? super T2, ? extends S2> secondMapper,
                                                                                                 Function<? super T3, ? extends S3> thirdMapper,
@@ -271,6 +275,7 @@ final class XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> implements Tuple<T1,
         return this;
     }
 
+    @Override
     public XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asOctuple() {
         return this;
     }
