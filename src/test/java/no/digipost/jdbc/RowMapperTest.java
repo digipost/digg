@@ -156,7 +156,7 @@ public class RowMapperTest {
     @Test
     public void combineTwoMappers() throws SQLException {
         Tuple<String, Integer> row = twoColumns.fromResultSet(rs);
-        User user = twoColumns.andThen(User::new).fromResultSet(rs);
+        User user = twoColumns.andThen((name, age) -> new User(name, age)).fromResultSet(rs);
 
         assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
         assertThat(row.second(), both(is(user.age)).and(is(30)));
