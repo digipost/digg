@@ -15,20 +15,49 @@
  */
 package no.digipost;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
 import static java.util.Collections.unmodifiableList;
+import static java.util.Spliterator.IMMUTABLE;
+import static java.util.Spliterator.ORDERED;
+import static java.util.Spliterators.spliterator;
 import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.StreamSupport.stream;
 
 /**
  * Utilities for working with {@link Optional}s.
  */
 public final class DiggOptionals {
+
+    /**
+     * Convert {@link Supplier suppliers} of {@link Optional} to a {@link Stream} consisting of only the
+     * {@link Optional#isPresent() present} optionals. The returned stream is {@link Stream#sequential()}, yielding
+     * the present values in the order they are given. Depending on how the stream is consumed, only the necessary
+     * optional values will be attempted resolved. E.g. calling {@link Stream#findFirst() .findFirst()} will only resolve
+     * as many {@code Optional}s needed until the first present one is encountered.
+     *
+     * <h2>Note on parallel streams</h2>
+     * The returned stream will be sequential and appropriate for use to resolve several {@link Optional}s in a deterministic
+     * order, or for instance to find the first present value of a prioritized set of possible ways to resolve it. One should
+     * be <em>very</em> (as always with streams) careful with {@link Stream#parallel() parallelizing} the stream, as you generally
+     * have no control with how the resolvers will be run. For instance, {@link Stream#findAny() .parallel().findAny()} will indeed return
+     * the the first resolved value, <em>but still block until the workers already started by the stream has terminated</em>.
+     *
+     * @param <T> The type of the given {@code Optional}s and returned {@code Stream}.
+     * @param optionalResolvers The operations resolving {@code Optional}s to convert to a {@code Stream}.
+     *
+     * @return a {@code Stream} containing the present {@code Optional}s
+     */
+    @SafeVarargs
+    public static <T> Stream<T> toStream(Supplier<Optional<T>> ... optionalResolvers) {
+        Supplier<Optional<T>>[] copiedResolvers = Arrays.copyOf(optionalResolvers, optionalResolvers.length);
+        Spliterator<Supplier<Optional<T>>> spliterator = spliterator(copiedResolvers, IMMUTABLE | ORDERED);
+        return stream(spliterator, false).map(Supplier::get).filter(Optional::isPresent).map(Optional::get);
+    }
+
 
     /**
      * Convert {@link Optional}s to a {@link Stream} consisting of only the
