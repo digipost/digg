@@ -36,8 +36,17 @@ import static java.util.Optional.ofNullable;
  */
 public final class Mappers {
 
-    /** @see ResultSet#getBoolean(String) */
-    public static final BasicColumnMapper<Boolean> getBoolean = (name, rs) -> rs.getBoolean(name);
+    /**
+     * Gets the value of a given column as a Java {@code boolean}. Unlike the {@link ResultSet#getBoolean(String)},
+     * this mapper yields {@code null} for SQL {@code NULL}, as the returned value is a boxed {@link java.lang.Boolean}.
+     * However, for <em>nullable</em> columns, the {@link #getNullableBoolean} mapper should be preferred over this.
+     *
+     * @see ResultSet#getBoolean(String)
+     */
+    public static final BasicColumnMapper<Boolean> getBoolean = (name, rs) -> {
+        boolean value = rs.getBoolean(name);
+        return rs.wasNull() ? null : value;
+    };
 
     /** @see ResultSet#getBoolean(String) */
     public static final NullableColumnMapper<Boolean> getNullableBoolean = (name, rs) -> {
@@ -45,8 +54,17 @@ public final class Mappers {
         return rs.wasNull() ? empty() : Optional.of(value);
     };
 
-    /** @see ResultSet#getByte(String) */
-    public static final BasicColumnMapper<Byte> getByte = (name, rs) -> rs.getByte(name);
+    /**
+     * Gets the value of a given column as a Java {@code byte}. Unlike the {@link ResultSet#getByte(String)},
+     * this mapper yields {@code null} for SQL {@code NULL}, as the returned value is a boxed {@link java.lang.Byte}.
+     * However, for <em>nullable</em> columns, the {@link #getNullableByte} mapper should be preferred over this.
+     *
+     * @see ResultSet#getByte(String)
+     */
+    public static final BasicColumnMapper<Byte> getByte = (name, rs) -> {
+        byte value = rs.getByte(name);
+        return rs.wasNull() ? null : value;
+    };
 
     /** @see ResultSet#getByte(String) */
     public static final NullableColumnMapper<Byte> getNullableByte = (name, rs) -> {
@@ -54,8 +72,17 @@ public final class Mappers {
         return rs.wasNull() ? empty() : Optional.of(value);
     };
 
-    /** @see ResultSet#getShort(String) */
-    public static final BasicColumnMapper<Short> getShort = (name, rs) -> rs.getShort(name);
+    /**
+     * Gets the value of a given column as a Java {@code short}. Unlike the {@link ResultSet#getShort(String)},
+     * this mapper yields {@code null} for SQL {@code NULL}, as the returned value is a boxed {@link java.lang.Short}.
+     * However, for <em>nullable</em> columns, the {@link #getNullableShort} mapper should be preferred over this.
+     *
+     * @see ResultSet#getShort(String)
+     */
+    public static final BasicColumnMapper<Short> getShort = (name, rs) -> {
+        short value = rs.getShort(name);
+        return rs.wasNull() ? null : value;
+    };
 
     /** @see ResultSet#getShort(String) */
     public static final NullableColumnMapper<Short> getNullableShort = (name, rs) -> {
@@ -63,8 +90,17 @@ public final class Mappers {
         return rs.wasNull() ? empty() : Optional.of(value);
     };
 
-    /** @see ResultSet#getInt(String) */
-    public static final BasicColumnMapper<Integer> getInt = (name, rs) -> rs.getInt(name);
+    /**
+     * Gets the value of a given column as a Java {@code int}. Unlike the {@link ResultSet#getInt(String)},
+     * this mapper yields {@code null} for SQL {@code NULL}, as the returned value is a boxed {@link java.lang.Integer}.
+     * However, for <em>nullable</em> columns, the {@link #getNullableInt} mapper should be preferred over this.
+     *
+     * @see ResultSet#getInt(String)
+     */
+    public static final BasicColumnMapper<Integer> getInt = (name, rs) -> {
+        int value = rs.getInt(name);
+        return rs.wasNull() ? null : value;
+    };
 
     /** @see ResultSet#getInt(String) */
     public static final NullableColumnMapper<Integer> getNullableInt = (name, rs) -> {
@@ -72,8 +108,17 @@ public final class Mappers {
         return rs.wasNull() ? empty() : Optional.of(value);
     };
 
-    /** @see ResultSet#getLong(String) */
-    public static final BasicColumnMapper<Long> getLong = (name, rs) -> rs.getLong(name);
+    /**
+     * Gets the value of a given column as a Java {@code long}. Unlike the {@link ResultSet#getLong(String)},
+     * this mapper yields {@code null} for SQL {@code NULL}, as the returned value is a boxed {@link java.lang.Long}.
+     * However, for <em>nullable</em> columns, the {@link #getNullableLong} mapper should be preferred over this.
+     *
+     * @see ResultSet#getLong(String)
+     */
+    public static final BasicColumnMapper<Long> getLong = (name, rs) -> {
+        long value = rs.getLong(name);
+        return rs.wasNull() ? null : value;
+    };
 
     /** @see ResultSet#getLong(String) */
     public static final NullableColumnMapper<Long> getNullableLong = (name, rs) -> {
@@ -81,8 +126,17 @@ public final class Mappers {
         return rs.wasNull() ? empty() : Optional.of(value);
     };
 
-    /** @see ResultSet#getFloat(String) */
-    public static final BasicColumnMapper<Float> getFloat = (name, rs) -> rs.getFloat(name);
+    /**
+     * Gets the value of a given column as a Java {@code float}. Unlike the {@link ResultSet#getFloat(String)},
+     * this mapper yields {@code null} for SQL {@code NULL}, as the returned value is a boxed {@link java.lang.Float}.
+     * However, for <em>nullable</em> columns, the {@link #getNullableFloat} mapper should be preferred over this.
+     *
+     * @see ResultSet#getFloat(String)
+     */
+    public static final BasicColumnMapper<Float> getFloat = (name, rs) -> {
+        float value = rs.getFloat(name);
+        return rs.wasNull() ? null : value;
+    };
 
     /** @see ResultSet#getFloat(String) */
     public static final NullableColumnMapper<Float> getNullableFloat = (name, rs) -> {
@@ -90,8 +144,17 @@ public final class Mappers {
         return rs.wasNull() ? empty() : Optional.of(value);
     };
 
-    /** @see ResultSet#getDouble(String) */
-    public static final BasicColumnMapper<Double> getDouble = (name, rs) -> rs.getDouble(name);
+    /**
+     * Gets the value of a given column as a Java {@code double}. Unlike the {@link ResultSet#getDouble(String)},
+     * this mapper yields {@code null} for SQL {@code NULL}, as the returned value is a boxed {@link java.lang.Double}.
+     * However, for <em>nullable</em> columns, the {@link #getNullableDouble} mapper should be preferred over this.
+     *
+     * @see ResultSet#getDouble(String)
+     */
+    public static final BasicColumnMapper<Double> getDouble = (name, rs) -> {
+        double value = rs.getDouble(name);
+        return rs.wasNull() ? null : value;
+    };
 
     /** @see ResultSet#getDouble(String) */
     public static final NullableColumnMapper<Double> getNullableDouble = (name, rs) -> {

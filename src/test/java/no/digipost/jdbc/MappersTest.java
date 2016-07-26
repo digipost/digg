@@ -24,9 +24,11 @@ import java.util.stream.Stream;
 
 import static co.unruly.matchers.StreamMatchers.allMatch;
 import static no.digipost.DiggExceptions.applyUnchecked;
+import static no.digipost.DiggExceptions.asUnchecked;
 import static no.digipost.jdbc.Mappers.*;
 import static no.digipost.jdbc.ResultSetMock.mockSingleColumnResult;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
 public class MappersTest {
@@ -38,6 +40,16 @@ public class MappersTest {
                     Stream.of(getNullableInt, getNullableBoolean, getNullableByte, getNullableDouble, getNullableFloat, getNullableLong, getNullableShort)
                         .map((NullableColumnMapper<?> nullableMapper) -> applyUnchecked(mapper -> mapper.map("value", rs), nullableMapper));
             assertThat(results, allMatch(is(Optional.empty())));
+        }
+    }
+
+    @Test
+    public void correctlyHandlesResultSetIckySQL_NULLHandling() throws SQLException {
+        try (MockResultSet rs = mockSingleColumnResult("value", new Object[] { null })) {
+            Stream<Object> results =
+                    Stream.of(getInt, getBoolean, getByte, getDouble, getFloat, getLong, getShort)
+                        .map((BasicColumnMapper<?> mapper) -> { try {return mapper.map("value", rs);} catch (SQLException e) {throw asUnchecked(e); } });
+            assertThat(results, allMatch(nullValue()));
         }
     }
 }
