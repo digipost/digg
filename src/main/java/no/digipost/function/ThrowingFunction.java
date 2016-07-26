@@ -37,7 +37,7 @@ public interface ThrowingFunction<T, R, X extends Throwable> {
     }
 
     default Function<T, R> ifExceptionThrow(BiFunction<? super T, ? super Exception, ? extends RuntimeException> exceptionMapper) {
-        return ifException((t, e) -> { throw exceptionMapper.apply(t, e); }).andThen(Optional::get);
+        return ifException((t, e) -> { throw exceptionMapper.apply(t, e); }).andThen(o -> o.orElse(null));
     }
 
     default Function<T, Optional<R>> ifException(Consumer<Exception> exceptionHandler) {

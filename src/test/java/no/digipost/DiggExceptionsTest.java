@@ -22,6 +22,7 @@ import org.junit.rules.ExpectedException;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 import static java.util.stream.Collectors.toList;
@@ -82,6 +83,8 @@ public class DiggExceptionsTest {
     @Test
     public void applyAThrowingFunctionUnchecked() {
         assertThat(applyUnchecked(Math::round, 4.6f), is(5));
+        assertThat(applyUnchecked(n -> n, null), nullValue());
+        assertThat(applyUnchecked(n -> n, Optional.empty()), is(Optional.empty()));
 
         Exception e = new Exception();
         try {

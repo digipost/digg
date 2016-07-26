@@ -24,7 +24,6 @@ import java.util.stream.Stream;
 
 import static co.unruly.matchers.StreamMatchers.allMatch;
 import static no.digipost.DiggExceptions.applyUnchecked;
-import static no.digipost.DiggExceptions.asUnchecked;
 import static no.digipost.jdbc.Mappers.*;
 import static no.digipost.jdbc.ResultSetMock.mockSingleColumnResult;
 import static org.hamcrest.Matchers.is;
@@ -48,7 +47,7 @@ public class MappersTest {
         try (MockResultSet rs = mockSingleColumnResult("value", new Object[] { null })) {
             Stream<Object> results =
                     Stream.of(getInt, getBoolean, getByte, getDouble, getFloat, getLong, getShort)
-                        .map((BasicColumnMapper<?> mapper) -> { try {return mapper.map("value", rs);} catch (SQLException e) {throw asUnchecked(e); } });
+                        .map((BasicColumnMapper<?> basicMapper) -> applyUnchecked(mapper -> mapper.map("value", rs), basicMapper));
             assertThat(results, allMatch(nullValue()));
         }
     }

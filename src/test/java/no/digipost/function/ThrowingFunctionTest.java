@@ -23,8 +23,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static java.util.Optional.empty;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.sameInstance;
+import static org.hamcrest.Matchers.*;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.*;
 
@@ -42,6 +41,12 @@ public class ThrowingFunctionTest {
         ThrowingFunction<Integer, ?, Exception> fn = i -> {throw ex;};
         expectedException.expect(sameInstance(ex));
         fn.asUnchecked().apply(42);
+    }
+
+    @Test
+    public void handlesNullResult() {
+        ThrowingFunction<String, String, ?> fn = i -> null;
+        assertThat(fn.asUnchecked().apply("x"), nullValue());
     }
 
     @Test
