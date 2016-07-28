@@ -40,6 +40,12 @@ public final class AttributesMap implements Serializable {
      * Switches to indicate behavior other than default.
      */
     public enum Config implements Supplier<AttributesMap.Builder> {
+        /**
+         * If one needs to be able to retrieve {@code null} values from an {@code AttributeMap},
+         * this {@code Config} switch can be passed to the builder. By default, the {@link AttributesMap.Builder} will ignore any
+         * values which are {@code null}, and consequently the resulting {@link AttributesMap} will throw an exception if one tries
+         * to {@link AttributesMap#get(GetsNamedValue) get} a particular value which was null.
+         */
         ALLOW_NULL_VALUES;
 
         @Override
