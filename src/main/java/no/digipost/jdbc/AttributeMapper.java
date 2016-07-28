@@ -28,9 +28,9 @@ import java.sql.SQLException;
  * the values can be accessed in a type-safe manner.
  * <p>
  * An {@link AttributeMapper} is constructed from an existing {@code ColumnMapper} by calling
- * {@link ColumnMapper#forAttribute(Attribute) .forAttribute(..)}.
+ * {@link ColumnMapper#forColumn(Attribute) .forColumn(..)}.
  * <p>
- * Usually, instances are directly given to a constructor of an {@link AttributesRowMapper}, but can
+ * Instances may be directly given to a constructor of an {@link AttributesRowMapper}, but can
  * also be used as a standalone {@link RowMapper}.
  *
  * @param <R> The type of the {@code Attribute} and the result yielded from the {@code ColumnMapper}
