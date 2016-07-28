@@ -60,7 +60,7 @@ public final class AttributeMapper<R> implements RowMapper<R> {
 
 
     Tuple<Attribute<R>, R> attributeAndValue(ResultSet resultSet) throws SQLException {
-        return attribute.withValue(fromResultSet(resultSet));
+        return attribute.withValue(map(resultSet));
     }
 
     String getAttributeName() {

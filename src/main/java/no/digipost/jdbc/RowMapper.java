@@ -25,6 +25,10 @@ import java.util.function.Function;
 
 /**
  * Defines how to map a {@link java.sql.ResultSet} to an object.
+ * The given {@code ResultSet} is expected to be positioned at the "current" row, i.e. the {@code RowMapper}
+ * is not expected to be required to do any cursor placement before doing any value extraction.
+ * <p>
+ * <strong>Please see the depraction notes on {@link #fromResultSet(ResultSet, int)}.</strong>
  *
  * @param <R> The type of object this {@code RowMapper} yields from a {@code ResultSet}
  */
@@ -39,6 +43,16 @@ public interface RowMapper<R> {
         return mapper;
     }
 
+    /**
+     * @deprecated This method was originally included as an intended convenience to be
+     *             {@link FunctionalInterface}-signature compatible with Spring's {@code RowMapper},
+     *             but the value of this has shown to be limited. This method will be removed, and
+     *             the lambda signature of a {@link no.digipost.jdbc.RowMapper} will then be {@code ResultSet -> R}.
+     *             Assigning an instance of this to Spring's {@code RowMapper} can be achieved with a
+     *             lambda like this (omit types for the lambda arguments if you prefer):
+     *             {@code org.springframework.jdbc.core.RowMapper<R> springMapper = (ResultSet rs, int n) -> diggRowMapper.map(rs);}
+     */
+    @Deprecated
     R fromResultSet(ResultSet resultSet, int rowNum) throws SQLException;
 
     /**
@@ -47,10 +61,19 @@ public interface RowMapper<R> {
      * @param resultSet the {@link ResultSet}
      * @return the result
      *
-     * @throws SQLException if an error happen when retrieving data from the {@code ResultSet}.
+     * @throws SQLException if any error happens when processing the {@link ResultSet}. May be if the name/label is not valid,
+     *                      if a database access error occurs, or this method is called on a closed result set.
      */
-    default R fromResultSet(ResultSet resultSet) throws SQLException {
+    default R map(ResultSet resultSet) throws SQLException {
         return fromResultSet(resultSet, resultSet.getRow());
+    }
+
+    /**
+     * @deprecated Use {@link #map(ResultSet)} instead.
+     */
+    @Deprecated
+    default R fromResultSet(ResultSet resultSet) throws SQLException {
+        return map(resultSet);
     }
 
 

@@ -109,31 +109,31 @@ public class RowMapperTest {
     final Attribute<Float> levelOfAwesome = new Attribute<>("level_of_awesome");
 
     final RowMapper.Tupled<String, Integer> twoColumns =
-            getString.forAttribute(name).combinedWith(getInt.forAttribute(age));
+            getString.forColumn(name).combinedWith(getInt.forColumn(age));
 
     final RowMapper.Tripled<String, Integer, Instant> threeColumns = twoColumns.combinedWith(
-            getTimestamp.andThen(Timestamp::toInstant).forAttribute(memberSince));
+            getTimestamp.andThen(Timestamp::toInstant).forColumn(memberSince));
 
     final RowMapper.Quadrupled<String, Integer, Instant, Double> fourColumns = threeColumns.combinedWith(
-            getDouble.forAttribute(profileCompleteness));
+            getDouble.forColumn(profileCompleteness));
 
     final RowMapper.Pentupled<String, Integer, Instant, Double, Boolean> fiveColumns = fourColumns.combinedWith(
-            getBoolean.forAttribute(active));
+            getBoolean.forColumn(active));
 
     final RowMapper.Hextupled<String, Integer, Instant, Double, Boolean, Optional<File>> sixColumns = fiveColumns.combinedWith(
-            getNullableString.andThen(File::new).forAttribute(avatar));
+            getNullableString.andThen(File::new).forColumn(avatar));
 
     final RowMapper.Septupled<String, Integer, Instant, Double, Boolean, Optional<File>, BigDecimal> sevenColumns = sixColumns.combinedWith(
-            getBigDecimal.forAttribute(credit));
+            getBigDecimal.forColumn(credit));
 
     final RowMapper.Octupled<String, Integer, Instant, Double, Boolean, Optional<File>, BigDecimal, Optional<URL>> eightColumns = sevenColumns.combinedWith(
-            getNullableURL.forAttribute(homepage));
+            getNullableURL.forColumn(homepage));
 
     final RowMapper.Nonupled<String, Integer, Instant, Double, Boolean, Optional<File>, BigDecimal, Optional<URL>, Optional<String>> nineColumns = eightColumns.combinedWith(
-            getNullableString.forAttribute(petName));
+            getNullableString.forColumn(petName));
 
     final RowMapper.Decupled<String, Integer, Instant, Double, Boolean, Optional<File>, BigDecimal, Optional<URL>, Optional<String>, Float> tenColumns = nineColumns.combinedWith(
-            getFloat.forAttribute(levelOfAwesome));
+            getFloat.forColumn(levelOfAwesome));
 
 
     private ResultSetMock rs;
@@ -155,8 +155,8 @@ public class RowMapperTest {
 
     @Test
     public void combineTwoMappers() throws SQLException {
-        Tuple<String, Integer> row = twoColumns.fromResultSet(rs);
-        User user = twoColumns.andThen((name, age) -> new User(name, age)).fromResultSet(rs);
+        Tuple<String, Integer> row = twoColumns.map(rs);
+        User user = twoColumns.andThen((name, age) -> new User(name, age)).map(rs);
 
         assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
         assertThat(row.second(), both(is(user.age)).and(is(30)));
@@ -164,8 +164,8 @@ public class RowMapperTest {
 
     @Test
     public void combineAndFlattenThreeMappers() throws SQLException {
-        Triple<String, Integer, Instant> row = threeColumns.andThen(Triple::flatten).fromResultSet(rs);
-        User user = threeColumns.andThen((n, a, ms) -> new User(n, a, ms)).fromResultSet(rs);
+        Triple<String, Integer, Instant> row = threeColumns.andThen(Triple::flatten).map(rs);
+        User user = threeColumns.andThen((n, a, ms) -> new User(n, a, ms)).map(rs);
 
         assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
         assertThat(row.second(), both(is(user.age)).and(is(30)));
@@ -175,8 +175,8 @@ public class RowMapperTest {
 
     @Test
     public void combineAndFlattenFourMappers() throws SQLException {
-        Quadruple<String, Integer, Instant, Double> row = fourColumns.andThen(Quadruple::flatten).fromResultSet(rs);
-        User user = fourColumns.andThen((n, a, ms, pc) -> new User(n, a, ms, pc)).fromResultSet(rs);
+        Quadruple<String, Integer, Instant, Double> row = fourColumns.andThen(Quadruple::flatten).map(rs);
+        User user = fourColumns.andThen((n, a, ms, pc) -> new User(n, a, ms, pc)).map(rs);
 
         assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
         assertThat(row.second(), both(is(user.age)).and(is(30)));
@@ -186,8 +186,8 @@ public class RowMapperTest {
 
     @Test
     public void combineAndFlattenFiveMappers() throws SQLException {
-        Pentuple<String, Integer, Instant, Double, Boolean> row = fiveColumns.andThen(Pentuple::flatten).fromResultSet(rs);
-        User user = fiveColumns.andThen((n, a, ms, pc, act) -> new User(n, a, ms, pc, act)).fromResultSet(rs);
+        Pentuple<String, Integer, Instant, Double, Boolean> row = fiveColumns.andThen(Pentuple::flatten).map(rs);
+        User user = fiveColumns.andThen((n, a, ms, pc, act) -> new User(n, a, ms, pc, act)).map(rs);
 
         assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
         assertThat(row.second(), both(is(user.age)).and(is(30)));
@@ -198,8 +198,8 @@ public class RowMapperTest {
 
     @Test
     public void combineAndFlattenSixMappers() throws SQLException {
-        Hextuple<String, Integer, Instant, Double, Boolean, Optional<File>> row = sixColumns.andThen(Hextuple::flatten).fromResultSet(rs);
-        User user = sixColumns.andThen((n, a, ms, pc, act, av) -> new User(n, a, ms, pc, act, av)).fromResultSet(rs);
+        Hextuple<String, Integer, Instant, Double, Boolean, Optional<File>> row = sixColumns.andThen(Hextuple::flatten).map(rs);
+        User user = sixColumns.andThen((n, a, ms, pc, act, av) -> new User(n, a, ms, pc, act, av)).map(rs);
 
         assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
         assertThat(row.second(), both(is(user.age)).and(is(30)));
@@ -211,8 +211,8 @@ public class RowMapperTest {
 
     @Test
     public void combineAndFlattenSevenMappers() throws SQLException {
-        Septuple<String, Integer, Instant, Double, Boolean, Optional<File>, BigDecimal> row = sevenColumns.andThen(Septuple::flatten).fromResultSet(rs);
-        User user = sevenColumns.andThen((n, a, ms, pc, act, av, c) -> new User(n, a, ms, pc, act, av, c)).fromResultSet(rs);
+        Septuple<String, Integer, Instant, Double, Boolean, Optional<File>, BigDecimal> row = sevenColumns.andThen(Septuple::flatten).map(rs);
+        User user = sevenColumns.andThen((n, a, ms, pc, act, av, c) -> new User(n, a, ms, pc, act, av, c)).map(rs);
 
         assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
         assertThat(row.second(), both(is(user.age)).and(is(30)));
@@ -225,8 +225,8 @@ public class RowMapperTest {
 
     @Test
     public void combineAndFlattenEightMappers() throws Exception {
-        Octuple<String, Integer, Instant, Double, Boolean, Optional<File>, BigDecimal, Optional<URL>> row = eightColumns.andThen(Octuple::flatten).fromResultSet(rs);
-        User user = eightColumns.andThen((n, a, ms, pc, act, av, c, u) -> new User(n, a, ms, pc, act, av, c, u)).fromResultSet(rs);
+        Octuple<String, Integer, Instant, Double, Boolean, Optional<File>, BigDecimal, Optional<URL>> row = eightColumns.andThen(Octuple::flatten).map(rs);
+        User user = eightColumns.andThen((n, a, ms, pc, act, av, c, u) -> new User(n, a, ms, pc, act, av, c, u)).map(rs);
 
         assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
         assertThat(row.second(), both(is(user.age)).and(is(30)));
@@ -240,8 +240,8 @@ public class RowMapperTest {
 
     @Test
     public void combineAndFlattenNineMappers() throws Exception {
-        Nonuple<String, Integer, Instant, Double, Boolean, Optional<File>, BigDecimal, Optional<URL>, Optional<String>> row = nineColumns.andThen(Nonuple::flatten).fromResultSet(rs);
-        User user = nineColumns.andThen((n, a, ms, pc, act, av, c, u, pn) -> new User(n, a, ms, pc, act, av, c, u, pn)).fromResultSet(rs);
+        Nonuple<String, Integer, Instant, Double, Boolean, Optional<File>, BigDecimal, Optional<URL>, Optional<String>> row = nineColumns.andThen(Nonuple::flatten).map(rs);
+        User user = nineColumns.andThen((n, a, ms, pc, act, av, c, u, pn) -> new User(n, a, ms, pc, act, av, c, u, pn)).map(rs);
 
         assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
         assertThat(row.second(), both(is(user.age)).and(is(30)));
@@ -256,8 +256,8 @@ public class RowMapperTest {
 
     @Test
     public void combineAndFlattenTenMappers() throws Exception {
-        Decuple<String, Integer, Instant, Double, Boolean, Optional<File>, BigDecimal, Optional<URL>, Optional<String>, Float> row = tenColumns.andThen(Decuple::flatten).fromResultSet(rs);
-        User user = tenColumns.andThen((n, a, ms, pc, act, av, c, u, pn, awe) -> new User(n, a, ms, pc, act, av, c, u, pn, awe)).fromResultSet(rs);
+        Decuple<String, Integer, Instant, Double, Boolean, Optional<File>, BigDecimal, Optional<URL>, Optional<String>, Float> row = tenColumns.andThen(Decuple::flatten).map(rs);
+        User user = tenColumns.andThen((n, a, ms, pc, act, av, c, u, pn, awe) -> new User(n, a, ms, pc, act, av, c, u, pn, awe)).map(rs);
 
         assertThat(row.first(), both(is(user.name)).and(is("John Doe")));
         assertThat(row.second(), both(is(user.age)).and(is(30)));
