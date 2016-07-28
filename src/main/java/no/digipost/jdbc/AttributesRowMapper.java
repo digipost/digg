@@ -21,12 +21,12 @@ import no.digipost.util.AttributesMap.Builder;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.IntStream.rangeClosed;
 import static no.digipost.DiggExceptions.asUnchecked;
@@ -60,8 +60,9 @@ public class AttributesRowMapper implements RowMapper<AttributesMap> {
     @Override
     public AttributesMap fromResultSet(ResultSet rs, int rowNum) throws SQLException {
         AttributesMap.Builder attributes = attributeMapBuilderSupplier.get();
-        for(AttributeMapper<?> mapper : applicableMappers(rs.getMetaData()).collect(toList())) {
-            attributes.and(mapper.attributeAndValue(rs));
+        Iterator<AttributeMapper<?>> mapperIter = applicableMappers(rs.getMetaData()).iterator();
+        while (mapperIter.hasNext()) {
+            attributes.and(mapperIter.next().attributeAndValue(rs));
         }
         return attributes.build();
     }
