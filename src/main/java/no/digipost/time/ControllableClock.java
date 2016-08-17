@@ -17,6 +17,7 @@ package no.digipost.time;
 
 import java.io.Serializable;
 import java.time.*;
+import java.time.temporal.TemporalAmount;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -62,6 +63,18 @@ public final class ControllableClock extends Clock implements TimeControllable, 
     @Override
     public Instant instant() {
         return delegate.get().instant();
+    }
+
+    @Override
+    public void timePasses(TemporalAmount amountOfTime) {
+        Duration duration;
+        if (amountOfTime instanceof Duration) {
+            duration = (Duration) amountOfTime;
+        } else {
+            Instant now = this.instant();
+            duration = Duration.between(now, now.atZone(getZone()).plus(amountOfTime));
+        }
+        timePasses(duration);
     }
 
     @Override

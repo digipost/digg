@@ -16,6 +16,7 @@
 package no.digipost.time;
 
 import java.time.*;
+import java.time.temporal.TemporalAmount;
 
 /**
  * The clock <em>mutation</em> operations, e.g. offered by a {@link ControllableClock}.
@@ -31,6 +32,8 @@ public interface TimeControllable {
     }
 
     void set(LocalDateTime localDateTime);
+
+    void timePasses(TemporalAmount amountOfTime);
 
     void timePasses(Duration duration);
 
