@@ -128,7 +128,7 @@
                 <plugin>
                     <groupId>com.mycila</groupId>
                     <artifactId>license-maven-plugin</artifactId>
-                    <version>3.0.rc1</version>
+                    <version>3.0</version>
                     <configuration>
                         <header>src/main/license-header.txt</header>
                         <excludes>
@@ -210,7 +210,7 @@
                 <plugin>
                     <groupId>com.github.siom79.japicmp</groupId>
                     <artifactId>japicmp-maven-plugin</artifactId>
-                    <version>0.8.1</version>
+                    <version>0.9.0</version>
                     <configuration>
                         <newVersion>
                             <file><path>${project.build.directory}/${project.build.finalName}.${project.packaging}</path></file>
