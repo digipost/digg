@@ -44,7 +44,7 @@ public class ConditionalTimerTest {
 
     @Property
     public void comparingDurationsForConditionsMet(boolean conditionMet, long ms) {
-        ControllableClock clock = new ControllableClock(now());
+        ControllableClock clock = ControllableClock.freezedAt(now());
         ConditionalTimer<Object> timer = using(clock).timeWhen(v -> conditionMet);
         Duration duration = Duration.of(ms, MILLIS);
         assertTrue(timer.sameOrlessThan(duration));
@@ -61,7 +61,7 @@ public class ConditionalTimerTest {
 
     @Test
     public void yieldsDurationWhenConditionIsMet() {
-        ControllableClock clock = new ControllableClock(LocalDateTime.of(2015, 6, 24, 12, 15));
+        ControllableClock clock = ControllableClock.freezedAt(LocalDateTime.of(2015, 6, 24, 12, 15));
         ConditionalTimer<Integer> timeWhenNegative = using(clock).timeWhen(i -> i < 0);
         clock.timePasses(ofSeconds(1));
         timeWhenNegative.inspect(0);

@@ -33,7 +33,7 @@ public class ControllableClockTest {
     @Test
     public void controlFixedTime() {
         LocalDateTime start = LocalDateTime.of(2015, 6, 24, 12, 15);
-        ControllableClock clock = new ControllableClock(start);
+        ControllableClock clock = ControllableClock.freezedAt(start);
 
         clock.timePasses((TemporalAmount) Duration.ofSeconds(45));
         assertThat(clock.instant(), is(start.atZone(clock.getZone()).plusSeconds(45).toInstant()));
@@ -73,14 +73,14 @@ public class ControllableClockTest {
         };
 
         LocalDateTime start = LocalDateTime.of(2015, 6, 24, 12, 15);
-        ControllableClock clock = new ControllableClock(start);
+        ControllableClock clock = ControllableClock.freezedAt(start);
         clock.timePasses(slack);
         assertThat(clock.instant(), is(LocalDateTime.of(2015, 6, 24, 12, 30).atZone(clock.getZone()).toInstant()));
     }
 
     @Test
     public void settingFixedClockToSpecificTimeAndZone() {
-        ControllableClock clock = new ControllableClock(LocalDateTime.of(2015, 6, 24, 12, 15));
+        ControllableClock clock = ControllableClock.freezedAt(LocalDateTime.of(2015, 6, 24, 12, 15));
 
         ZonedDateTime newTime = ZonedDateTime.of(LocalDateTime.of(2014, 3, 29, 11, 0), ZoneId.of("GMT-4"));
         clock.set(newTime);
@@ -89,7 +89,7 @@ public class ControllableClockTest {
 
     @Test
     public void settingTimeBasedOnSystemClock() throws InterruptedException {
-        ControllableClock clock = new ControllableClock(systemUTC());
+        ControllableClock clock = ControllableClock.control(systemUTC());
 
         LocalDateTime newTime = LocalDateTime.of(2014, 3, 29, 11, 0);
         clock.set(newTime);
@@ -104,14 +104,14 @@ public class ControllableClockTest {
 
     @Test
     public void setClockToItselfIsAnError() {
-        ControllableClock clock = new ControllableClock(LocalDateTime.of(2015, 6, 24, 12, 15));
+        ControllableClock clock = ControllableClock.freezedAt(LocalDateTime.of(2015, 6, 24, 12, 15));
         expectedException.expect(IllegalArgumentException.class);
         clock.set(clock);
     }
 
     @Test
     public void settingTheTimeOnSystemClockWillKeepTheClockMovingUntilFreezingTheClock() throws InterruptedException {
-        ControllableClock clock = new ControllableClock(systemUTC());
+        ControllableClock clock = ControllableClock.control(systemUTC());
         ZonedDateTime start = ZonedDateTime.of(LocalDateTime.of(2013, 2, 17, 14, 30), ZoneId.systemDefault());
         clock.set(start);
         Thread.sleep(10);

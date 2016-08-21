@@ -25,20 +25,53 @@ import java.time.temporal.TemporalAmount;
  */
 public interface TimeControllable {
 
-    void set(Instant time);
+    /**
+     * Set the time to the given instant.
+     *
+     * @param instant the instant to set.
+     */
+    void set(Instant instant);
 
+    /**
+     * Set the time to the given <em>zoned</em> date and time.
+     *
+     * @param zonedDateTime the date and time to set.
+     */
     default void set(ZonedDateTime zonedDateTime) {
         set(zonedDateTime.toInstant());
     }
 
+    /**
+     * Set the time to the given local date and time.
+     *
+     * @param localDateTime the date and time to set.
+     */
     void set(LocalDateTime localDateTime);
 
+    /**
+     * Signal that time is passing a given amount of time.
+     *
+     * @param amountOfTime the amount of time which are passing.
+     */
     void timePasses(TemporalAmount amountOfTime);
 
+    /**
+     * Signal that time is passing a given amount of time.
+     *
+     * @param amountOfTime the amount of time which are passing.
+     */
     void timePasses(Duration duration);
 
+    /**
+     * Signal that time should freeze.
+     */
     void freeze();
 
+    /**
+     * Set the time to freely progressing system time.
+     *
+     * @see Clock#system(ZoneId)
+     */
     void setToSystemClock();
 
 }
