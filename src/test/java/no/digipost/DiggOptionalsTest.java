@@ -24,6 +24,7 @@ import org.junit.rules.ExpectedException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import static no.digipost.DiggExceptions.mayThrow;
 import static no.digipost.DiggOptionals.toList;
@@ -70,6 +71,18 @@ public class DiggOptionalsTest {
     public void getPresentOptionalsInStream() {
         assertThat(toStream(() -> Optional.empty(), () -> Optional.empty()), StreamMatchers.empty());
         assertThat(toStream(() -> Optional.empty(), () -> Optional.of(1), () -> Optional.of(2), () -> Optional.empty()), StreamMatchers.contains(1, 2));
+    }
+
+    @Test
+    public void convertPresentOptionalsToStreamOfMostCommonBaseType() {
+        Stream<Number> nums = toStream(Optional.of(3.14), Optional.empty(), Optional.of(42));
+        assertThat(nums.map(n -> String.format("%.2f", n.doubleValue())), StreamMatchers.contains("3.14", "42.00"));
+    }
+
+    @Test
+    public void getPresentOptionalsInStreamOfMostCommonBaseType() {
+        Stream<Number> nums = toStream(() -> Optional.of(3.14), Optional::empty, () -> Optional.of(42));
+        assertThat(nums.map(n -> String.format("%.2f", n.doubleValue())), StreamMatchers.contains("3.14", "42.00"));
     }
 
     @Test

@@ -69,7 +69,7 @@ public final class DiggOptionals {
      * @return a {@code Stream} containing the present {@code Optional}s
      */
     @SafeVarargs
-    public static <T> Stream<T> toStream(Optional<T> ... optionals) {
+    public static <T> Stream<T> toStream(Optional<? extends T> ... optionals) {
         return Stream.of(optionals).filter(Optional::isPresent).map(Optional::get);
     }
 
