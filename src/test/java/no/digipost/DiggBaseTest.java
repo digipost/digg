@@ -27,8 +27,11 @@ import java.util.Optional;
 
 import static co.unruly.matchers.StreamMatchers.contains;
 import static co.unruly.matchers.StreamMatchers.empty;
-import static no.digipost.DiggBase.*;
-import static org.hamcrest.Matchers.*;
+import static no.digipost.DiggBase.friendlyName;
+import static no.digipost.DiggBase.nonNull;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assume.assumeThat;
 
@@ -69,13 +72,13 @@ public class DiggBaseTest {
 
     @Test
     public void extractOptionalValuesFromAnObject() {
-        assertThat(extractIfPresent("abc", (String s) -> Optional.of(s.charAt(0)), s -> Optional.empty(), (String s) -> Optional.of(s.charAt(2))), contains('a', 'c'));
-        assertThat(extractIfPresent("abc", s -> Optional.empty(), s -> Optional.empty()), empty());
+        assertThat(DiggBase.<String, Character>extractIfPresent("abc", s -> Optional.of(s.charAt(0)), s -> Optional.empty(), s -> Optional.of(s.charAt(2))), contains('a', 'c'));
+        assertThat(DiggBase.<String, Character>extractIfPresent("abc", s -> Optional.empty(), s -> Optional.empty()), empty());
     }
 
     @Test
     public void extractValuesIncludesEverythingEvenNulls() {
-        assertThat(extract("abc", s -> s.charAt(0), s -> null), contains('a', null));
+        assertThat(DiggBase.<String, Character>extract("abc", s -> s.charAt(0), s -> null), contains('a', null));
     }
 
     @Property

@@ -69,8 +69,11 @@ public class DiggOptionalsTest {
 
     @Test
     public void getPresentOptionalsInStream() {
-        assertThat(toStream(() -> Optional.empty(), () -> Optional.empty()), StreamMatchers.empty());
-        assertThat(toStream(() -> Optional.empty(), () -> Optional.of(1), () -> Optional.of(2), () -> Optional.empty()), StreamMatchers.contains(1, 2));
+        Stream<Object> onlyNonPresentOptionals = toStream(() -> Optional.empty(), () -> Optional.empty());
+        assertThat(onlyNonPresentOptionals, StreamMatchers.empty());
+
+        Stream<Integer> nonPresentOptionalsAndOneAndTwo = toStream(() -> Optional.empty(), () -> Optional.of(1), () -> Optional.of(2), () -> Optional.empty());
+        assertThat(nonPresentOptionalsAndOneAndTwo, StreamMatchers.contains(1, 2));
     }
 
     @Test
