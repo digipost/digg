@@ -15,7 +15,6 @@
  */
 package no.digipost;
 
-import no.digipost.collection.AdaptableCollector;
 import no.digipost.collection.ConflictingElementEncountered;
 import no.digipost.collection.EnforceAtMostOneElementCollector;
 import no.digipost.collection.EnforceDistinctFirstTupleElementCollector;
@@ -24,7 +23,11 @@ import no.digipost.tuple.Tuple;
 import no.digipost.tuple.ViewableAsTuple;
 import no.digipost.util.ViewableAsOptional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collector;
@@ -36,7 +39,6 @@ import static java.util.Collections.unmodifiableList;
 /**
  * Various {@link java.util.stream.Collector} implementations.
  */
-@SuppressWarnings("deprecation")
 public final class DiggCollectors {
 
     /**
@@ -92,17 +94,17 @@ public final class DiggCollectors {
      *
      * @return the multimap collector.
      */
-    public static <T1, T2> AdaptableCollector<ViewableAsTuple<T1, Optional<T2>>, ?, Map<T1, List<T2>>> toMultimap() {
+    public static <T1, T2> Collector<ViewableAsTuple<T1, Optional<T2>>, ?, Map<T1, List<T2>>> toMultimap() {
         Function<ViewableAsTuple<T1, Optional<T2>>, Tuple<T1, Optional<T2>>> asTuple = ViewableAsTuple::asTuple;
         return toMultimap(asTuple.andThen(Tuple::first), asTuple.andThen(Tuple::second));
     }
 
-    public static <T, V> AdaptableCollector<T, ?, Map<T, List<V>>> toMultimap(Function<? super T, Optional<V>> extractor) {
+    public static <T, V> Collector<T, ?, Map<T, List<V>>> toMultimap(Function<? super T, Optional<V>> extractor) {
         return toMultimap(Function.identity(), extractor);
     }
 
-    public static <T, K, V> AdaptableCollector<T, ?, Map<K, List<V>>> toMultimap(Function<? super T, K> keyExtractor, Function<? super T, Optional<V>> extractor) {
-        return adapt(Collectors.toMap(keyExtractor, extractor.andThen(DiggOptionals::toList), DiggCollectors::concat));
+    public static <T, K, V> Collector<T, ?, Map<K, List<V>>> toMultimap(Function<? super T, K> keyExtractor, Function<? super T, Optional<V>> extractor) {
+        return Collectors.toMap(keyExtractor, extractor.andThen(DiggOptionals::toList), DiggCollectors::concat);
     }
 
 
@@ -115,7 +117,7 @@ public final class DiggCollectors {
      *
      * @return the collector
      */
-    public static <T> AdaptableCollector<T, OneTimeAssignment<T>, Optional<T>> allowAtMostOne() {
+    public static <T> Collector<T, OneTimeAssignment<T>, Optional<T>> allowAtMostOne() {
         return allowAtMostOneOrElseThrow(ViewableAsOptional.TooManyElements::new);
     }
 
@@ -129,29 +131,10 @@ public final class DiggCollectors {
      * @return the collector
      * @see #allowAtMostOne()
      */
-    public static <T> AdaptableCollector<T, OneTimeAssignment<T>, Optional<T>> allowAtMostOneOrElseThrow(BiFunction<? super T, ? super T, ? extends RuntimeException> exceptionOnExcessiveElements) {
-        return adapt(new EnforceAtMostOneElementCollector<>(exceptionOnExcessiveElements));
+    public static <T> Collector<T, OneTimeAssignment<T>, Optional<T>> allowAtMostOneOrElseThrow(BiFunction<? super T, ? super T, ? extends RuntimeException> exceptionOnExcessiveElements) {
+        return new EnforceAtMostOneElementCollector<>(exceptionOnExcessiveElements);
     }
 
-
-    /**
-     * Turn any {@link Collector} into an {@link AdaptableCollector}.
-     *
-     * @param collector the collector to convert
-     *
-     * @return the {@link AdaptableCollector}
-     *
-     * @see AdaptableCollector
-     * @deprecated Use {@link Collectors#collectingAndThen(Collector, Function)} instead.
-     */
-    @Deprecated
-    public static <T, A, R> AdaptableCollector<T, A, R> adapt(Collector<T, A, R> collector) {
-        if (collector instanceof AdaptableCollector) {
-            return (AdaptableCollector<T, A, R>) collector;
-        } else {
-            return AdaptableCollector.of(collector.supplier(), collector.accumulator(), collector.combiner(), collector.finisher(), collector.characteristics());
-        }
-    }
 
 
 

@@ -31,12 +31,16 @@ import org.junit.runner.RunWith;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static co.unruly.matchers.OptionalMatchers.contains;
-import static no.digipost.DiggCollectors.*;
-import static org.hamcrest.Matchers.*;
+import static no.digipost.DiggCollectors.allowAtMostOne;
+import static no.digipost.DiggCollectors.allowAtMostOneOrElseThrow;
+import static no.digipost.DiggCollectors.toMultimap;
+import static no.digipost.DiggCollectors.toMultituple;
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
 @RunWith(JUnitQuickcheck.class)
@@ -93,13 +97,6 @@ public class DiggCollectorsTest {
         Stream<NumTranslation> translations = Stream.<NumTranslation>builder().add(oneInEnglish).add(missingOne).add(oneInEsperanto).add(twoInEnglish).build();
         expectedException.expect(ConflictingElementEncountered.class);
         translations.collect(toMultituple());
-    }
-
-
-    @Test
-    @SuppressWarnings("deprecation")
-    public void adaptACollector() {
-        assertThat(Stream.of("1", "2", "3").collect(adapt(Collectors.<String>toList()).andThen(l -> l.get(0))), is("1"));
     }
 
     @Test
