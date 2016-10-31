@@ -58,7 +58,7 @@ public class AttributesRowMapper implements RowMapper<AttributesMap> {
 
 
     @Override
-    public AttributesMap fromResultSet(ResultSet rs, int rowNum) throws SQLException {
+    public AttributesMap map(ResultSet rs) throws SQLException {
         AttributesMap.Builder attributes = attributeMapBuilderSupplier.get();
         Iterator<AttributeMapper<?>> mapperIter = applicableMappers(rs.getMetaData()).iterator();
         while (mapperIter.hasNext()) {

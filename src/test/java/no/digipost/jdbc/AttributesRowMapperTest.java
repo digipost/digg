@@ -31,7 +31,10 @@ import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static java.util.function.Function.identity;
-import static no.digipost.jdbc.Mappers.*;
+import static no.digipost.jdbc.Mappers.getLong;
+import static no.digipost.jdbc.Mappers.getNullableTimestamp;
+import static no.digipost.jdbc.Mappers.getString;
+import static no.digipost.jdbc.Mappers.getTimestamp;
 import static no.digipost.jdbc.ResultSetMock.mockResult;
 import static no.digipost.jdbc.ResultSetMock.mockSingleRowResult;
 import static no.digipost.util.AttributesMap.Config.ALLOW_NULL_VALUES;
@@ -137,7 +140,7 @@ public class AttributesRowMapperTest {
         try (MockResultSet rs = mockResult(myString.withValue("x").map(a -> a.name, Arrays::asList))) {
             Attribute<Integer> fortyTwo = new Attribute<Integer>("fortyTwo");
             AttributesMap attributes = rowMapper
-                    .combinedWith((r, n) -> AttributesMap.with(fortyTwo, 42).build())
+                    .combinedWith(r -> AttributesMap.with(fortyTwo, 42).build())
                     .andThen(results -> AttributesMap.buildNew().and(results.first()).and(results.second()).build())
                     .map(rs);
             assertThat(attributes.get(myString), is("x"));

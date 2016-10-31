@@ -50,11 +50,10 @@ public final class AttributeMapper<R> implements RowMapper<R> {
      *
      * @param resultSet the {@link ResultSet} to retrieve necessary data from in order to yield
      *                  the result of type {@code R}.
-     * @param rowNum the current row of the {@code ResultSet} cursor. Not used by this mapper.
      * @return the result
      */
     @Override
-    public R fromResultSet(ResultSet resultSet, int rowNum) throws SQLException {
+    public R map(ResultSet resultSet) throws SQLException {
         return mapper.map(attribute.name, resultSet);
     }
 

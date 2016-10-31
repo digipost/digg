@@ -15,7 +15,15 @@
  */
 package no.digipost.jdbc;
 
-import no.digipost.function.*;
+import no.digipost.function.DecaFunction;
+import no.digipost.function.HexaFunction;
+import no.digipost.function.NonaFunction;
+import no.digipost.function.OctoFunction;
+import no.digipost.function.PentaFunction;
+import no.digipost.function.QuadFunction;
+import no.digipost.function.SeptiFunction;
+import no.digipost.function.ThrowingFunction;
+import no.digipost.function.TriFunction;
 import no.digipost.tuple.Tuple;
 
 import java.sql.ResultSet;
@@ -27,8 +35,6 @@ import java.util.function.Function;
  * Defines how to map a {@link java.sql.ResultSet} to an object.
  * The given {@code ResultSet} is expected to be positioned at the "current" row, i.e. the {@code RowMapper}
  * is not expected to be required to do any cursor placement before doing any value extraction.
- * <p>
- * <strong>Please see the depraction notes on {@link #fromResultSet(ResultSet, int)}.</strong>
  *
  * @param <R> The type of object this {@code RowMapper} yields from a {@code ResultSet}
  */
@@ -36,24 +42,9 @@ import java.util.function.Function;
 public interface RowMapper<R> {
 
     static <R> RowMapper<R> of(ThrowingFunction<ResultSet, R, SQLException> mapper) {
-        return of((rs, n) -> mapper.apply(rs));
+        return rs -> mapper.apply(rs);
     }
 
-    static <R> RowMapper<R> of(RowMapper<R> mapper) {
-        return mapper;
-    }
-
-    /**
-     * @deprecated This method was originally included as an intended convenience to be
-     *             {@link FunctionalInterface}-signature compatible with Spring's {@code RowMapper},
-     *             but the value of this has shown to be limited. This method will be removed, and
-     *             the lambda signature of a {@link no.digipost.jdbc.RowMapper} will then be {@code ResultSet -> R}.
-     *             Assigning an instance of this to Spring's {@code RowMapper} can be achieved with a
-     *             lambda like this (omit types for the lambda arguments if you prefer):
-     *             {@code org.springframework.jdbc.core.RowMapper<R> springMapper = (ResultSet rs, int n) -> diggRowMapper.map(rs);}
-     */
-    @Deprecated
-    R fromResultSet(ResultSet resultSet, int rowNum) throws SQLException;
 
     /**
      * Obtain the result from the current row of a {@code ResultSet}.
@@ -64,17 +55,7 @@ public interface RowMapper<R> {
      * @throws SQLException if any error happens when processing the {@link ResultSet}. May be if the name/label is not valid,
      *                      if a database access error occurs, or this method is called on a closed result set.
      */
-    default R map(ResultSet resultSet) throws SQLException {
-        return fromResultSet(resultSet, resultSet.getRow());
-    }
-
-    /**
-     * @deprecated Use {@link #map(ResultSet)} instead.
-     */
-    @Deprecated
-    default R fromResultSet(ResultSet resultSet) throws SQLException {
-        return map(resultSet);
-    }
+    R map(ResultSet resultSet) throws SQLException;
 
 
     /**
@@ -88,7 +69,7 @@ public interface RowMapper<R> {
      * @return the new row mapper
      */
     default <S> RowMapper<S> andThen(Function<? super R, S> resultMapper) {
-        return (rs, n) -> resultMapper.apply(fromResultSet(rs, n));
+        return rs -> resultMapper.apply(map(rs));
     }
 
 
@@ -100,7 +81,7 @@ public interface RowMapper<R> {
      * @return the new mapper
      */
     default <S> RowMapper.Tupled<R, S> combinedWith(RowMapper<S> otherMapper) {
-        return (rs, n) -> Tuple.of(this.fromResultSet(rs, n), otherMapper.fromResultSet(rs, n));
+        return rs -> Tuple.of(this.map(rs), otherMapper.map(rs));
     }
 
 
@@ -124,7 +105,7 @@ public interface RowMapper<R> {
 
         @Override
         default <V> RowMapper.Tripled<T, U, V> combinedWith(RowMapper<V> otherMapper) {
-            return (rs, n) -> Tuple.of(this.fromResultSet(rs, n), otherMapper.fromResultSet(rs, n));
+            return rs -> Tuple.of(this.map(rs), otherMapper.map(rs));
         }
 
     }
@@ -150,7 +131,7 @@ public interface RowMapper<R> {
 
         @Override
         default <W> RowMapper.Quadrupled<T, U, V, W> combinedWith(RowMapper<W> otherMapper) {
-            return (rs, n) -> Tuple.of(this.fromResultSet(rs, n), otherMapper.fromResultSet(rs, n));
+            return rs -> Tuple.of(this.map(rs), otherMapper.map(rs));
         }
 
     }
@@ -177,7 +158,7 @@ public interface RowMapper<R> {
 
         @Override
         default <X> RowMapper.Pentupled<T, U, V, W, X> combinedWith(RowMapper<X> otherMapper) {
-            return (rs, n) -> Tuple.of(this.fromResultSet(rs, n), otherMapper.fromResultSet(rs, n));
+            return rs -> Tuple.of(this.map(rs), otherMapper.map(rs));
         }
 
     }
@@ -206,7 +187,7 @@ public interface RowMapper<R> {
 
         @Override
         default <Z> RowMapper.Hextupled<T, U, V, W, X, Z> combinedWith(RowMapper<Z> otherMapper) {
-            return (rs, n) -> Tuple.of(this.fromResultSet(rs, n), otherMapper.fromResultSet(rs, n));
+            return rs -> Tuple.of(this.map(rs), otherMapper.map(rs));
         }
 
     }
@@ -235,7 +216,7 @@ public interface RowMapper<R> {
 
         @Override
         default <A> Septupled<T, U, V, W, X, Z, A> combinedWith(RowMapper<A> otherMapper) {
-            return (rs, n) -> Tuple.of(this.fromResultSet(rs, n), otherMapper.fromResultSet(rs, n));
+            return rs -> Tuple.of(this.map(rs), otherMapper.map(rs));
         }
 
     }
@@ -265,7 +246,7 @@ public interface RowMapper<R> {
 
         @Override
         default <B> Octupled<T, U, V, W, X, Z, A, B> combinedWith(RowMapper<B> otherMapper) {
-            return (rs, n) -> Tuple.of(this.fromResultSet(rs, n), otherMapper.fromResultSet(rs, n));
+            return rs -> Tuple.of(this.map(rs), otherMapper.map(rs));
         }
 
     }
@@ -296,7 +277,7 @@ public interface RowMapper<R> {
 
         @Override
         default <C> Nonupled<T, U, V, W, X, Z, A, B, C> combinedWith(RowMapper<C> otherMapper) {
-            return (rs, n) -> Tuple.of(this.fromResultSet(rs, n), otherMapper.fromResultSet(rs, n));
+            return rs -> Tuple.of(this.map(rs), otherMapper.map(rs));
         }
 
     }
@@ -328,7 +309,7 @@ public interface RowMapper<R> {
 
         @Override
         default <D> Decupled<T, U, V, W, X, Z, A, B, C, D> combinedWith(RowMapper<D> otherMapper) {
-            return (rs, n) -> Tuple.of(this.fromResultSet(rs, n), otherMapper.fromResultSet(rs, n));
+            return rs -> Tuple.of(this.map(rs), otherMapper.map(rs));
         }
 
     }
