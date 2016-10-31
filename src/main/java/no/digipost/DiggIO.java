@@ -17,9 +17,13 @@ package no.digipost;
 
 import no.digipost.function.ThrowingConsumer;
 import no.digipost.function.ThrowingFunction;
+import no.digipost.io.LimitedInputStream;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static no.digipost.DiggExceptions.asUnchecked;
 
@@ -61,6 +65,20 @@ public final class DiggIO {
                 throw asUnchecked(e);
             }
         };
+    }
+
+
+   /**
+    * Limit the number of bytes to be read from an {@link InputStream}. If the number of bytes exceeds the given threshold, an exception
+    * will be thrown.
+    *
+    * @param inputStream The {@code InputStream} to limit bytes to read from.
+    * @param maxBytesToRead The limit in bytes.
+    * @param throwIfTooManyBytes Supplier of exception to throw if more bytes are read than the max allowed. If the supplier returns
+    *                            a non-{@link RuntimeException} which is <em>not</em> an {@link IOException}, it will be wrapped in a {@code RuntimeException}.
+    */
+    public static InputStream limit(InputStream inputStream, long maxBytesToRead, Supplier<? extends Exception> throwIfTooManyBytes) {
+        return new LimitedInputStream(inputStream, maxBytesToRead, throwIfTooManyBytes);
     }
 
     private DiggIO() {}

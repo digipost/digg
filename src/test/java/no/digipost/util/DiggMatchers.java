@@ -20,11 +20,37 @@ import org.hamcrest.Description;
 import org.hamcrest.Matcher;
 import org.hamcrest.TypeSafeDiagnosingMatcher;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.NotSerializableException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 
 import static org.hamcrest.Matchers.equalTo;
 
 public final class DiggMatchers {
+
+    public static Matcher<Exception> hasCause(Matcher<? extends Throwable> causeMatcher) {
+        return new TypeSafeDiagnosingMatcher<Exception>() {
+
+            @Override
+            public void describeTo(Description description) {
+                description.appendText("cause should ").appendDescriptionOf(causeMatcher);
+            }
+
+            @Override
+            protected boolean matchesSafely(Exception e, Description mismatchDescription) {
+                Throwable cause = e.getCause();
+                boolean matches = causeMatcher.matches(cause);
+                if (!matches) {
+                    mismatchDescription.appendValue(e).appendText(" had cause ").appendValue(cause);
+                }
+                return matches;
+            }
+        };
+    }
 
     public static Matcher<Serializable> isEffectivelySerializable() {
         return new TypeSafeDiagnosingMatcher<Serializable>() {
