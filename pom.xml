@@ -109,10 +109,22 @@
             <artifactId>mockrunner-jdbc</artifactId>
             <version>1.1.2</version>
             <scope>test</scope>
+            <exclusions>
+                <exclusion>
+                    <groupId>commons-logging</groupId>
+                    <artifactId>commons-logging</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
+            <version>1.7.21</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>jcl-over-slf4j</artifactId>
             <version>1.7.21</version>
             <scope>test</scope>
         </dependency>
@@ -282,6 +294,7 @@
                             <failOnWarning>true</failOnWarning>
                             <usedDependencies>
                                 <usedDependency>org.slf4j:slf4j-simple</usedDependency>
+                                <usedDependency>org.slf4j:jcl-over-slf4j</usedDependency>
                             </usedDependencies>
                         </configuration>
                     </execution>
