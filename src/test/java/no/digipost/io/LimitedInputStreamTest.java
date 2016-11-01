@@ -30,6 +30,7 @@ import java.util.function.Supplier;
 import static com.google.common.io.ByteStreams.toByteArray;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static no.digipost.DiggIO.limit;
+import static no.digipost.io.DataSize.bytes;
 import static no.digipost.util.DiggMatchers.hasCause;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.equalTo;
@@ -76,11 +77,11 @@ public class LimitedInputStreamTest {
         final InputStream limitedInputStream1;
         final InputStream limitedInputStream2;
         if (throwIfTooManyBytes == null) {
-            limitedInputStream1 = limit(new ByteArrayInputStream(contentBytes), contentBytes.length, () -> { throw new AssertionError("Not expected to fail"); });
-            limitedInputStream2 = limit(new ByteArrayInputStream(contentBytes), contentBytes.length, () -> { throw new AssertionError("Not expected to fail"); });
+            limitedInputStream1 = limit(new ByteArrayInputStream(contentBytes), bytes(contentBytes.length), () -> { throw new AssertionError("Not expected to fail"); });
+            limitedInputStream2 = limit(new ByteArrayInputStream(contentBytes), bytes(contentBytes.length), () -> { throw new AssertionError("Not expected to fail"); });
         } else {
-            limitedInputStream1 = limit(new ByteArrayInputStream(contentBytes), contentBytes.length - 1, throwIfTooManyBytes);
-            limitedInputStream2 = limit(new ByteArrayInputStream(contentBytes), contentBytes.length - 1, throwIfTooManyBytes);
+            limitedInputStream1 = limit(new ByteArrayInputStream(contentBytes), bytes(contentBytes.length - 1), throwIfTooManyBytes);
+            limitedInputStream2 = limit(new ByteArrayInputStream(contentBytes), bytes(contentBytes.length - 1), throwIfTooManyBytes);
         }
 
         Exception e1 = null;

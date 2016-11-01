@@ -32,7 +32,7 @@ import static no.digipost.DiggExceptions.asUnchecked;
  */
 public final class LimitedInputStream extends FilterInputStream implements Closeable {
 
-    private final long sizeMax;
+    private final DataSize sizeMax;
 
     private final Supplier<? extends Exception> throwIfTooManyBytes;
 
@@ -42,9 +42,9 @@ public final class LimitedInputStream extends FilterInputStream implements Close
     /**
      * @see no.digipost.DiggIO#limit(InputStream, long, Supplier)
      */
-    public LimitedInputStream(InputStream inputStream, long maxBytesToRead, Supplier<? extends Exception> throwIfTooManyBytes) {
+    public LimitedInputStream(InputStream inputStream, DataSize maxDataToRead, Supplier<? extends Exception> throwIfTooManyBytes) {
         super(inputStream);
-        this.sizeMax = maxBytesToRead;
+        this.sizeMax = maxDataToRead;
         this.throwIfTooManyBytes = throwIfTooManyBytes;
     }
 
@@ -111,7 +111,7 @@ public final class LimitedInputStream extends FilterInputStream implements Close
 
 
     private void checkLimit() throws IOException {
-        if (count > sizeMax) {
+        if (count > sizeMax.toBytes()) {
             Exception tooManyBytes = throwIfTooManyBytes.get();
             if (tooManyBytes instanceof IOException) {
                 throw (IOException) tooManyBytes;

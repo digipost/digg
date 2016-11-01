@@ -52,6 +52,11 @@ public enum DataSizeUnit {
      */
     public static final DataSizeUnit MB = MEGABYTES;
 
+    /**
+     * Alias for {@link #GIGABYTES}
+     */
+    public static final DataSizeUnit GB = GIGABYTES;
+
 
 
     private final int numberOfBytes;

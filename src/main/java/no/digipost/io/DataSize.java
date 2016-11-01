@@ -19,6 +19,7 @@ import java.io.Serializable;
 import java.util.Objects;
 
 import static no.digipost.io.DataSizeUnit.BYTES;
+import static no.digipost.io.DataSizeUnit.GIGABYTES;
 import static no.digipost.io.DataSizeUnit.KILOBYTES;
 import static no.digipost.io.DataSizeUnit.MEGABYTES;
 
@@ -50,6 +51,10 @@ public final class DataSize implements Serializable, Comparable<DataSize> {
 
     public static DataSize MB(long value) {
         return of(value, MEGABYTES);
+    }
+
+    public static DataSize GB(long value) {
+        return of(value, GIGABYTES);
     }
 
 

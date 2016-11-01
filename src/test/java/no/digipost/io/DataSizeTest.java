@@ -20,6 +20,7 @@ import com.pholser.junit.quickcheck.generator.InRange;
 import com.pholser.junit.quickcheck.generator.ValuesOf;
 import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import nl.jqno.equalsverifier.EqualsVerifier;
+import no.digipost.tuple.Tuple;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -30,15 +31,21 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import java.util.function.LongFunction;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toCollection;
 import static no.digipost.io.DataSize.bytes;
 import static no.digipost.io.DataSize.kB;
+import static no.digipost.io.DataSizeUnit.B;
 import static no.digipost.io.DataSizeUnit.BYTES;
+import static no.digipost.io.DataSizeUnit.GB;
 import static no.digipost.io.DataSizeUnit.GIGABYTES;
+import static no.digipost.io.DataSizeUnit.KILOBYTES;
+import static no.digipost.io.DataSizeUnit.MB;
 import static no.digipost.io.DataSizeUnit.MEGABYTES;
 import static no.digipost.io.DataSizeUnit.kB;
+import static no.digipost.tuple.Tuple.of;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
@@ -60,6 +67,21 @@ public class DataSizeTest {
     public void convertFromDifferentUnits() {
         assertThat(kB(1), is(bytes(1_024)));
         assertThat(DataSize.MB(2), both(is(kB(2_048))).and(is(bytes(2_097_152))));
+    }
+
+    @Test
+    public void factoryMethodsCorrectlyCorrespondsToUnits() {
+        Stream.<Tuple<LongFunction<DataSize>, DataSizeUnit>>of(
+                of(DataSize::bytes, B),
+                of(DataSize::bytes, BYTES),
+                of(DataSize::kB, kB),
+                of(DataSize::kB, KILOBYTES),
+                of(DataSize::MB, MB),
+                of(DataSize::MB, MEGABYTES),
+                of(DataSize::GB, GB),
+                of(DataSize::GB, GIGABYTES))
+            .map(t -> t.mapFirst(factory -> factory.apply(1)))
+            .forEach(t -> assertThat(t.first() + " is the unit size of " + t.second(), t.first().toBytes(), is(t.second().asBytes(1))));
     }
 
     @Property
