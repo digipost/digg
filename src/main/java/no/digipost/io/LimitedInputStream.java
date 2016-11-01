@@ -40,7 +40,7 @@ public final class LimitedInputStream extends FilterInputStream implements Close
 
 
     /**
-     * @see no.digipost.DiggIO#limit(InputStream, long, Supplier)
+     * @see no.digipost.DiggIO#limit(InputStream, DataSize, Supplier)
      */
     public LimitedInputStream(InputStream inputStream, DataSize maxDataToRead, Supplier<? extends Exception> throwIfTooManyBytes) {
         super(inputStream);
