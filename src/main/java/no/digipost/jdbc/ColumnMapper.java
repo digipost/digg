@@ -63,12 +63,4 @@ public interface ColumnMapper<R> {
         return new AttributeMapper<R>(attribute, this);
     }
 
-    /**
-     * @deprecated Use {@link #forColumn(Attribute)} instead.
-     */
-    @Deprecated
-    default AttributeMapper<R> forAttribute(Attribute<R> attribute) {
-        return forColumn(attribute);
-    }
-
 }
