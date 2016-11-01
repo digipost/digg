@@ -16,7 +16,12 @@
 package no.digipost.time;
 
 import java.io.Serializable;
-import java.time.*;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
@@ -44,7 +49,7 @@ public final class ControllableClock extends Clock implements TimeControllable, 
      * @return the new {@code ControllableClock}
      */
     public static ControllableClock freezedAt(LocalDateTime dateTime) {
-        return new ControllableClock(dateTime);
+        return freezedAt(dateTime.atZone(ZoneId.systemDefault()));
     }
 
 
@@ -58,7 +63,7 @@ public final class ControllableClock extends Clock implements TimeControllable, 
      * @return the new {@code ControllableClock}
      */
     public static ControllableClock freezedAt(ZonedDateTime dateTime) {
-        return new ControllableClock(dateTime);
+        return control(Clock.fixed(dateTime.toInstant(), dateTime.getZone()));
     }
 
 
@@ -73,7 +78,7 @@ public final class ControllableClock extends Clock implements TimeControllable, 
      * @return the new {@code ControllableClock}
      */
     public static ControllableClock freezedAt(Instant instant) {
-        return new ControllableClock(instant);
+        return control(Clock.fixed(instant, ZoneId.systemDefault()));
     }
 
 
@@ -86,7 +91,7 @@ public final class ControllableClock extends Clock implements TimeControllable, 
      * @return the new {@code ControllableClock}
      */
     public static ControllableClock freezedAt(Instant instant, ZoneId zone) {
-        return new ControllableClock(instant, zone);
+        return control(Clock.fixed(instant, zone));
     }
 
 
@@ -109,43 +114,7 @@ public final class ControllableClock extends Clock implements TimeControllable, 
 
     private final AtomicReference<Clock> delegate;
 
-    /**
-     * @deprecated Use {@link #freezedAt(Instant)} instead.
-     */
-    @Deprecated
-    public ControllableClock(Instant fixedNow) {
-        this(fixedNow, ZoneId.systemDefault());
-    }
-
-    /**
-     * @deprecated Use {@link #freezedAt(LocalDateTime)} instead.
-     */
-    @Deprecated
-    public ControllableClock(LocalDateTime fixedNow) {
-        this(fixedNow.atZone(ZoneId.systemDefault()));
-    }
-
-    /**
-     * @deprecated Use {@link #freezedAt(ZonedDateTime)} instead.
-     */
-    @Deprecated
-    public ControllableClock(ZonedDateTime fixedNow) {
-        this(fixedNow.toInstant(), fixedNow.getZone());
-    }
-
-    /**
-     * @deprecated Use {@link #freezedAt(Instant, ZoneId)} instead.
-     */
-    @Deprecated
-    public ControllableClock(Instant fixedNow, ZoneId zone) {
-        this(Clock.fixed(fixedNow, zone));
-    }
-
-    /**
-     * @deprecated Use {@link #control(Clock)} instead.
-     */
-    @Deprecated
-    public ControllableClock(Clock delegate) {
+    private ControllableClock(Clock delegate) {
         this.delegate = new AtomicReference<>(delegate);
     }
 
