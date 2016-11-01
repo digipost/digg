@@ -17,7 +17,7 @@ _Digg_ is available in [![Maven Central Repository](https://maven-badges.herokua
 <dependency>
     <groupId>no.digipost</groupId>
     <artifactId>digg</artifactId>
-    <version>0.9</version>
+    <version>0.10</version>
 </dependency>
 ```
 
