@@ -30,7 +30,7 @@
     </parent>
 
     <artifactId>digg</artifactId>
-    <version>0.12</version>
+    <version>1.0-SNAPSHOT</version>
     <name>Digipost Digg</name>
     <description>Some stellar general purpose utils.</description>
     <url>https://github.com/digipost/digg/</url>
@@ -319,7 +319,7 @@
         <connection>scm:git:git@github.com:digipost/digg.git</connection>
         <developerConnection>scm:git:git@github.com:digipost/digg.git</developerConnection>
         <url>https://github.com/digipost/digg/</url>
-        <tag>0.12</tag>
+        <tag>HEAD</tag>
     </scm>
 
 </project>
