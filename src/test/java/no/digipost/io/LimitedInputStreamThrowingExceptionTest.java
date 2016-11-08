@@ -39,7 +39,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
 
-public class LimitedInputStreamTest {
+public class LimitedInputStreamThrowingExceptionTest {
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -74,14 +74,15 @@ public class LimitedInputStreamTest {
 
     private String testLimitedStream(String content, Supplier<? extends Exception> throwIfTooManyBytes) throws Exception {
         final byte[] contentBytes = content.getBytes(UTF_8);
+        DataSize contentSize = DataSize.bytes(contentBytes.length);
         final InputStream limitedInputStream1;
         final InputStream limitedInputStream2;
         if (throwIfTooManyBytes == null) {
-            limitedInputStream1 = limit(new ByteArrayInputStream(contentBytes), bytes(contentBytes.length), () -> { throw new AssertionError("Not expected to fail"); });
-            limitedInputStream2 = limit(new ByteArrayInputStream(contentBytes), bytes(contentBytes.length), () -> { throw new AssertionError("Not expected to fail"); });
+            limitedInputStream1 = limit(new ByteArrayInputStream(contentBytes), contentSize, () -> { throw new AssertionError("Not expected to fail"); });
+            limitedInputStream2 = limit(new ByteArrayInputStream(contentBytes), contentSize, () -> { throw new AssertionError("Not expected to fail"); });
         } else {
-            limitedInputStream1 = limit(new ByteArrayInputStream(contentBytes), bytes(contentBytes.length - 1), throwIfTooManyBytes);
-            limitedInputStream2 = limit(new ByteArrayInputStream(contentBytes), bytes(contentBytes.length - 1), throwIfTooManyBytes);
+            limitedInputStream1 = limit(new ByteArrayInputStream(contentBytes), bytes(contentSize.toBytes() - 1), throwIfTooManyBytes);
+            limitedInputStream2 = limit(new ByteArrayInputStream(contentBytes), bytes(contentSize.toBytes() - 1), throwIfTooManyBytes);
         }
 
         Exception e1 = null;
@@ -95,12 +96,8 @@ public class LimitedInputStreamTest {
         Exception e2 = null;
         String readUsingSingleBytes = null;
         try (InputStream toRead = limitedInputStream2) {
-            int next;
-            ByteBuffer byteBuffer = ByteBuffer.allocate(contentBytes.length);
-            while ((next = toRead.read()) != -1) {
-                byteBuffer.put((byte) next);
-            }
-            readUsingSingleBytes = new String(byteBuffer.array(), UTF_8);
+            byte[] readBytes = toByteArrayUsingSingleByteReads(toRead, contentSize);
+            readUsingSingleBytes = new String(readBytes, UTF_8);
         } catch (Exception e) {
             e2 = e;
         }
@@ -114,5 +111,18 @@ public class LimitedInputStreamTest {
             return readUsingByteBuffers;
         }
 
+    }
+
+    static byte[] toByteArrayUsingSingleByteReads(InputStream toRead, DataSize amountToRead) throws IOException {
+        int next;
+        ByteBuffer byteBuffer = ByteBuffer.allocate((int) amountToRead.toBytes());
+        while ((next = toRead.read()) != -1) {
+            if (!byteBuffer.hasRemaining()) {
+                break;
+            }
+            byteBuffer.put((byte) next);
+        }
+        byte[] readBytes = byteBuffer.array();
+        return readBytes;
     }
 }

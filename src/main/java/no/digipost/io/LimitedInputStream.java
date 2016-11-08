@@ -28,14 +28,33 @@ import static no.digipost.DiggExceptions.asUnchecked;
  * <p>
  * This class is based on the
  * <a href="https://commons.apache.org/proper/commons-fileupload/apidocs/org/apache/commons/fileupload/util/LimitedInputStream.html">LimitedInputStream from Apache Commons Fileupload</a> (v1.3.2),
- * which has the license as the Digg library, <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a>.
+ * which has the license as the Digg library, <a href="http://www.apache.org/licenses/LICENSE-2.0">Apache License 2.0</a>, but also supports
+ * to {@link #SILENTLY_EOF_ON_REACHING_LIMIT silently treat the limit as EOF} without any signal to distinguish between the EOF of the wrapped stream and
+ * the <em>limited</em> stream.
  */
 public final class LimitedInputStream extends FilterInputStream implements Closeable {
 
-    private final DataSize sizeMax;
+    private static final class SilentlyEofWhenReachingLimit implements Supplier<Exception> {
+        @Override
+        public Exception get() {
+            throw new UnsupportedOperationException("Should not call get() on instance of " + SilentlyEofWhenReachingLimit.class.getSimpleName() + ", this indicates a bug.");
+        }
+        private SilentlyEofWhenReachingLimit() {}
+    }
 
+    /**
+     * Supply this instead of an {@link Supplier exception supplier} as parameter when contructing
+     * a new {@code LimitedInputStream} to instruct it to
+     * treat the limit as an ordinary EOF, and <em>not</em> throw any exception to signal that the
+     * limit was reached during consumption of the stream.
+     * <p>
+     * Invoking {@link Supplier#get() get()} on this will throw an exception.
+     */
+    public static final Supplier<Exception> SILENTLY_EOF_ON_REACHING_LIMIT = new SilentlyEofWhenReachingLimit();
+
+
+    private final DataSize limit;
     private final Supplier<? extends Exception> throwIfTooManyBytes;
-
     private long count;
 
 
@@ -44,7 +63,7 @@ public final class LimitedInputStream extends FilterInputStream implements Close
      */
     public LimitedInputStream(InputStream inputStream, DataSize maxDataToRead, Supplier<? extends Exception> throwIfTooManyBytes) {
         super(inputStream);
-        this.sizeMax = maxDataToRead;
+        this.limit = maxDataToRead;
         this.throwIfTooManyBytes = throwIfTooManyBytes;
     }
 
@@ -71,7 +90,9 @@ public final class LimitedInputStream extends FilterInputStream implements Close
         int res = super.read();
         if (res != -1) {
             count++;
-            checkLimit();
+            if (hasReachedLimit()) {
+                return -1;
+            }
         }
         return res;
     }
@@ -104,20 +125,27 @@ public final class LimitedInputStream extends FilterInputStream implements Close
         int res = super.read(b, off, len);
         if (res > 0) {
             count += res;
-            checkLimit();
+            if (hasReachedLimit()) {
+                return -1;
+            }
         }
         return res;
     }
 
 
-    private void checkLimit() throws IOException {
-        if (count > sizeMax.toBytes()) {
+    private boolean hasReachedLimit() throws IOException {
+        if (count > limit.toBytes()) {
+            if (throwIfTooManyBytes == SILENTLY_EOF_ON_REACHING_LIMIT) {
+                return true;
+            }
             Exception tooManyBytes = throwIfTooManyBytes.get();
             if (tooManyBytes instanceof IOException) {
                 throw (IOException) tooManyBytes;
             } else {
                 throw asUnchecked(tooManyBytes);
             }
+        } else {
+            return false;
         }
     }
 

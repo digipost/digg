@@ -68,6 +68,21 @@ public final class DiggIO {
         };
     }
 
+    /**
+     * Limit the number of bytes to be read from an {@link InputStream}. The returned stream silently ends reading, i.e. returns
+     * {@code -1} from {@link InputStream#read() .read()}, if the read bytes exceeds the given threshold. This behavior is appropriate
+     * when it is actually <em>not desireable to consume the entire stream</em>, typically for processing some data known to be located in the leading
+     * part of the stream, and it is imperative to protect against accidentally consuming an entire (potentially large) stream.
+     *
+     * @param inputStream The {@code InputStream} to limit bytes to read from.
+     * @param maxDataToRead The limit of data to read.
+     *
+     * @see #limit(InputStream, DataSize, Supplier)
+     */
+     public static InputStream limit(InputStream inputStream, DataSize maxDataToRead) {
+         return new LimitedInputStream(inputStream, maxDataToRead, LimitedInputStream.SILENTLY_EOF_ON_REACHING_LIMIT);
+     }
+
 
    /**
     * Limit the number of bytes to be read from an {@link InputStream}. If the number of bytes exceeds the given threshold, an exception
@@ -81,6 +96,8 @@ public final class DiggIO {
     public static InputStream limit(InputStream inputStream, DataSize maxDataToRead, Supplier<? extends Exception> throwIfTooManyBytes) {
         return new LimitedInputStream(inputStream, maxDataToRead, throwIfTooManyBytes);
     }
+
+
 
     private DiggIO() {}
 }
