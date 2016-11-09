@@ -32,7 +32,9 @@ import static java.util.Optional.ofNullable;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 @RunWith(JUnitQuickcheck.class)
@@ -120,5 +122,23 @@ public class OneTimeAssignmentTest {
         assignments.limit(concurrentAssignments).parallel().forEach(CompletableFuture::runAsync);
         expectedFails.await();
         assertThat(x.get(), is("x"));
+    }
+
+    @Test
+    public void askIfAValueHasBeenSet() {
+        OneTimeAssignment<String> assignment = OneTimeAssignment.newInstance();
+        OneTimeAssignment<String> assignmentWithDefault = OneTimeAssignment.defaultTo("x");
+
+
+        assertFalse(assignment.isSet());
+        assertFalse(assignment.isSet());
+        assertFalse(assignmentWithDefault.isSet());
+        assertFalse(assignmentWithDefault.isSet());
+
+        assignment.set("x");
+        assertTrue(assignment.isSet());
+
+        assignmentWithDefault.get();
+        assertTrue(assignmentWithDefault.isSet());
     }
 }

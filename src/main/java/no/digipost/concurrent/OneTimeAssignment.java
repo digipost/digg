@@ -86,6 +86,20 @@ public final class OneTimeAssignment<V> implements Assignment<V> {
     }
 
     /**
+     * Determine if this {@code OneTimeAssignment} has been set, either by using {@link #set(Object)}
+     * or implicitly by a {@link OneTimeAssignment#defaultTo(Supplier) default value}, triggered with a call to {@link #get()}.
+     * <p>
+     * For sake of clarity, an invocation of this method does <em>never</em> implicitly assign any default value. An assignment
+     * with <em>no</em> default value <em>requires</em> an invocation of {@link #set(Object)} for this method to return {@code true}.
+     *
+     * @return {@code true} if the assignment has a value, {@code false} if it has not been assigned yet.
+     */
+    public boolean isSet() {
+        return ref.get() != UNASSIGNED;
+    }
+
+
+    /**
      * @return the referenced value. If the reference has not yet been set but is
      *         {@link #defaultTo(Supplier) initialized with a default value},
      *         the reference is assigned the default value and this is returned.
