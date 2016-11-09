@@ -11,13 +11,13 @@ The term _"digg"_ is Norwegian jargon for tasty stuff, like candy.
 
 ## Getting Digg
 
-_Digg_ is available in [![Maven Central Repository](https://maven-badges.herokuapp.com/maven-central/no.digipost/digg/badge.svg)](https://maven-badges.herokuapp.com/maven-central/no.digipost/digg), and can be acquired using your favorite build/dependency management tool. If you are using Maven, you would include the following in your `pom.xml` file:
+_Digg_ is available in [![Maven Central Repository](https://maven-badges.herokuapp.com/maven-central/no.digipost/digg/badge.svg?style=flat-square)](https://maven-badges.herokuapp.com/maven-central/no.digipost/digg), and can be acquired using your favorite build/dependency management tool. If you are using Maven, you would include the following in your `pom.xml` file:
 
 ```xml
 <dependency>
     <groupId>no.digipost</groupId>
     <artifactId>digg</artifactId>
-    <version>0.11</version>
+    <version>0.12</version>
 </dependency>
 ```
 
