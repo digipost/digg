@@ -16,18 +16,24 @@
 package no.digipost.io;
 
 import no.digipost.DiggExceptions;
+import no.digipost.concurrent.OneTimeToggle;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.PipedInputStream;
+import java.io.PipedOutputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
  * An {@link InputStream} getting its contents from consuming an {@link OutputStream}.
  * The InputStream will be immediately available for reading after construction, regardless
- * of how much data that will be produced by the OutputStream.
+ * of how much data that will be produced by the OutputStream. This class abstracts the use
+ * of a {@link PipedInputStream} and a {@link PipedOutputStream}, hiding the
+ * complexities required to orchestrate this multithreaded combination of streams.
  */
 public class ConsumingInputStream extends InputStream {
 
@@ -36,23 +42,33 @@ public class ConsumingInputStream extends InputStream {
 
     private final Future<?> producing;
 
-    private final AtomicBoolean attemptToCloseInputStream = new AtomicBoolean(false);
+    private final OneTimeToggle attemptToCloseInputStream = new OneTimeToggle();
 
 
 
+    /**
+     * Create a new {@link ConsumingInputStream} which will provide data once they are written to an
+     * {@link OutputStream} passed to the given {@link Consumer}.
+     *
+     * @param executorService The executorService to use to start producing data which will be readable by this inputstream.
+     * @param write The data producing logic. The {@link Consumer} will be given the <code>OutputStream</code< resulting from the
+     *              <code>outputStreamDecorator</code>.
+     */
     public ConsumingInputStream(ExecutorService executorService, Consumer<? super OutputStream> write) {
         this(executorService, o -> o, write);
     }
 
 
     /**
+     * Create a new {@link ConsumingInputStream} which will provide data once they are written to an
+     * {@link OutputStream} passed to the given {@link Consumer}.
      *
      * @param executorService The executorService to use to start producing data which will be readable by this inputstream.
-     * @param outputStreamDecorator An {@link Fn} to wrap the outputstream to push data to. This <code>Fn</code> must
-     *                              <em>always</em> wrap the given OutputStream in the OutputStream returned from this <code>Fn</code>,
+     * @param outputStreamDecorator A {@link Function} to wrap the outputstream to push data to. This <code>Function</code> must
+     *                              <em>always</em> wrap the given OutputStream in the OutputStream returned from this <code>Function</code>,
      *                              i.e. the resulting OutputStream must be constructed by wrapping the given OutputStream as
-     *                              a constructor argument. (E.g. <code>new ZipOutputStream(givenOutputStream)</code>.
-     * @param write The data producing logic. This {@link Do} will be given the OutputStream resulting from the
+     *                              a constructor argument. (E.g. <code>ZipOutputStream::new</code>.
+     * @param write The data producing logic. The {@link Consumer} will be given the <code>OutputStream</code< resulting from the
      *              <code>outputStreamDecorator</code>.
      */
     public <S extends OutputStream> ConsumingInputStream(ExecutorService executorService, Function<OutputStream, S> outputStreamDecorator, Consumer<? super S> write) {
@@ -79,7 +95,7 @@ public class ConsumingInputStream extends InputStream {
     public void close() throws IOException {
         try {
             failIfProducerFailed();
-            attemptToCloseInputStream.set(true);
+            attemptToCloseInputStream.now();
             if (!producing.isDone()) {
                 producing.cancel(true);
             }
@@ -185,7 +201,7 @@ public class ConsumingInputStream extends InputStream {
                         outputPipe.close();
                     }
                 } catch (IOException e) {
-                    if (attemptToCloseInputStream.get()) {
+                    if (attemptToCloseInputStream.yet()) {
                         return;
                     }
                     throw DiggExceptions.asUnchecked(e);
