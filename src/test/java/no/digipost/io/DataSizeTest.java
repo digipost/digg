@@ -35,6 +35,7 @@ import java.util.function.LongFunction;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toCollection;
+import static no.digipost.io.DataSize.ZERO;
 import static no.digipost.io.DataSize.bytes;
 import static no.digipost.io.DataSize.kB;
 import static no.digipost.io.DataSizeUnit.B;
@@ -49,8 +50,11 @@ import static no.digipost.tuple.Tuple.of;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 
 @RunWith(JUnitQuickcheck.class)
 public class DataSizeTest {
@@ -127,12 +131,36 @@ public class DataSizeTest {
     }
 
     @Test
-    public void theUnitsIncreaseByFactorsOf1024() {
+    public void theUnitsIncreasedByFactorsOf1024() {
         Optional<DataSizeUnit> biggestUnit = Stream.of(DataSizeUnit.values()).reduce((smallerUnit, biggerUnit) -> {
                 assertThat(smallerUnit.asBytes(1024), is(biggerUnit.asBytes(1)));
                 return biggerUnit;
             });
         assertThat(biggestUnit.get(), is(GIGABYTES));
+    }
+
+    @Property
+    public void arithemtic(@InRange(minInt=0, maxInt=2048) int originalSize, @ValuesOf DataSizeUnit unit, @InRange(minInt=1) int deltaBytes) {
+        DataSize original = DataSize.of(originalSize, unit);
+        DataSize delta = DataSize.bytes(deltaBytes);
+        DataSize newSize = original.plus(delta);
+        assertThat(newSize, not(original));
+        assertTrue(newSize.isMoreThan(original));
+        assertTrue(newSize.isSameOrMoreThan(original));
+        assertFalse(newSize.isSameOrLessThan(original));
+        assertTrue(original.isLessThan(newSize));
+        assertTrue(original.isSameOrLessThan(newSize));
+        assertFalse(original.isSameOrMoreThan(newSize));
+        assertThat(newSize.minus(delta), is(original));
+        assertTrue(newSize.minus(delta).isSameOrLessThan(original));
+        assertTrue(newSize.minus(delta).isSameOrMoreThan(original));
+    }
+
+    @Property
+    public void addOrSubtractZeroYieldsSameInstance(@InRange(minInt=0) int byteSize) {
+        DataSize size = DataSize.bytes(byteSize);
+        assertThat(size.plus(ZERO), sameInstance(size));
+        assertThat(size.minus(ZERO), sameInstance(size));
     }
 
 }

@@ -65,6 +65,30 @@ public final class DataSize implements Serializable, Comparable<DataSize> {
         this.bytes = bytes;
     }
 
+    public DataSize plus(DataSize otherSize) {
+        return otherSize.bytes != 0 ? DataSize.bytes(this.bytes + otherSize.bytes) : this;
+    }
+
+    public DataSize minus(DataSize otherSize) {
+        return otherSize.bytes != 0 ? DataSize.bytes(this.bytes - otherSize.bytes) : this;
+    }
+
+    public boolean isMoreThan(DataSize otherSize) {
+        return this.bytes > otherSize.bytes;
+    }
+
+    public boolean isSameOrMoreThan(DataSize otherSize) {
+        return ! isLessThan(otherSize);
+    }
+
+    public boolean isLessThan(DataSize otherSize) {
+        return this.bytes < otherSize.bytes;
+    }
+
+    public boolean isSameOrLessThan(DataSize otherSize) {
+        return ! isMoreThan(otherSize);
+    }
+
     public double get(DataSizeUnit unit) {
         return unit.fromBytes(bytes);
     }
