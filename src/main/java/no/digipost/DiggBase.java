@@ -15,6 +15,9 @@
  */
 package no.digipost;
 
+import no.digipost.function.ThrowingConsumer;
+import no.digipost.util.AutoClosed;
+
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Optional;
@@ -180,6 +183,15 @@ public final class DiggBase {
         return extract(object, extractors).filter(Optional::isPresent).map(Optional::get);
     }
 
+
+    public static <T, X extends Exception> AutoClosed<T, X> autoClose(T object, ThrowingConsumer<? super T, X> closeOperation) {
+        return new AutoClosed<T, X>(object, closeOperation);
+    }
+
+
     private DiggBase() {}
+
+
+
 
 }
