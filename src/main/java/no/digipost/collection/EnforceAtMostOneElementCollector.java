@@ -22,7 +22,11 @@ import no.digipost.util.ViewableAsOptional;
 import java.util.EnumSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.*;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collector;
 
 import static java.util.Collections.unmodifiableSet;
@@ -50,11 +54,13 @@ public class EnforceAtMostOneElementCollector<T> implements Collector<T, OneTime
     @Override
     public BinaryOperator<OneTimeAssignment<T>> combiner() {
         return (a1, a2) -> {
-            T a2Value = a2.get();
-            if (a2Value != null) {
-                trySet(a1, a2Value);
+            if (a1.isSet() && a2.isSet()) {
+                throw exceptionOnExcessiveElements.apply(a1.get(), a2.get());
+            } else if (a1.isSet()) {
+                return a1;
+            } else {
+                return a2;
             }
-            return a1;
         };
     }
 
