@@ -163,6 +163,29 @@
                     </configuration>
                 </plugin>
                 <plugin>
+                    <artifactId>maven-enforcer-plugin</artifactId>
+                    <version>3.0.0-M1</version>
+                    <configuration>
+                        <rules>
+                            <requireMavenVersion>
+                                <version>3.0.3</version>
+                            </requireMavenVersion>
+                            <bannedDependencies>
+                                <excludes>
+                                    <exclude>*:*</exclude>
+                                </excludes>
+                                <includes>
+                                    <include>*:*:*:*:test</include>
+                                </includes>
+                                <searchTransitive>true</searchTransitive>
+                                <message>
+                                    Only test dependencies are allowed for this library!
+                                </message>
+                            </bannedDependencies>
+                        </rules>
+                    </configuration>
+                </plugin>
+                <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.8.0</version>
                     <configuration>
