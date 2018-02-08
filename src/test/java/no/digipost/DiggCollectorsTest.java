@@ -103,6 +103,13 @@ public class DiggCollectorsTest {
     public void collectTheValueOfSingleElementStream() {
         assertThat(Stream.of(42).collect(allowAtMostOne()), contains(is(42)));
         assertThat(Stream.empty().collect(allowAtMostOne()), OptionalMatchers.empty());
+        assertThat(Stream.of((String) null).collect(allowAtMostOne()), OptionalMatchers.empty());
+    }
+
+    @Test
+    public void allowAtMostOneFailsEvenIfExcessiveElementsAreNull() {
+        expectedException.expect(ViewableAsOptional.TooManyElements.class);
+        Stream.of("x", null).collect(allowAtMostOne());
     }
 
     @Property
