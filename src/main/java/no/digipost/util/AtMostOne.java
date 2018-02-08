@@ -42,7 +42,7 @@ public interface AtMostOne<T> extends ViewableAsOptional<T> {
             @Override
             public <X extends Throwable> Optional<T> orElse(ThrowingRunnable<X> handleUnexpectedMultipleElements) throws X {
                 Iterator<T> iterator = iterable.iterator();
-                final Optional<T> expected = iterator.hasNext() ? Optional.of(iterator.next()) : Optional.empty();
+                final Optional<T> expected = iterator.hasNext() ? Optional.ofNullable(iterator.next()) : Optional.empty();
                 if (iterator.hasNext()) {
                     handleUnexpectedMultipleElements.run();
                 }
@@ -66,9 +66,10 @@ public interface AtMostOne<T> extends ViewableAsOptional<T> {
     /**
      * Get the at most single contained element, or throw a {@link TooManyElements} exception
      * if there are excessive elements available. If you need control over the thrown exception, use
-     * {@link #orIfExcessiveThrow(Supplier)}
+     * {@link #orIfExcessiveThrow(Supplier)}.
      *
-     * @return The single element if it exists, or {@link Optional#empty()} if no elements exist.
+     * @return The single element if it exists, or else {@link Optional#empty()} if no elements exist or
+     *         the single element is {@code null}.
      */
     @Override
     default Optional<T> toOptional() {

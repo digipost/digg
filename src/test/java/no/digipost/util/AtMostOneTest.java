@@ -48,12 +48,17 @@ public class AtMostOneTest {
     @Test
     public void picksOutFirstElementInSingleElementList() {
         assertThat(AtMostOne.from(singleton("a")).toOptional().get(), is("a"));
+        assertThat(AtMostOne.from(singleton(null)).toOptional(), is(Optional.empty()));
     }
 
     @Test
     public void handleExcessiveElements() {
         OneTimeToggle excessiveElements = new OneTimeToggle();
         AtMostOne.from(asList("a", "b")).orElse(excessiveElements::now);
+        assertTrue(excessiveElements.yet());
+
+        OneTimeToggle excessiveNull = new OneTimeToggle();
+        AtMostOne.from(asList("a", null)).orElse(excessiveNull::now);
         assertTrue(excessiveElements.yet());
     }
 
