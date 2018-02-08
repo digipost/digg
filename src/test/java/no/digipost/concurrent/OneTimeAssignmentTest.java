@@ -15,20 +15,19 @@
  */
 package no.digipost.concurrent;
 
-import com.pholser.junit.quickcheck.Property;
-import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.rules.Timeout;
-import org.junit.runner.RunWith;
+import org.quicktheories.WithQuickTheories;
+import org.quicktheories.api.Subject2;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Stream;
 
-import static java.util.Optional.ofNullable;
+import static co.unruly.matchers.Java8Matchers.where;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
@@ -37,8 +36,7 @@ import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-@RunWith(JUnitQuickcheck.class)
-public class OneTimeAssignmentTest {
+public class OneTimeAssignmentTest implements WithQuickTheories {
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -97,12 +95,18 @@ public class OneTimeAssignmentTest {
         x.set(null);
     }
 
-    @Property
-    public void assignWhenConvertToOptionalForOneTimeAssignmentWithDefaultValue(Object defaultValue) {
-        OneTimeAssignment<?> assignment = OneTimeAssignment.defaultTo(defaultValue);
-        Optional<?> value = assignment.toOptional();
-        assertThat(assignment.get(), is(defaultValue));
-        assertThat(value, is(ofNullable(defaultValue)));
+    @Test
+    public void assignDefaultValue() {
+
+        Subject2<Object, OneTimeAssignment<Object>> initializedWithDefaultValue = qt()
+            .forAll(arbitrary().pick(new Object(), "some string", null))
+            .asWithPrecursor(OneTimeAssignment::defaultTo);
+
+        initializedWithDefaultValue
+            .check((defaultValue, assignment) -> assignment.get() == defaultValue);
+        initializedWithDefaultValue
+            .checkAssert((defaultValue, assignment) -> assertThat(assignment, where(OneTimeAssignment::toOptional, is(Optional.ofNullable(defaultValue)))));
+
     }
 
     @Test

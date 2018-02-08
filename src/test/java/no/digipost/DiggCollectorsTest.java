@@ -16,9 +16,6 @@
 package no.digipost;
 
 import co.unruly.matchers.OptionalMatchers;
-import com.pholser.junit.quickcheck.Property;
-import com.pholser.junit.quickcheck.When;
-import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import no.digipost.collection.ConflictingElementEncountered;
 import no.digipost.tuple.Tuple;
 import no.digipost.tuple.ViewableAsTuple;
@@ -26,7 +23,8 @@ import no.digipost.util.ViewableAsOptional;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.quicktheories.WithQuickTheories;
+import org.quicktheories.core.Gen;
 
 import java.io.IOException;
 import java.sql.BatchUpdateException;
@@ -57,12 +55,13 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
-@RunWith(JUnitQuickcheck.class)
-public class DiggCollectorsTest {
+public class DiggCollectorsTest implements WithQuickTheories {
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -180,19 +179,39 @@ public class DiggCollectorsTest {
         assertThat(noException, whereNot(Optional::isPresent));
     }
 
-    @Property
-    public void allowAtMostOneFails(@When(satisfies = " #_.size() > 1") List<?> tooManyElements) {
-        expectedException.expect(ViewableAsOptional.TooManyElements.class);
-        tooManyElements.stream().parallel().collect(allowAtMostOne());
+
+    private final Gen<List<String>> listsWithAtLeastTwoElements = lists().of(strings().allPossible().ofLengthBetween(0, 10)).ofSizeBetween(2, 40);
+
+    @Test
+    public void allowAtMostOneFails() {
+        qt()
+            .forAll(listsWithAtLeastTwoElements)
+            .check(list -> {
+                try {
+                    list.stream().parallel().collect(allowAtMostOne());
+                    return false;
+                } catch (ViewableAsOptional.TooManyElements e) {
+                    return true;
+                }
+            });
     }
 
-    @Property
-    public void allowAtMostOneFailsWithCustomException(@When(satisfies = " #_.size() > 1") List<?> tooManyElements) {
-        expectedException.expect(IllegalStateException.class);
-        tooManyElements.stream().collect(allowAtMostOneOrElseThrow((first, excess) -> {
-            assertThat(first, is(tooManyElements.get(0)));
-            assertThat(excess, is(tooManyElements.get(1)));
-            return new IllegalStateException();
-        }));
+    @Test
+    public void allowAtMostOneFailsWithCustomException() {
+        IllegalStateException customException = new IllegalStateException();
+        qt()
+            .forAll(listsWithAtLeastTwoElements)
+            .checkAssert(list -> {
+                try {
+                    list.stream().collect(allowAtMostOneOrElseThrow((first, excess) -> {
+                        assertThat(first, is(list.get(0)));
+                        assertThat(excess, is(list.get(1)));
+                        return customException;
+                    }));
+                    fail("Should have thrown " + customException);
+                } catch (IllegalStateException e) {
+                    assertThat(e, sameInstance(customException));
+                }
+            });
     }
 }

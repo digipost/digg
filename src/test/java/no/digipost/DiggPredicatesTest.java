@@ -15,37 +15,37 @@
  */
 package no.digipost;
 
-import com.pholser.junit.quickcheck.Property;
-import com.pholser.junit.quickcheck.generator.InRange;
-import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
-import org.junit.Rule;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.Test;
+import org.quicktheories.WithQuickTheories;
 
-import java.util.function.Predicate;
-import java.util.stream.Stream;
-
+import static co.unruly.matchers.StreamMatchers.contains;
+import static java.lang.Integer.MIN_VALUE;
+import static java.util.stream.Stream.iterate;
+import static no.digipost.DiggBase.forceOnAll;
 import static no.digipost.DiggPredicates.nth;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertThat;
 
-@RunWith(JUnitQuickcheck.class)
-public class DiggPredicatesTest {
+public class DiggPredicatesTest implements WithQuickTheories {
 
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
-
-    @Property
-    public void yieldsTrueOnGivenInvocationNumber(@InRange(minInt=1, maxInt=1024) int invocationNum) {
-        Predicate<Integer> isNthEvenNumber = nth(invocationNum, t -> t % 2 == 0);
-        Integer nthEvenNumber = Stream.iterate(1, i -> i + 1).limit(invocationNum * 2).filter(isNthEvenNumber).findFirst().get();
-        assertThat(nthEvenNumber, is(invocationNum * 2));
+    @Test
+    public void yieldsTrueOnGivenInvocationNumber() {
+        qt()
+            .forAll(integers().between(1, 1024))
+            .asWithPrecursor(n -> iterate(1, i -> i + 1).filter(nth(n, this::isEven)).findFirst().get())
+            .check((evenNumberOrdinal, evenNumber) -> evenNumber == evenNumberOrdinal * 2);
     }
 
-    @Property
-    public void zeroAndNegativeNumbersAreInvalidForNth(@InRange(maxInt=0) int invalidInvocationNum) {
-        expectedException.expect(IllegalArgumentException.class);
-        nth(invalidInvocationNum, t -> true);
+    @Test
+    public void zeroAndNegativeNumbersAreInvalidForNth() {
+        qt()
+            .forAll(integers().between(MIN_VALUE, 0))
+            .as(negativeOrdinal -> forceOnAll(n -> nth(n, t -> true), negativeOrdinal))
+            .checkAssert(error -> assertThat(error, contains(instanceOf(IllegalArgumentException.class))));
+    }
+
+    private boolean isEven(int n) {
+        return n % 2 == 0;
     }
 
 }

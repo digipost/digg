@@ -15,34 +15,49 @@
  */
 package no.digipost.tuple;
 
-import com.pholser.junit.quickcheck.Property;
-import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.quicktheories.WithQuickTheories;
+import org.quicktheories.core.Gen;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.both;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
 
-@RunWith(JUnitQuickcheck.class)
-public class TupleTest {
+public class TupleTest implements WithQuickTheories {
 
-    @Property
-    public void accessElements(Object first, Object second) {
-        Tuple<?, ?> tuple = Tuple.of(first, second);
-        assertThat(tuple.first(), sameInstance(first));
-        assertThat(tuple.second(), sameInstance(second));
+    private final Gen<Object> anything = arbitrary()
+            .pick(new Object())
+            .mix(strings().allPossible().ofLengthBetween(0, 100).map(s -> s), 90)
+            .mix(integers().all().map(i -> i), 50);
+
+    @Test
+    public void accessElements() {
+        qt()
+            .forAll(anything, anything)
+            .asWithPrecursor(Tuple::of)
+            .checkAssert((first, second, tuple) -> {
+                assertThat(tuple.first(), sameInstance(first));
+                assertThat(tuple.second(), sameInstance(second));
+            });
     }
 
-    @Property
-    public void stringRepresentationIncludesBothElements(Object first, Object second) {
-        Tuple<?, ?> tuple = Tuple.of(first, second);
-        assertThat(tuple.toString(), both(containsString(String.valueOf(first))).and(containsString(String.valueOf(second))));
+    @Test
+    public void stringRepresentationIncludesBothElements() {
+        qt()
+            .forAll(anything, anything)
+            .asWithPrecursor(Tuple::of)
+            .checkAssert((first, second, tuple) -> {
+                assertThat(tuple.toString(), both(containsString(String.valueOf(first))).and(containsString(String.valueOf(second))));
+            });
     }
 
     @Test
     public void asTupleReturnsSameInstance() {
-        Tuple<?, ?> tuple = Tuple.of(1, 2);
-        assertThat(tuple.asTuple(), sameInstance(tuple));
+        qt()
+            .forAll(anything.zip(anything, Tuple::of))
+            .check(tuple -> tuple.asTuple() == tuple);
     }
 
     @Test

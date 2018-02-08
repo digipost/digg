@@ -15,25 +15,23 @@
  */
 package no.digipost;
 
-import com.pholser.junit.quickcheck.Property;
-import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
-import org.junit.runner.RunWith;
+import org.junit.Test;
+import org.quicktheories.WithQuickTheories;
+import org.quicktheories.dsl.TheoryBuilder2;
 
 import static no.digipost.DiggCompare.max;
 import static no.digipost.DiggCompare.min;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assume.assumeThat;
 
-@RunWith(JUnitQuickcheck.class)
-public class DiggCompareTest {
+public class DiggCompareTest implements WithQuickTheories {
 
-    @Property
-    public void minAndMax(int x, int y) {
-        assumeThat(x, not(y));
-        assertThat(min(x, y), not(max(x, y)));
-        assertThat(min(x, y), is(min(y, x)));
-        assertThat(max(x, y), is(max(y, x)));
+    @Test
+    public void minAndMax() {
+        TheoryBuilder2<Integer, Integer> forNonEqualsInts = qt()
+            .forAll(integers().all(), integers().all())
+            .assuming((x, y) -> !x.equals(y));
+
+        forNonEqualsInts.check((x, y) -> min(x, y) != max(x, y));
+        forNonEqualsInts.check((x, y) -> min(x, y) == min(y, x));
+        forNonEqualsInts.check((x, y) -> max(x, y) == max(y, x));
     }
 }

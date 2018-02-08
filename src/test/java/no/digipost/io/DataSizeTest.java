@@ -15,16 +15,15 @@
  */
 package no.digipost.io;
 
-import com.pholser.junit.quickcheck.Property;
-import com.pholser.junit.quickcheck.generator.InRange;
-import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import no.digipost.tuple.Tuple;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.quicktheories.WithQuickTheories;
+import org.quicktheories.core.Gen;
 
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.Set;
@@ -49,14 +48,10 @@ import static no.digipost.tuple.Tuple.of;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
 
-@RunWith(JUnitQuickcheck.class)
-public class DataSizeTest {
+public class DataSizeTest implements WithQuickTheories {
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -87,25 +82,40 @@ public class DataSizeTest {
             .forEach(t -> assertThat(t.first() + " is the unit size of " + t.second(), t.first().toBytes(), is(t.second().asBytes(1))));
     }
 
-    @Property
-    public void convertToUnit(@InRange(minInt = 0, maxInt=10240) int amount, DataSizeUnit unit) {
-        DataSize size = DataSize.of(amount, unit);
-        assertThat(size.get(unit), is((double) amount));
+
+    private final Gen<Integer> amounts = integers().between(0, 10240);
+    private final Gen<DataSizeUnit> units = arbitrary().enumValues(DataSizeUnit.class);
+    private final Gen<DataSize> dataSizes = amounts.flatMap(size -> units.map(unit -> DataSize.of(size, unit)));
+
+
+    @Test
+    public void convertToUnit() {
+        qt()
+            .forAll(amounts, units)
+            .asWithPrecursor(DataSize::of)
+            .check((amount, unit, dataSize) -> dataSize.get(unit) == amount);
     }
 
-    @Property
-    public void sorting(Set<@InRange(minInt = 0, maxInt = 10240) Integer> ints, DataSizeUnit unit) {
-        SortedSet<DataSize> sortedSizes = ints.stream().map(i -> DataSize.of(i, unit)).collect(toCollection(TreeSet::new));
-        Iterator<Integer> sortedByteSizes = new TreeSet<>(ints).iterator();
-        for (DataSize size : sortedSizes) {
-            assertThat(size.get(unit), is((double) sortedByteSizes.next()));
-        }
+    @Test
+    public void zeroSizeIsAlwaysTheZeroInstance() {
+        qt()
+            .forAll(units).as(unit -> DataSize.of(0, unit))
+            .check(size -> size == DataSize.ZERO);
     }
 
-    @Property
-    public void zeroIsZero(DataSizeUnit unit) {
-        assertThat(DataSize.of(0, unit), sameInstance(DataSize.ZERO));
+    @Test
+    public void datasizeHasNaturalOrder() {
+        Gen<Set<Integer>> setsOfUnorderedAmounts = lists().of(amounts).ofSizeBetween(0, 100).map(l -> new HashSet<>(l));
+
+        qt()
+            .forAll(setsOfUnorderedAmounts, units)
+            .check((unorderedAmounts, unit) -> {
+                SortedSet<DataSize> sortedSizes = unorderedAmounts.stream().map(i -> DataSize.of(i, unit)).collect(toCollection(TreeSet::new));
+                Iterator<Integer> sortedByteSizes = new TreeSet<>(unorderedAmounts).iterator();
+                return sortedSizes.stream().sequential().allMatch(size -> size.get(unit) == sortedByteSizes.next());
+            });
     }
+
 
     @Test
     public void maxSizeIsASingleton() {
@@ -138,28 +148,49 @@ public class DataSizeTest {
         assertThat(biggestUnit.get(), is(GIGABYTES));
     }
 
-    @Property
-    public void arithemtic(@InRange(minInt=0, maxInt=2048) int originalSize, DataSizeUnit unit, @InRange(minInt=1) int deltaBytes) {
-        DataSize original = DataSize.of(originalSize, unit);
-        DataSize delta = DataSize.bytes(deltaBytes);
-        DataSize newSize = original.plus(delta);
-        assertThat(newSize, not(original));
-        assertTrue(newSize.isMoreThan(original));
-        assertTrue(newSize.isSameOrMoreThan(original));
-        assertFalse(newSize.isSameOrLessThan(original));
-        assertTrue(original.isLessThan(newSize));
-        assertTrue(original.isSameOrLessThan(newSize));
-        assertFalse(original.isSameOrMoreThan(newSize));
-        assertThat(newSize.minus(delta), is(original));
-        assertTrue(newSize.minus(delta).isSameOrLessThan(original));
-        assertTrue(newSize.minus(delta).isSameOrMoreThan(original));
+    @Test
+    public void addingAndSubtractingTheSameSizeYieldsTheOriginal() {
+        qt()
+            .forAll(dataSizes).check(size -> size.plus(size).minus(size).equals(size));
     }
 
-    @Property
-    public void addOrSubtractZeroYieldsSameInstance(@InRange(minInt=0) int byteSize) {
-        DataSize size = DataSize.bytes(byteSize);
-        assertThat(size.plus(ZERO), sameInstance(size));
-        assertThat(size.minus(ZERO), sameInstance(size));
+    @Test
+    public void equalSizesAreAlwaysTheSameOrAnything() {
+        qt()
+            .forAll(dataSizes)
+            .check(size ->
+                size.isSameOrLessThan(size) &&
+                size.isSameOrMoreThan(size));
+    }
+
+
+    @Test
+    public void arithemtic() {
+        qt()
+            .forAll(dataSizes, dataSizes.assuming(size -> !DataSize.ZERO.equals(size)))
+            .check((original, delta) -> {
+                DataSize newSize = original.plus(delta);
+                return !newSize.equals(original) &&
+                        newSize.isMoreThan(original) &&
+                        newSize.isSameOrMoreThan(original) &&
+                        original.isLessThan(newSize) &&
+                        original.isSameOrLessThan(newSize) &&
+                       !newSize.isSameOrLessThan(original) &&
+                       !original.isSameOrMoreThan(newSize);
+            });
+    }
+
+    @Test
+    public void addZeroYieldsSameInstance() {
+        qt()
+            .forAll(dataSizes).check(size -> size.plus(ZERO) == size);
+    }
+
+    @Test
+    public void subtractZeroYieldsSameInstance() {
+        qt()
+            .forAll(dataSizes).check(size -> size.minus(ZERO) == size);
+
     }
 
 }

@@ -15,14 +15,13 @@
  */
 package no.digipost.time;
 
-import com.pholser.junit.quickcheck.From;
-import com.pholser.junit.quickcheck.Property;
-import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.quicktheories.WithQuickTheories;
+import org.quicktheories.api.Pair;
+import org.quicktheories.core.Gen;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -37,8 +36,7 @@ import static java.time.Period.ofDays;
 import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 
-@RunWith(JUnitQuickcheck.class)
-public class TimeSpanTest {
+public class TimeSpanTest implements WithQuickTheories {
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
@@ -122,9 +120,15 @@ public class TimeSpanTest {
         assertThat(secondSpan.collapse(firstSpan), contains(firstSpan));
     }
 
-    @Property
-    public void collapsingIsCommutative(@From(RandomTimeSpans.class) TimeSpan someSpan, @From(RandomTimeSpans.class) TimeSpan someOtherSpan) {
-        assertThat(someSpan.collapse(someOtherSpan), equalTo(someOtherSpan.collapse(someSpan)));
+    @Test
+    public void collapsingIsCommutative() {
+        Gen<TimeSpan> timeSpans = integers().all()
+            .map(Instant.now()::plusSeconds)
+            .zip(integers().allPositive().map(Duration::ofMillis), (start, duration) -> TimeSpan.from(start).lasting(duration));
+
+        qt()
+            .forAll(timeSpans.map(Pair::of))
+            .checkAssert(spans -> assertThat(spans._1.collapse(spans._2), equalTo(spans._2.collapse(spans._1))));
     }
 
 }

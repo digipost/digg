@@ -15,78 +15,82 @@
  */
 package no.digipost.util;
 
-import com.pholser.junit.quickcheck.Property;
-import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import nl.jqno.equalsverifier.EqualsVerifier;
+import no.digipost.tuple.Tuple;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.quicktheories.WithQuickTheories;
+import org.quicktheories.core.Gen;
 
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import static no.digipost.util.AttributesMap.buildNew;
+import static co.unruly.matchers.Java8Matchers.where;
 import static no.digipost.util.AttributesMap.Config.ALLOW_NULL_VALUES;
 import static no.digipost.util.DiggMatchers.isEffectivelySerializable;
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.both;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertThat;
 
-@RunWith(JUnitQuickcheck.class)
-public class AttributeMapTest {
+
+public class AttributesMapTest implements WithQuickTheories {
 
     @Rule
     public final ExpectedException expectedException = ExpectedException.none();
 
-    @Property
-    public void attributeMapIsEmptyWhenSizeIsZero(List<String> attributeNames) {
-        AttributesMap attributes = attributeNames.stream()
-                .map(Attribute::new)
-                .map(a -> a.withValue(42))
-                .collect(AttributesMap::buildNew, AttributesMap.Builder::and, AttributesMap.Builder::and)
-                .build();
-
-        assertThat(attributes.isEmpty(), is(attributes.size() == 0));
+    private final Gen<Attribute<Integer>> attributes() {
+        return strings().ascii().ofLengthBetween(0, 40).map(Attribute::new);
     }
 
-    @Property
-    public void retrievesAttributeValueFor(String anyAttributeName, Long value) {
-        Attribute<Long> myLong = new Attribute<>(anyAttributeName);
-        AttributesMap attributes = AttributesMap.with(myLong.withValue(value)).build();
-        assertThat(attributes.get(myLong), is(value));
-
-        AttributesMap sameAttributes = AttributesMap.with(myLong, value).build();
-        assertThat(attributes.get(myLong), is(sameAttributes.get(myLong)));
+    private Gen<Map<Attribute<Integer>, Integer>> attributesInMaps() {
+        return maps().of(attributes(), integers().all()).ofSizeBetween(0, 40);
     }
 
-    @Property
-    public void stringRepresentation(Map<String, Integer> anyAttributes) {
-        AttributesMap attributes = anyAttributes.entrySet().parallelStream().collect(
-                () -> buildNew(ALLOW_NULL_VALUES),
-                (builder, entry) -> builder.and(new Attribute<>(entry.getKey()), entry.getValue()),
-                AttributesMap.Builder::and).build();
+    private final Gen<AttributesMap> attributesMaps = attributesInMaps().map(AttributesMapTest::toAttributesMap);
 
-        AtomicInteger asserts = new AtomicInteger();
-        anyAttributes.entrySet().forEach(e -> { assertThat(attributes.toString(), containsString(e.toString())); asserts.incrementAndGet(); });
-        assertThat(asserts.get(), is(anyAttributes.size()));
+
+    @Test
+    public void attributeMapIsEmptyWhenSizeIsZero() {
+        qt()
+            .forAll(attributesMaps)
+            .check(map -> (map.size() == 0) == map.isEmpty());
+    }
+
+    @Test
+    public void retrievesAttributeValues() {
+        qt()
+            .forAll(attributes(), integers().all())
+            .check((attribute, value) -> AttributesMap.with(attribute.withValue(value)).build().get(attribute).equals(value));
+
+        qt()
+            .forAll(attributes(), integers().all())
+            .check((attribute, value) -> AttributesMap.with(attribute, value).build().get(attribute).equals(value));
+    }
+
+    @Test
+    public void stringRepresentation() {
+        qt()
+            .forAll(attributesInMaps())
+            .asWithPrecursor(AttributesMapTest::toAttributesMap)
+            .checkAssert((attributes, attributesMap) -> attributes
+                    .forEach((attr, value) -> assertThat(attributesMap.toString(), both(containsString(attr.name.toString())).and(containsString(value.toString())))));
     }
 
 
     @Test
     public void serializesAttributeWithNullValue() {
         AttributesMap attributes = AttributesMap.with(new Attribute<String>("a"), null, ALLOW_NULL_VALUES).build();
-        assertThat(attributes.size(), is(1));
+        assertThat(attributes, where(AttributesMap::size, is(1)));
         assertThat(attributes, isEffectivelySerializable());
     }
 
-    @Property
-    public void isSerializable(Map<String, String> serializableAttributes) {
-        AttributesMap attributes = serializableAttributes.entrySet().parallelStream().collect(
-                () -> buildNew(ALLOW_NULL_VALUES),
-                (builder, entry) -> builder.and(new Attribute<>(entry.getKey()), entry.getValue()),
-                AttributesMap.Builder::and).build();
-        assertThat(attributes, isEffectivelySerializable());
+    @Test
+    public void isSerializable() {
+        qt()
+            .forAll(attributesMaps)
+            .checkAssert(map -> assertThat(map, isEffectivelySerializable()));
     }
 
     @Test
@@ -119,6 +123,10 @@ public class AttributeMapTest {
 
         expectedException.expect(GetsNamedValue.NotFound.class);
         attributes.get(num);
+    }
+
+    private static <V> AttributesMap toAttributesMap(Map<? extends SetsNamedValue<V>, V> namesAndValues) {
+        return namesAndValues.entrySet().stream().map(e -> Tuple.of(e.getKey(), e.getValue())).collect(AttributesMap::buildNew, AttributesMap.Builder::and, AttributesMap.Builder::and).build();
     }
 
 }
