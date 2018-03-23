@@ -18,6 +18,7 @@ package no.digipost.concurrent.executor;
 import java.time.Duration;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
@@ -32,11 +33,15 @@ public final class DefaultExecutors {
 
 
     public static ExecutorService fixedThreadPool(int threadAmount, String name) {
-        return Executors.newFixedThreadPool(threadAmount, threadNamingFactory(n -> name + "-" + n));
+        return Executors.newFixedThreadPool(threadAmount, threadNamingFactory(threadId -> name + "-" + threadId));
     }
 
     public static ExecutorService singleThreaded(String name) {
-        return Executors.newSingleThreadExecutor(threadNamingFactory(n -> name + "-" + n));
+        return Executors.newSingleThreadExecutor(threadNamingFactory(threadId -> name + "-" + threadId));
+    }
+
+    public static ScheduledExecutorService scheduledSingleThreaded(String name){
+        return Executors.newSingleThreadScheduledExecutor(threadNamingFactory(threadId -> name + "-" + threadId));
     }
 
     public static ThreadFactory threadNamingFactory(LongFunction<String> threadName) {
