@@ -33,30 +33,58 @@ public final class DefaultExecutors {
 
 
     public static ExecutorService fixedThreadPool(int threadAmount, String name) {
-        return Executors.newFixedThreadPool(threadAmount, threadNamingFactory(threadId -> name + "-" + threadId));
+        return Executors.newFixedThreadPool(threadAmount, threadNamingFactory(name));
     }
 
     public static ExecutorService singleThreaded(String name) {
-        return Executors.newSingleThreadExecutor(threadNamingFactory(threadId -> name + "-" + threadId));
+        return Executors.newSingleThreadExecutor(threadNamingFactory(name));
     }
 
-    public static ScheduledExecutorService scheduledSingleThreaded(String name){
-        return Executors.newSingleThreadScheduledExecutor(threadNamingFactory(threadId -> name + "-" + threadId));
+    public static ScheduledExecutorService scheduledSingleThreaded(String name) {
+        return Executors.newSingleThreadScheduledExecutor(threadNamingFactory(name));
     }
 
+    public static ScheduledExecutorService scheduled(int threadAmount, String name) {
+        return Executors.newScheduledThreadPool(threadAmount, threadNamingFactory(name));
+    }
+
+
+    /**
+     * Create a thread factory based on {@link Executors#defaultThreadFactory()}, but naming the
+     * created threads using the given {@code threadBaseName} and an incrementing number for each thread
+     * created by the factory. The threads will have names on the form {@code threadBaseName-N}.
+     *
+     * @param threadBaseName the base name for threads created by the factory.
+     */
+    public static ThreadFactory threadNamingFactory(String threadBaseName) {
+        return threadNamingFactory(threadNum -> threadBaseName + "-" + threadNum);
+    }
+
+    /**
+     * Create a thread factory based on {@link Executors#defaultThreadFactory()}, but naming the
+     * created threads using the result of the given given {@link LongFunction long -&gt; String} function, which
+     * argument is the number of the created thread.
+     *
+     * @param threadName function used for naming each thread created by the factory.
+     */
     public static ThreadFactory threadNamingFactory(LongFunction<String> threadName) {
         return threadNamingFactory(threadName, Executors.defaultThreadFactory());
     }
 
+    /**
+     * Create a thread factory delegating to the given {@code backingFactory} for creating new threads, but naming the
+     * created threads using the result of the given given {@link LongFunction long -&gt; String} function, which
+     * argument is the number of the created thread.
+     *
+     * @param threadName function used for naming each thread created by the factory.
+     * @param backingFactory the factory used for creating new threads.
+     */
     public static ThreadFactory threadNamingFactory(LongFunction<String> threadName, ThreadFactory backingFactory) {
-        return new ThreadFactory() {
-            final AtomicLong threadNum = new AtomicLong(0);
-            @Override
-            public Thread newThread(Runnable r) {
-                Thread newThread = backingFactory.newThread(r);
-                newThread.setName(threadName.apply(threadNum.incrementAndGet()));
-                return newThread;
-            }
+        AtomicLong threadNum = new AtomicLong(0);
+        return r -> {
+            Thread newThread = backingFactory.newThread(r);
+            newThread.setName(threadName.apply(threadNum.incrementAndGet()));
+            return newThread;
         };
     }
 
