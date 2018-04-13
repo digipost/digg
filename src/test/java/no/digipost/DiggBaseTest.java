@@ -159,7 +159,6 @@ public class DiggBaseTest {
         verifyNoMoreInteractions(resource);
     }
 
-
 }
 
 
