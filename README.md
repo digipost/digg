@@ -17,7 +17,7 @@ _Digg_ is available in [![Maven Central Repository](https://maven-badges.herokua
 <dependency>
     <groupId>no.digipost</groupId>
     <artifactId>digg</artifactId>
-    <version>0.13</version>
+    <version>0.15</version>
 </dependency>
 ```
 
@@ -31,7 +31,7 @@ _Digg_ requires Java 8, and has no other dependencies.
 
 _Digg_ contains a lot of useful utilities implemented as static methods. The "entry point" for these methods are all classes with the prefix `Digg*`. An easy way to explore the API is to type `Digg` in your IDE, and let auto-completion show you what is available.
 
-![Auto-complete in an IDE](https://digipost.github.io/digg/img/digg-autocomplete.png)
+![Auto-complete in an IDE](https://digipost.github.io/digg/img/digg-autocomplete.png?nocache=1)
 
 Javadocs are available at [javadoc.io/doc/no.digipost/digg](http://www.javadoc.io/doc/no.digipost/digg)
 

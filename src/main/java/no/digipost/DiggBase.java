@@ -15,9 +15,14 @@
  */
 package no.digipost;
 
+import no.digipost.function.ThrowingConsumer;
+import no.digipost.util.AutoClosed;
+import no.digipost.util.ThrowingAutoClosed;
+
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
@@ -179,6 +184,56 @@ public final class DiggBase {
     public static final <T, R> Stream<R> extractIfPresent(T object, Function<? super T, ? extends Optional<R>> ... extractors) {
         return extract(object, extractors).filter(Optional::isPresent).map(Optional::get);
     }
+
+
+    /**
+     * Wrap an arbitrary object to an {@link AutoCloseable} container, and assign an operation to be
+     * performed on the wrapped object when calling {@link AutoCloseable#close()}. This can be
+     * used for legacy classes which does not implement {@code AutoCloseable} to be used with the
+     * {@code try-with-resources} construct. It should not be used (although it <em>can</em>) for
+     * objects already implementing {@code AutoCloseable}.
+     *
+     * @param object the object to be managed with {@code try-with-resources}.
+     * @param closeOperation the operation to invoke on {@code object} to close it.
+     *
+     * @return The wrapper which is {@link AutoCloseable}. Assign this with {@code try-with-resources} to
+     *         have it properly closed.
+     *
+     *
+     * @param <T> The type of the wrapped/managed object.
+     * @param <X> The exception which may be throwed when closing by {@link AutoCloseable#close()}.
+     *
+     * @see #autoClose(Object, Consumer)
+     */
+    public static <T, X extends Exception> ThrowingAutoClosed<T, X> throwingAutoClose(T object, ThrowingConsumer<? super T, X> closeOperation) {
+        return new ThrowingAutoClosed<T, X>(object, closeOperation);
+    }
+
+
+    /**
+     * Wrap an arbitrary object to an {@link AutoCloseable} container, and assign an operation to be
+     * performed on the wrapped object when calling {@link AutoCloseable#close()}. This can be
+     * used for legacy classes which does not implement {@code AutoCloseable} to be used with the
+     * {@code try-with-resources} construct. It should not be used (although it <em>can</em>) for
+     * objects already implementing {@code AutoCloseable}.
+     *
+     * @param object the object to be managed with {@code try-with-resources}.
+     * @param closeOperation the operation to invoke on {@code object} to close it. If the operation
+     *                       can throw a checked exception, use {@link #throwingAutoClose(Object, ThrowingConsumer)}
+     *                       instead.
+     *
+     * @return The wrapper which is {@link AutoCloseable}. Assign this with {@code try-with-resources} to
+     *         have it properly closed.
+     *
+     *
+     * @param <T> The type of the wrapped/managed object.
+     *
+     * @see #throwingAutoClose(Object, ThrowingConsumer)
+     */
+    public static <T> AutoClosed<T> autoClose(T object, Consumer<? super T> closeOperation) {
+        return new AutoClosed<T>(object, closeOperation);
+    }
+
 
     private DiggBase() {}
 
