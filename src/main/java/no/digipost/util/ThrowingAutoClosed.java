@@ -15,7 +15,7 @@
  */
 package no.digipost.util;
 
-import java.util.function.Consumer;
+import no.digipost.function.ThrowingConsumer;
 
 /**
  * An adapter to enable any arbitrary object to be managed by the
@@ -24,11 +24,12 @@ import java.util.function.Consumer;
  *
  * @param <T> The type of the arbitrary object which will have an operation invoked
  *            on exiting from a try-with-resources block.
+ * @param <X> The type of exception which may be throwed by the {@code closeOperation}
  */
-public final class AutoClosed<T> extends AutoCloseableAdapter<T, RuntimeException> implements AutoCloseable {
+public final class ThrowingAutoClosed<T, X extends Exception> extends AutoCloseableAdapter<T, X> implements AutoCloseable {
 
-    public AutoClosed(T managedObject, Consumer<? super T> closeOperation) {
-        super(managedObject, closeOperation::accept);
+    public ThrowingAutoClosed(T managedObject, ThrowingConsumer<? super T, X> closeOperation) {
+        super(managedObject, closeOperation);
     }
 
 }

@@ -19,6 +19,7 @@ import com.pholser.junit.quickcheck.Property;
 import com.pholser.junit.quickcheck.When;
 import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import no.digipost.util.AutoClosed;
+import no.digipost.util.ThrowingAutoClosed;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -33,6 +34,7 @@ import static co.unruly.matchers.StreamMatchers.empty;
 import static no.digipost.DiggBase.autoClose;
 import static no.digipost.DiggBase.friendlyName;
 import static no.digipost.DiggBase.nonNull;
+import static no.digipost.DiggBase.throwingAutoClose;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
@@ -111,7 +113,7 @@ public class DiggBaseTest {
     @Test
     public void objectManagedByAutoCloseIsSameInstanceAsGiven() {
         Object object = new Object();
-        AutoClosed<Object, RuntimeException> managed = autoClose(object, o -> {});
+        ThrowingAutoClosed<Object, RuntimeException> managed = throwingAutoClose(object, o -> {});
         assertThat(managed.object(), sameInstance(object));
     }
 
@@ -122,7 +124,7 @@ public class DiggBaseTest {
             abstract void done();
         }
         MyResource resource = mock(MyResource.class);
-        try (AutoClosed<MyResource, RuntimeException> managedResource = autoClose(resource, MyResource::done)) {
+        try (ThrowingAutoClosed<MyResource, RuntimeException> managedResource = throwingAutoClose(resource, MyResource::done)) {
             verifyZeroInteractions(resource);
         }
         verify(resource, times(1)).done();
@@ -135,13 +137,26 @@ public class DiggBaseTest {
             abstract void done() throws IOException;
         }
         MyResource resource = mock(MyResource.class);
-        try (AutoClosed<MyResource, IOException> managedResource = autoClose(resource, MyResource::done)) {
+        try (ThrowingAutoClosed<MyResource, IOException> managedResource = throwingAutoClose(resource, MyResource::done)) {
             verifyZeroInteractions(resource);
         }
         InOrder inOrder = inOrder(resource);
         inOrder.verify(resource, times(1)).done();
         inOrder.verify(resource, times(1)).close();
         inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    public void autoCloseWithoutCheckedException() {
+        abstract class MyResource {
+            abstract void done();
+        }
+        MyResource resource = mock(MyResource.class);
+        try (AutoClosed<MyResource> managedResource = autoClose(resource, MyResource::done)) {
+            verifyZeroInteractions(resource);
+        }
+        verify(resource, times(1)).done();
+        verifyNoMoreInteractions(resource);
     }
 
 
