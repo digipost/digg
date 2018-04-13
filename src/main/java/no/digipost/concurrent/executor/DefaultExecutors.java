@@ -15,120 +15,100 @@
  */
 package no.digipost.concurrent.executor;
 
+import no.digipost.DiggConcurrent;
+
 import java.time.Duration;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ThreadFactory;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.LongFunction;
 
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static java.util.logging.Level.FINE;
-
+/**
+ * @deprecated Use {@link DiggConcurrent} instead. This will eventually be removed.
+ */
+@Deprecated
 public final class DefaultExecutors {
 
-    private static final java.util.logging.Logger LOG = java.util.logging.Logger.getLogger(DefaultExecutors.class.getName());
-
-
+    /**
+     * @see DiggConcurrent#fixedThreadPool(int, String)
+     */
     public static ExecutorService fixedThreadPool(int threadAmount, String name) {
-        return Executors.newFixedThreadPool(threadAmount, threadNamingFactory(n -> name + "-" + n));
+        return DiggConcurrent.fixedThreadPool(threadAmount, name);
     }
 
+    /**
+     * @see DiggConcurrent#singleThreaded(String)
+     */
     public static ExecutorService singleThreaded(String name) {
-        return Executors.newSingleThreadExecutor(threadNamingFactory(n -> name + "-" + n));
+        return DiggConcurrent.singleThreaded(name);
     }
 
-    public static ThreadFactory threadNamingFactory(LongFunction<String> threadName) {
-        return threadNamingFactory(threadName, Executors.defaultThreadFactory());
+    /**
+     * @see DiggConcurrent#scheduledSingleThreaded(String)
+     */
+    public static ScheduledExecutorService scheduledSingleThreaded(String name) {
+        return DiggConcurrent.scheduledSingleThreaded(name);
     }
 
-    public static ThreadFactory threadNamingFactory(LongFunction<String> threadName, ThreadFactory backingFactory) {
-        return new ThreadFactory() {
-            final AtomicLong threadNum = new AtomicLong(0);
-            @Override
-            public Thread newThread(Runnable r) {
-                Thread newThread = backingFactory.newThread(r);
-                newThread.setName(threadName.apply(threadNum.incrementAndGet()));
-                return newThread;
-            }
-        };
+    /**
+     * @see DiggConcurrent#scheduled(int, String)
+     */
+    public static ScheduledExecutorService scheduled(int threadAmount, String name) {
+        return DiggConcurrent.scheduled(threadAmount, name);
     }
 
 
     /**
-     * Wraps another {@link ExecutorService} as an "externally managed
-     * executor service", which will discard any invocations of the
-     * methods used to manage the lifecycle of the ExecutorService itself.
-     * This includes the methods:
-     * <ul>
-     * 	<li>{@link ExecutorService#shutdown()}</li>
-     * 	<li>{@link ExecutorService#shutdownNow()} (returns empty list)</li>
-     * 	<li>{@link ExecutorService#awaitTermination(long, TimeUnit)} (immediately
-     *      returns with the result of {@link ExecutorService#isTerminated()})</li>
-     * </ul>
-     * An externally managed executor will not be attempted shut down by {@link #ensureShutdown(ExecutorService, Duration)}.
+     * @see DiggConcurrent#threadNamingFactory(String)
+     */
+    public static ThreadFactory threadNamingFactory(String threadBaseName) {
+        return DiggConcurrent.threadNamingFactory(threadBaseName);
+    }
+
+    /**
+     * @see DiggConcurrent#threadNamingFactory(LongFunction)
+     */
+    public static ThreadFactory threadNamingFactory(LongFunction<String> threadName) {
+        return DiggConcurrent.threadNamingFactory(threadName);
+    }
+
+    /**
+     * @see DiggConcurrent#threadNamingFactory(LongFunction, ThreadFactory)
+     */
+    public static ThreadFactory threadNamingFactory(LongFunction<String> threadName, ThreadFactory backingFactory) {
+        return DiggConcurrent.threadNamingFactory(threadName, backingFactory);
+    }
+
+
+    /**
+     * @see DiggConcurrent#externallyManaged(ExecutorService)
      */
     public static ExecutorService externallyManaged(ExecutorService executor) {
-        return new ExternallyManagedExecutorService(executor);
+        return DiggConcurrent.externallyManaged(executor);
     }
 
 
     /**
-     * Determine if the given {@link ExecutorService} is marked as
-     * {@link #externallyManaged(ExecutorService) externally managed}.
+     * @see DiggConcurrent#isExternallyManaged(ExecutorService)
      */
     public static boolean isExternallyManaged(ExecutorService executor) {
-        return executor instanceof ExternallyManagedExecutorService;
+        return DiggConcurrent.isExternallyManaged(executor);
     }
 
 
     /**
-     * Perform an orderly shutdown, trying to wait for any currently running tasks to finish,
-     * or else forcefully shutdown the executor if the tasks are not able to finish their work
-     * within the given timeout duration. The {@link #ensureShutdown(String, ExecutorService, Duration)}
-     * method is preferred over this.
-     *
-     * @param executor the {@link ExecutorService} to shut down.
-     * @param timeoutBeforeForcefulShutdown the maximum amount of time to wait for tasks to finish
-     *                                      before forcefully shutting down the executor.
+     * @see DiggConcurrent#ensureShutdown(ExecutorService, Duration)
      */
     public static void ensureShutdown(ExecutorService executor, Duration timeoutBeforeForcefulShutdown) {
-        ensureShutdown(executor.getClass().getSimpleName(), executor, timeoutBeforeForcefulShutdown);
+        DiggConcurrent.ensureShutdown(executor, timeoutBeforeForcefulShutdown);
     }
 
 
     /**
-     * Perform an orderly shutdown, trying to wait for any currently running tasks to finish,
-     * or else forcefully shutdown the executor if the tasks are not able to finish their work
-     * within the given timeout duration.
-     *
-     * @param executorName a descriptive name of the executor to shut down, used for logging.
-     * @param executor the {@link ExecutorService} to shut down.
-     * @param timeoutBeforeForcefulShutdown the maximum amount of time to wait for tasks to finish
-     *                                      before forcefully shutting down the executor.
+     * @see DiggConcurrent#ensureShutdown(String, ExecutorService, Duration)
      */
     public static void ensureShutdown(String executorName, ExecutorService executor, Duration timeoutBeforeForcefulShutdown) {
-        if (isExternallyManaged(executor)) {
-            LOG.info(() -> "Not shutting down " + executorName + " executor since it is an " + ExternallyManagedExecutorService.class.getSimpleName());
-            return;
-        }
-        executor.shutdown();
-        try {
-            if (!executor.awaitTermination(timeoutBeforeForcefulShutdown.toMillis(), MILLISECONDS)) {
-                LOG.info(() -> executorName + " executor is forcefully shut down as waiting for orderly termination took more than " + timeoutBeforeForcefulShutdown);
-                executor.shutdownNow();
-            } else {
-                LOG.info(() -> executorName + " executor was orderly shut down within the timeout of " + timeoutBeforeForcefulShutdown.toMillis() + " ms");
-            }
-        } catch (InterruptedException e) {
-            String logMessageTemplate = "Interrupted when waiting for termination of %s executor. %s: %s";
-            if (LOG.isLoggable(FINE)) {
-                LOG.log(FINE, e, () -> String.format(logMessageTemplate, executorName, e.getClass().getSimpleName(), e.getMessage()));
-            } else {
-                LOG.info(() -> String.format(logMessageTemplate, executorName, e.getClass().getSimpleName(), e.getMessage()));
-            }
-        }
+        DiggConcurrent.ensureShutdown(executorName, executor, timeoutBeforeForcefulShutdown);
     }
 
     private DefaultExecutors() {}
