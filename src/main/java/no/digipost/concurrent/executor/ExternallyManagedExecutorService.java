@@ -17,16 +17,21 @@ package no.digipost.concurrent.executor;
 
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static java.util.Collections.emptyList;
 
 
-class ExternallyManagedExecutorService implements ExecutorService {
+public class ExternallyManagedExecutorService implements ExecutorService {
 
     private final ExecutorService executor;
 
-    ExternallyManagedExecutorService(ExecutorService executor) {
+    public ExternallyManagedExecutorService(ExecutorService executor) {
         this.executor = executor;
     }
 
