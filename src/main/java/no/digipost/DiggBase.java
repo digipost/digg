@@ -21,6 +21,7 @@ import no.digipost.util.ThrowingAutoClosed;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -183,6 +184,26 @@ public final class DiggBase {
     @SafeVarargs
     public static final <T, R> Stream<R> extractIfPresent(T object, Function<? super T, ? extends Optional<R>> ... extractors) {
         return extract(object, extractors).filter(Optional::isPresent).map(Optional::get);
+    }
+
+
+    /**
+     * Create a stream which will yield the exceptions from closing several {@link AutoCloseable closeables}.
+     * Consuming the stream will ensure that <strong>all</strong> closeables are attempted {@link AutoCloseable#close() closed},
+     * and any exceptions happening will be available through the returned stream.
+     *
+     * @param closeables The {@code AutoCloseable} instances to close.
+     * @return the Stream with exceptions, if any, from closing the closeables
+     */
+    public static Stream<Exception> close(AutoCloseable ... closeables) {
+        return Stream.of(closeables).filter(Objects::nonNull).flatMap(closeable -> {
+            try {
+                closeable.close();
+            } catch (Exception closeException) {
+                return Stream.of(closeException);
+            }
+            return Stream.empty();
+        });
     }
 
 
