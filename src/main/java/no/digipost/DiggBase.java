@@ -189,11 +189,21 @@ public final class DiggBase {
 
     /**
      * Create a stream which will yield the exceptions from closing several {@link AutoCloseable closeables}.
-     * Consuming the stream will ensure that <strong>all</strong> closeables are attempted {@link AutoCloseable#close() closed},
-     * and any exceptions happening will be available through the returned stream.
+     * Consuming the stream will ensure that <strong>all</strong> closeables are attempted
+     * {@link AutoCloseable#close() closed}, and any exceptions happening will be available
+     * through the returned stream.
+     * <p>
+     * To further collapse the possibly multiple exceptions into <em>one</em> throwable exception,
+     * use either
+     * {@link DiggCollectors#toSingleExceptionWithSuppressed() .collect(toSingleExceptionWithSuppressed())}
+     * or {@link DiggCollectors#asSuppressedExceptionsOf(Throwable) .collect(asSuppressedExceptionsOf(..))}
+     * in {@code DiggCollectors}.
      *
      * @param closeables The {@code AutoCloseable} instances to close.
      * @return the Stream with exceptions, if any, from closing the closeables
+     *
+     * @see DiggCollectors#toSingleExceptionWithSuppressed()
+     * @see DiggCollectors#asSuppressedExceptionsOf(Throwable)
      */
     public static Stream<Exception> close(AutoCloseable ... closeables) {
         return Stream.of(closeables).filter(Objects::nonNull).flatMap(closeable -> {
