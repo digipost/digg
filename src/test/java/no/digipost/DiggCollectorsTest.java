@@ -28,20 +28,38 @@ import org.junit.Test;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 
+import java.io.IOException;
+import java.sql.BatchUpdateException;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static co.unruly.matchers.Java8Matchers.where;
+import static co.unruly.matchers.Java8Matchers.whereNot;
 import static co.unruly.matchers.OptionalMatchers.contains;
+import static java.util.Arrays.asList;
+import static java.util.stream.IntStream.range;
+import static no.digipost.DiggBase.close;
 import static no.digipost.DiggCollectors.allowAtMostOne;
 import static no.digipost.DiggCollectors.allowAtMostOneOrElseThrow;
+import static no.digipost.DiggCollectors.asSuppressedExceptionsOf;
 import static no.digipost.DiggCollectors.toMultimap;
 import static no.digipost.DiggCollectors.toMultituple;
+import static no.digipost.DiggCollectors.toSingleExceptionWithSuppressed;
+import static org.hamcrest.Matchers.arrayContaining;
+import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.emptyArray;
+import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 
 @RunWith(JUnitQuickcheck.class)
 public class DiggCollectorsTest {
@@ -110,6 +128,56 @@ public class DiggCollectorsTest {
     public void allowAtMostOneFailsEvenIfExcessiveElementsAreNull() {
         expectedException.expect(ViewableAsOptional.TooManyElements.class);
         Stream.of("x", null).collect(allowAtMostOne());
+    }
+
+    @Test
+    public void convertTwoExceptionsToSingleWithSuppressed() {
+        Exception mainException = new Exception("main");
+        Exception suppressedException = new Exception("suppressed");
+        Exception collatedException = Stream.of(mainException, suppressedException).collect(toSingleExceptionWithSuppressed()).get();
+        assertThat(collatedException, is(mainException));
+        assertThat(collatedException, where(Exception::getSuppressed, arrayContaining(suppressedException)));
+    }
+
+    @Test
+    public void convertLotsOfExceptionsToSingleWithTheRestSuppressed() {
+        Stream<Exception> exceptions = range(0, 300).mapToObj(n -> new Exception("exception-" + n));
+        Exception collatedException = exceptions.parallel().collect(toSingleExceptionWithSuppressed()).get();
+        assertThat(collatedException, where(Throwable::getSuppressed, arrayWithSize(299)));
+        assertThat(asList(collatedException.getSuppressed()), everyItem(where(Throwable::getSuppressed, emptyArray())));
+    }
+
+    @Test
+    public void addLotsOfSuppressedToGivenException() {
+        Stream<Exception> exceptions = range(0, 300).mapToObj(n -> new Exception("exception-" + n));
+        IOException collatedException = exceptions.parallel().collect(asSuppressedExceptionsOf(new IOException()));
+        assertThat(collatedException, where(Throwable::getSuppressed, arrayWithSize(300)));
+        assertThat(asList(collatedException.getSuppressed()), everyItem(where(Throwable::getSuppressed, emptyArray())));
+    }
+
+    @Test
+    public void suppressesExceptionsCorrectlyWithTryCatchBlocks() throws SQLException {
+        Connection connection = mock(Connection.class);
+        PreparedStatement pstmt = mock(PreparedStatement.class);
+        SQLException connectionCloseException = new SQLException();
+        BatchUpdateException statementCloseException = new BatchUpdateException();
+        doThrow(connectionCloseException).when(connection).close();
+        doThrow(statementCloseException).when(pstmt).close();
+
+        expectedException.expect(IllegalStateException.class);
+        expectedException.expect(where(Throwable::getSuppressed, arrayContaining(statementCloseException, connectionCloseException)));
+        try {
+            throw new IllegalStateException("main");
+        } catch (IllegalStateException e) {
+            throw close(pstmt, connection).collect(asSuppressedExceptionsOf(e));
+        }
+
+    }
+
+    @Test
+    public void convertNoExceptionsToEmptyOptional() {
+        Optional<Exception> noException = range(0, 300).parallel().mapToObj(n -> new Exception("exception-" + n)).filter(e -> false).collect(toSingleExceptionWithSuppressed());
+        assertThat(noException, whereNot(Optional::isPresent));
     }
 
     @Property
