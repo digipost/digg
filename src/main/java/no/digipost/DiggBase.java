@@ -198,19 +198,56 @@ public final class DiggBase {
      * {@link DiggCollectors#toSingleExceptionWithSuppressed() .collect(toSingleExceptionWithSuppressed())}
      * or {@link DiggCollectors#asSuppressedExceptionsOf(Throwable) .collect(asSuppressedExceptionsOf(..))}
      * in {@code DiggCollectors}.
+     * <p>
+     * If you have non-AutoCloseable related actions that need to be performed as well, this can be achieved
+     * by using <tt><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#concat-java.util.stream.Stream-java.util.stream.Stream-">Stream.concat(</a>close(..),
+     * {@link #forceOnAll(ThrowingConsumer, Object...) forceOnAll(T::action, T ... instances)})</tt>
+     *
      *
      * @param closeables The {@code AutoCloseable} instances to close.
+     *
      * @return the Stream with exceptions, if any, from closing the closeables
      *
      * @see DiggCollectors#toSingleExceptionWithSuppressed()
      * @see DiggCollectors#asSuppressedExceptionsOf(Throwable)
      */
     public static Stream<Exception> close(AutoCloseable ... closeables) {
-        return Stream.of(closeables).filter(Objects::nonNull).flatMap(closeable -> {
+        return forceOnAll(AutoCloseable::close, closeables);
+    }
+
+
+    /**
+     * Create a stream which will yield the exceptions (if any) from invoking an {@link ThrowingConsumer action} on
+     * several {@code instances}. Consuming the stream will ensure that <strong>all</strong> instances will have
+     * the action invoked on them, and any exceptions happening will be available through the returned stream.
+     *
+     * @param action the action to execute for each provided instance
+     * @param instances the instances to act on with the provided {@code action}.
+     *
+     * @return the Stream with exceptions, if any
+     */
+    @SafeVarargs
+    public static <T> Stream<Exception> forceOnAll(ThrowingConsumer<? super T, ? extends Exception> action, T ... instances) {
+        return forceOnAll(action, Stream.of(instances));
+    }
+
+
+    /**
+     * Create a stream which will yield the exceptions (if any) from invoking an {@link ThrowingConsumer action} on
+     * several {@code instances}. Consuming the stream will ensure that <strong>all</strong> instances will have
+     * the action invoked on them, and any exceptions happening will be available through the returned stream.
+     *
+     * @param action the action to execute for each provided instance
+     * @param instances the instances to act on with the provided {@code action}.
+     *
+     * @return the Stream with exceptions, if any
+     */
+    public static <T> Stream<Exception> forceOnAll(ThrowingConsumer<? super T, ? extends Exception> action, Stream<T> instances) {
+        return instances.filter(Objects::nonNull).flatMap(instance -> {
             try {
-                closeable.close();
-            } catch (Exception closeException) {
-                return Stream.of(closeException);
+                action.accept(instance);
+            } catch (Exception exception) {
+                return Stream.of(exception);
             }
             return Stream.empty();
         });
