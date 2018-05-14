@@ -20,6 +20,7 @@ import com.pholser.junit.quickcheck.When;
 import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import no.digipost.util.AutoClosed;
 import no.digipost.util.ThrowingAutoClosed;
+import org.hamcrest.Matchers;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -27,19 +28,27 @@ import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static co.unruly.matchers.StreamMatchers.contains;
 import static co.unruly.matchers.StreamMatchers.empty;
+import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.Stream.generate;
 import static no.digipost.DiggBase.autoClose;
+import static no.digipost.DiggBase.close;
 import static no.digipost.DiggBase.friendlyName;
 import static no.digipost.DiggBase.nonNull;
 import static no.digipost.DiggBase.throwingAutoClose;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assume.assumeThat;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -157,6 +166,25 @@ public class DiggBaseTest {
         }
         verify(resource, times(1)).done();
         verifyNoMoreInteractions(resource);
+    }
+
+    @Test
+    public void getAllExceptionsFromClosingSeveralAutoCloseables() throws Exception {
+        AutoCloseable closeable = mock(AutoCloseable.class);
+        doNothing()
+            .doThrow(new IOException())
+            .doNothing()
+            .doNothing()
+            .doThrow(new IllegalStateException())
+            .doNothing()
+            .when(closeable).close();
+
+        Stream<Exception> closeExceptionsStream = close(generate(() -> closeable).limit(5).toArray(AutoCloseable[]::new));
+        verifyZeroInteractions(closeable);
+        List<Exception> closeExceptions = closeExceptionsStream.collect(toList());
+        assertThat(closeExceptions, Matchers.contains(asList(instanceOf(IOException.class), instanceOf(IllegalStateException.class))));
+        verify(closeable, times(5)).close();
+        verifyNoMoreInteractions(closeable);
     }
 
 }

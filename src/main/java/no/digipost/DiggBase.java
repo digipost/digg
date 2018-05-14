@@ -21,6 +21,7 @@ import no.digipost.util.ThrowingAutoClosed;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -183,6 +184,73 @@ public final class DiggBase {
     @SafeVarargs
     public static final <T, R> Stream<R> extractIfPresent(T object, Function<? super T, ? extends Optional<R>> ... extractors) {
         return extract(object, extractors).filter(Optional::isPresent).map(Optional::get);
+    }
+
+
+    /**
+     * Create a stream which will yield the exceptions from closing several {@link AutoCloseable closeables}.
+     * Consuming the stream will ensure that <strong>all</strong> closeables are attempted
+     * {@link AutoCloseable#close() closed}, and any exceptions happening will be available
+     * through the returned stream.
+     * <p>
+     * To further collapse the possibly multiple exceptions into <em>one</em> throwable exception,
+     * use either
+     * {@link DiggCollectors#toSingleExceptionWithSuppressed() .collect(toSingleExceptionWithSuppressed())}
+     * or {@link DiggCollectors#asSuppressedExceptionsOf(Throwable) .collect(asSuppressedExceptionsOf(..))}
+     * in {@code DiggCollectors}.
+     * <p>
+     * If you have non-AutoCloseable related actions that need to be performed as well, this can be achieved
+     * by using <tt><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#concat-java.util.stream.Stream-java.util.stream.Stream-">Stream.concat(</a>close(..),
+     * {@link #forceOnAll(ThrowingConsumer, Object...) forceOnAll(T::action, T ... instances)})</tt>
+     *
+     *
+     * @param closeables The {@code AutoCloseable} instances to close.
+     *
+     * @return the Stream with exceptions, if any, from closing the closeables
+     *
+     * @see DiggCollectors#toSingleExceptionWithSuppressed()
+     * @see DiggCollectors#asSuppressedExceptionsOf(Throwable)
+     */
+    public static Stream<Exception> close(AutoCloseable ... closeables) {
+        return forceOnAll(AutoCloseable::close, closeables);
+    }
+
+
+    /**
+     * Create a stream which will yield the exceptions (if any) from invoking an {@link ThrowingConsumer action} on
+     * several {@code instances}. Consuming the stream will ensure that <strong>all</strong> instances will have
+     * the action invoked on them, and any exceptions happening will be available through the returned stream.
+     *
+     * @param action the action to execute for each provided instance
+     * @param instances the instances to act on with the provided {@code action}.
+     *
+     * @return the Stream with exceptions, if any
+     */
+    @SafeVarargs
+    public static <T> Stream<Exception> forceOnAll(ThrowingConsumer<? super T, ? extends Exception> action, T ... instances) {
+        return forceOnAll(action, Stream.of(instances));
+    }
+
+
+    /**
+     * Create a stream which will yield the exceptions (if any) from invoking an {@link ThrowingConsumer action} on
+     * several {@code instances}. Consuming the stream will ensure that <strong>all</strong> instances will have
+     * the action invoked on them, and any exceptions happening will be available through the returned stream.
+     *
+     * @param action the action to execute for each provided instance
+     * @param instances the instances to act on with the provided {@code action}.
+     *
+     * @return the Stream with exceptions, if any
+     */
+    public static <T> Stream<Exception> forceOnAll(ThrowingConsumer<? super T, ? extends Exception> action, Stream<T> instances) {
+        return instances.filter(Objects::nonNull).flatMap(instance -> {
+            try {
+                action.accept(instance);
+            } catch (Exception exception) {
+                return Stream.of(exception);
+            }
+            return Stream.empty();
+        });
     }
 
 

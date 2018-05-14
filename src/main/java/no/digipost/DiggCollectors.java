@@ -28,6 +28,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collector;
@@ -35,6 +36,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.unmodifiableList;
+import static java.util.stream.Collectors.collectingAndThen;
+import static java.util.stream.Collectors.toCollection;
+import static java.util.stream.Collectors.toList;
 
 /**
  * Various {@link java.util.stream.Collector} implementations.
@@ -134,6 +138,36 @@ public final class DiggCollectors {
     public static <T> Collector<T, OneTimeAssignment<T>, Optional<T>> allowAtMostOneOrElseThrow(BiFunction<? super T, ? super T, ? extends RuntimeException> exceptionOnExcessiveElements) {
         return new EnforceAtMostOneElementCollector<>(exceptionOnExcessiveElements);
     }
+
+
+    /**
+     * Add exceptions as {@link Throwable#addSuppressed(Throwable) suppressed} exception to a given
+     * exception.
+     *
+     * @param exception The exception to add the suppressed exceptions to.
+     * @return the collector
+     */
+    public static <X extends Throwable> Collector<Throwable, ?, X> asSuppressedExceptionsOf(X exception) {
+        return collectingAndThen(toList(), suppressed -> {
+            suppressed.forEach(exception::addSuppressed);
+            return exception;
+        });
+    }
+
+    /**
+     * Collapse exceptions by taking the first (if any) and add every exception after the first
+     * as {@link Throwable#addSuppressed(Throwable) suppressed} to the first one.
+     *
+     * @return the collector
+     */
+    public static <X extends Throwable> Collector<X, ?, Optional<X>> toSingleExceptionWithSuppressed() {
+        return collectingAndThen(toCollection(() -> new ConcurrentLinkedQueue<X>()),
+                exceptions -> Optional.ofNullable(exceptions.poll()).map(firstException -> {
+                    exceptions.forEach(firstException::addSuppressed);
+                    return firstException;
+                }));
+    }
+
 
 
 
