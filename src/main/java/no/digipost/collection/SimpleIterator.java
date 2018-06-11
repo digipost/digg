@@ -60,9 +60,4 @@ public abstract class SimpleIterator<T> implements Iterator<T> {
         return toReturn;
     }
 
-    @Override
-    public void remove() {
-        throw new UnsupportedOperationException("remove() method is not supported");
-    }
-
 }
