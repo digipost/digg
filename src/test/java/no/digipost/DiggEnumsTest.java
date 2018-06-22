@@ -16,7 +16,6 @@
 package no.digipost;
 
 import com.pholser.junit.quickcheck.Property;
-import com.pholser.junit.quickcheck.generator.ValuesOf;
 import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,9 +25,15 @@ import java.util.function.Function;
 
 import static co.unruly.matchers.StreamMatchers.empty;
 import static co.unruly.matchers.StreamMatchers.equalTo;
+import static com.pholser.junit.quickcheck.Mode.EXHAUSTIVE;
 import static java.util.stream.Collectors.joining;
-import static no.digipost.DiggEnums.*;
-import static no.digipost.DiggEnumsTest.MyEnum.*;
+import static no.digipost.DiggEnums.fromCommaSeparatedNames;
+import static no.digipost.DiggEnums.toCommaSeparatedNames;
+import static no.digipost.DiggEnums.toNames;
+import static no.digipost.DiggEnums.toStringOf;
+import static no.digipost.DiggEnumsTest.MyEnum.A;
+import static no.digipost.DiggEnumsTest.MyEnum.AA;
+import static no.digipost.DiggEnumsTest.MyEnum.ABA;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -39,8 +44,8 @@ public class DiggEnumsTest {
         A, AA, ABA, ABC
     }
 
-    @Property
-    public void convertFromCommaSeparatedListOfEnumNames(List<@ValuesOf MyEnum> enums) {
+    @Property(mode = EXHAUSTIVE)
+    public void convertFromCommaSeparatedListOfEnumNames(List<MyEnum> enums) {
         assertThat(fromCommaSeparatedNames(enums.stream().map(Enum::name).collect(joining(",")), MyEnum.class), equalTo(enums.stream()));
         assertThat(fromCommaSeparatedNames(enums.stream().map(Enum::name).collect(joining(" , ", "  ", "   ")), MyEnum.class), equalTo(enums.stream()));
     }
@@ -56,7 +61,7 @@ public class DiggEnumsTest {
         assertThat(toStringOf(lowerCasedEnumName, joining(": ", "[", "]"), A, ABA, AA), is("[a: aba: aa]"));
     }
 
-    @Property
+    @Property(mode = EXHAUSTIVE)
     public void toStringConversionsAreSpecialCasesOfTheGenericBaseCase(MyEnum ... enums) {
         assertThat(toCommaSeparatedNames(enums), is(toStringOf(Enum::name, joining(","), enums)));
         assertThat(toNames(": ", enums), is(toStringOf(Enum::name, joining(": "), enums)));

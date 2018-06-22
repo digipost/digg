@@ -17,7 +17,6 @@ package no.digipost.io;
 
 import com.pholser.junit.quickcheck.Property;
 import com.pholser.junit.quickcheck.generator.InRange;
-import com.pholser.junit.quickcheck.generator.ValuesOf;
 import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import no.digipost.tuple.Tuple;
@@ -89,13 +88,13 @@ public class DataSizeTest {
     }
 
     @Property
-    public void convertToUnit(@InRange(minInt = 0, maxInt=10240) int amount, @ValuesOf DataSizeUnit unit) {
+    public void convertToUnit(@InRange(minInt = 0, maxInt=10240) int amount, DataSizeUnit unit) {
         DataSize size = DataSize.of(amount, unit);
         assertThat(size.get(unit), is((double) amount));
     }
 
     @Property
-    public void sorting(Set<@InRange(minInt = 0, maxInt = 10240) Integer> ints, @ValuesOf DataSizeUnit unit) {
+    public void sorting(Set<@InRange(minInt = 0, maxInt = 10240) Integer> ints, DataSizeUnit unit) {
         SortedSet<DataSize> sortedSizes = ints.stream().map(i -> DataSize.of(i, unit)).collect(toCollection(TreeSet::new));
         Iterator<Integer> sortedByteSizes = new TreeSet<>(ints).iterator();
         for (DataSize size : sortedSizes) {
@@ -104,7 +103,7 @@ public class DataSizeTest {
     }
 
     @Property
-    public void zeroIsZero(@ValuesOf DataSizeUnit unit) {
+    public void zeroIsZero(DataSizeUnit unit) {
         assertThat(DataSize.of(0, unit), sameInstance(DataSize.ZERO));
     }
 
@@ -140,7 +139,7 @@ public class DataSizeTest {
     }
 
     @Property
-    public void arithemtic(@InRange(minInt=0, maxInt=2048) int originalSize, @ValuesOf DataSizeUnit unit, @InRange(minInt=1) int deltaBytes) {
+    public void arithemtic(@InRange(minInt=0, maxInt=2048) int originalSize, DataSizeUnit unit, @InRange(minInt=1) int deltaBytes) {
         DataSize original = DataSize.of(originalSize, unit);
         DataSize delta = DataSize.bytes(deltaBytes);
         DataSize newSize = original.plus(delta);
