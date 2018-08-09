@@ -146,8 +146,8 @@ public final class ControllableClock extends Clock implements TimeControllable, 
     }
 
     @Override
-    public void timePasses(Duration duration) {
-        delegate.getAndUpdate(previous -> Clock.offset(previous, duration));
+    public void timePasses(Duration amountOfTime) {
+        delegate.getAndUpdate(previous -> Clock.offset(previous, amountOfTime));
     }
 
     @Override

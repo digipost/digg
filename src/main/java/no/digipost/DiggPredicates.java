@@ -27,7 +27,7 @@ public final class DiggPredicates {
      * <p>
      * As this is a stateful predicate, it should usually not be kept as a
      * reference, but used inline when processing a number of elements,
-     * with {@link java.util.Stream#filter streams}.
+     * with {@link java.util.stream.Stream#filter streams}.
      *
      * @param n the nth {@code true}-yielding invocation, {@code 1} indicates first,
      *          {@code 2} second, and so forth. {@code 0} or less will throw an

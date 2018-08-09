@@ -51,7 +51,7 @@ public class ConsumingInputStream extends InputStream {
      * {@link OutputStream} passed to the given {@link Consumer}.
      *
      * @param executorService The executorService to use to start producing data which will be readable by this inputstream.
-     * @param write The data producing logic. The {@link Consumer} will be given the <code>OutputStream</code< resulting from the
+     * @param write The data producing logic. The {@link Consumer} will be given the <code>OutputStream</code> resulting from the
      *              <code>outputStreamDecorator</code>.
      */
     public ConsumingInputStream(ExecutorService executorService, Consumer<? super OutputStream> write) {
@@ -68,7 +68,7 @@ public class ConsumingInputStream extends InputStream {
      *                              <em>always</em> wrap the given OutputStream in the OutputStream returned from this <code>Function</code>,
      *                              i.e. the resulting OutputStream must be constructed by wrapping the given OutputStream as
      *                              a constructor argument. (E.g. <code>ZipOutputStream::new</code>.
-     * @param write The data producing logic. The {@link Consumer} will be given the <code>OutputStream</code< resulting from the
+     * @param write The data producing logic. The {@link Consumer} will be given the <code>OutputStream</code> resulting from the
      *              <code>outputStreamDecorator</code>.
      */
     public <S extends OutputStream> ConsumingInputStream(ExecutorService executorService, Function<OutputStream, S> outputStreamDecorator, Consumer<? super S> write) {

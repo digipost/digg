@@ -23,7 +23,7 @@ import java.util.Optional;
 
 /**
  * SimpleIterator offers an easier way to implement the
- * {@link java.lang.Iterator} interface, by requiring only
+ * {@link java.util.Iterator} interface, by requiring only
  * one method, {@link #nextIfAvailable()}, to be implemented instead of both
  * {@link Iterator#hasNext() hasNext()} and {@link Iterator#next() next()}.
  *

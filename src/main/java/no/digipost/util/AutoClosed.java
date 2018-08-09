@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 
 /**
  * An adapter to enable any arbitrary object to be managed by the
- * <em>try-with-resources</em> facility of Java >= 7, i.e. it will have a
+ * <em>try-with-resources</em> facility of Java &gt;= 7, i.e. it will have a
  * closing operation invoked when exiting the {@code try}-block.
  *
  * @param <T> The type of the arbitrary object which will have an operation invoked

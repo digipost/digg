@@ -59,8 +59,6 @@ import java.util.Objects;
  * }</pre>
  *
  * @see JustA {@code JustA<SomeType>} is the generic version for any (reference-) type.
- *
- * @param <T> The type of wrapped value. Should be an immutable value-type.
  */
 public abstract class JustALong implements Serializable {
 

@@ -15,7 +15,12 @@
  */
 package no.digipost.time;
 
-import java.time.*;
+import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAmount;
 
 /**
@@ -60,7 +65,7 @@ public interface TimeControllable {
      *
      * @param amountOfTime the amount of time which are passing.
      */
-    void timePasses(Duration duration);
+    void timePasses(Duration amountOfTime);
 
     /**
      * Signal that time should freeze.
