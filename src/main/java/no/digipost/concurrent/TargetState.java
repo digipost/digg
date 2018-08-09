@@ -29,8 +29,8 @@ import static java.util.Arrays.asList;
  * be named as the state it models
  * <em>when the state has been reached</em>.
  *
- * E.g:
  * <p>
+ * E.g:
  * <pre>
  * TargetState isShutdown = ...
  * ...
@@ -44,9 +44,9 @@ import static java.util.Arrays.asList;
  * <pre>
  * TargetState isShutdown = ...
  * ...
- * isShutdown.untilThen(() -> {
+ * isShutdown.untilThen(() -&gt; {
  *     ...
- * }, exception -> handle(exception));
+ * }, exception -&gt; handle(exception));
  * </pre>
  */
 @FunctionalInterface

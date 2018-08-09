@@ -50,7 +50,7 @@ public final class DiggEnums {
      * The string may include any whitespace before and/or after each comma.
      * The identifiers must be converted to {@code enum} names using a given {@link Function}.
      *
-     * @param enumString the string containing the comma separated {@code enum} identifiers.
+     * @param enumsString the string containing the comma separated {@code enum} identifiers.
      * @param toEnumName the function to convert from the identifiers to {@code enum} names.
      * @param enumType the type of the {@code enum}.
      * @return a stream of the resolved {@code enum} constants.
@@ -64,7 +64,7 @@ public final class DiggEnums {
      * Resolve {@code enum} constants from a string containing identifiers separated by a delimiter.
      * The identifiers must be converted to {@code enum} constants using a given {@link Function}.
      *
-     * @param enumString the string containing the {@code enum} identifiers.
+     * @param enumsString the string containing the {@code enum} identifiers.
      * @param delimRegex the regular expression which is applied to the {code enumString} to split it into
      *                   separate identifiers.
      * @param convertToEnum the function to convert from the identifiers to {@code enum} constants from the identifiers.
@@ -80,7 +80,7 @@ public final class DiggEnums {
      * The identifiers must be converted to {@code enum} constants using a given {@link Function}. In
      * addition, this method offers a filtering mechanism to only include identifiers which satisfy a {@link Predicate}.
      *
-     * @param enumString the string containing the {@code enum} identifiers.
+     * @param enumsString the string containing the {@code enum} identifiers.
      * @param delimRegex the regular expression which is applied to the {code enumString} to split it into
      *                   separate identifiers.
      * @param included predicate which is used as a filter on each identifier. Identifiers not satisfying this predicate

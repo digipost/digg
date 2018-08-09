@@ -60,7 +60,7 @@ import java.util.Objects;
  * Say a query of some sort: <pre>{@code db.findPerson(WithName.of("John Doe"), WithPhonenumber.of("555-98437"))}</pre>
  * If the method parameters for some reason are refactored to switch places, the code invoking the method will not compile
  * anymore, as the arguments are not given in the correct order even though they are really just Strings.
- * </p>
+ *
  *
  * @param <T> The type of wrapped value. Should be an immutable value-type.
  */

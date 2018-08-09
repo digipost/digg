@@ -173,7 +173,7 @@ public final class DiggStreams {
      * the resolved objects. The first object not accepted by the predicate will end the stream.
      *
      * @param firstPageNum the initial page number
-     * @param resolvePage@param resolvePage a function accepting an int indicating the page number and returns a page to include
+     * @param resolvePage a function accepting an int indicating the page number and returns a page to include
      *                    in the resulting stream
      * @param includeWhile the predicate accepting the objects to include in the stream
      *
