@@ -18,10 +18,18 @@ package no.digipost;
 import no.digipost.function.ObjIntFunction;
 import no.digipost.function.ObjLongFunction;
 
+import java.util.Collection;
+import java.util.Spliterator;
+import java.util.Spliterators;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.BiFunction;
+import java.util.function.Consumer;
+import java.util.function.IntFunction;
+import java.util.function.Predicate;
 import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * Utilities for working with {@link Stream}s.
@@ -129,6 +137,67 @@ public final class DiggStreams {
     }
 
 
+
+    /**
+     * Stream elements retrieved from resolved collections while they are non-empty.
+     * The first empty collection will end the stream.
+     *
+     * @param <E> The type of the elements in the resolved collections, and elements in the resulting stream
+     *
+     * @param resolveCollection a function accepting an int indicating the page number and returns a {@link Collection} with
+     *                          elements to include in the resulting stream
+     *
+     * @return the stream yielding the elements of the resolved collections
+     */
+    public static <E> Stream<E> streamWhileNonEmpty(IntFunction<? extends Collection<E>> resolveCollection) {
+        return streamPages(resolveCollection, c -> !c.isEmpty()).flatMap(Collection::stream);
+    }
+
+
+    /**
+     * Generate a stream of objects resolved from an incrementing int (page number), while a predicate is accepting
+     * the resolved objects. The first object not accepted by the predicate will end the stream.
+     *
+     * @param resolvePage a function accepting an int indicating the page number and returns a page to include
+     *                    in the resulting stream
+     * @param includeWhile the predicate accepting the objects to include in the stream
+     *
+     * @return the stream of the resolved objects
+     */
+    public static <P> Stream<P> streamPages(IntFunction<P> resolvePage, Predicate<? super P> includeWhile) {
+        return streamPages(0, resolvePage, includeWhile);
+    }
+
+    /**
+     * Generate a stream of objects resolved from an incrementing int (page number), while a predicate is accepting
+     * the resolved objects. The first object not accepted by the predicate will end the stream.
+     *
+     * @param firstPageNum the initial page number
+     * @param resolvePage@param resolvePage a function accepting an int indicating the page number and returns a page to include
+     *                    in the resulting stream
+     * @param includeWhile the predicate accepting the objects to include in the stream
+     *
+     * @return the stream of the resolved objects
+     */
+    public static <P> Stream<P> streamPages(int firstPageNum, IntFunction<P> resolvePage, Predicate<? super P> includeWhile) {
+        Spliterator<P> spliterator = new Spliterators.AbstractSpliterator<P>(Long.MAX_VALUE, 0) {
+            final AtomicInteger pageNum = new AtomicInteger(firstPageNum);
+            @Override
+            public boolean tryAdvance(Consumer<? super P> action) {
+                P nextPage = resolvePage.apply(pageNum.getAndIncrement());
+                if (includeWhile.test(nextPage)) {
+                    action.accept(nextPage);
+                    return true;
+                } else {
+                    return false;
+                }
+            }
+        };
+        return StreamSupport.stream(spliterator, false);
+    }
+
+
     private DiggStreams() {
     }
+
 }

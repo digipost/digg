@@ -16,21 +16,28 @@
 package no.digipost;
 
 import com.pholser.junit.quickcheck.Property;
+import com.pholser.junit.quickcheck.generator.InRange;
 import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.stream.Stream;
 
 import static co.unruly.matchers.StreamMatchers.contains;
+import static co.unruly.matchers.StreamMatchers.equalTo;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
+import static java.util.stream.IntStream.iterate;
 import static no.digipost.DiggStreams.streamByIntIndex;
 import static no.digipost.DiggStreams.streamByKey;
 import static no.digipost.DiggStreams.streamByLongIndex;
+import static no.digipost.DiggStreams.streamWhileNonEmpty;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertThat;
 
@@ -58,5 +65,18 @@ public class DiggStreamsTest {
         String asString(long value) {
             return String.valueOf(value);
         }
+    }
+
+    @Property
+    public void streamPagesWhilePageHasContent(@InRange(minInt = 10, maxInt = 200) int alphabetLength, @InRange(minInt = 1, maxInt = 13) int pageSize) {
+        IntFunction<Collection<Character>> pagedAlphabet = page -> iterate('A' + pageSize * page, chr -> chr + 1)
+                .limit(pageSize)
+                .filter(chr -> chr < 'A' + alphabetLength)
+                .mapToObj(chr -> Character.valueOf((char) chr))
+                .collect(toList());
+
+        Stream<Character> expectedAlphabet = iterate('A', chr -> chr + 1).limit(alphabetLength).mapToObj(chr -> Character.valueOf((char) chr));
+
+        assertThat(streamWhileNonEmpty(pagedAlphabet), equalTo(expectedAlphabet));
     }
 }
