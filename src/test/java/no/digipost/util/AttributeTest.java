@@ -17,24 +17,23 @@ package no.digipost.util;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 import no.digipost.tuple.Tuple;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import static co.unruly.matchers.Java8Matchers.where;
 import static java.util.Optional.empty;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AttributeTest {
 
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void settingAndGettingValues() {
@@ -54,9 +53,8 @@ public class AttributeTest {
         assertThat(name.requireFrom(myAttributes), is("my name"));
         assertThat(age.requireFrom(myAttributes), is(29));
 
-        expectedException.expect(Attribute.NotFound.class);
-        expectedException.expectMessage(birthday.name);
-        birthday.requireFrom(myAttributes);
+        assertThat(assertThrows(Attribute.NotFound.class, () -> birthday.requireFrom(myAttributes)),
+                where(Exception::getMessage, containsString(birthday.name)));
     }
 
     @Test

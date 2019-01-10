@@ -17,9 +17,7 @@ package no.digipost.io;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 import no.digipost.tuple.Tuple;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 import org.quicktheories.WithQuickTheories;
 import org.quicktheories.core.Gen;
 
@@ -45,16 +43,14 @@ import static no.digipost.io.DataSizeUnit.MB;
 import static no.digipost.io.DataSizeUnit.MEGABYTES;
 import static no.digipost.io.DataSizeUnit.kB;
 import static no.digipost.tuple.Tuple.of;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class DataSizeTest implements WithQuickTheories {
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void correctEqualsAndHashCode() {
@@ -125,8 +121,7 @@ public class DataSizeTest implements WithQuickTheories {
 
     @Test
     public void negativeSizeIsNotAllowed() {
-        expectedException.expect(IllegalArgumentException.class);
-        DataSize.bytes(-1);
+        assertThrows(IllegalArgumentException.class, () -> DataSize.bytes(-1));
     }
 
     @Test

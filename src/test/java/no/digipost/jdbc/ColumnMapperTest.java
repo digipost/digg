@@ -15,7 +15,7 @@
  */
 package no.digipost.jdbc;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 import java.util.Optional;
@@ -24,9 +24,9 @@ import static co.unruly.matchers.OptionalMatchers.contains;
 import static co.unruly.matchers.OptionalMatchers.empty;
 import static java.util.function.Function.identity;
 import static no.digipost.jdbc.ResultSetMock.mockResult;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
 
 public class ColumnMapperTest {
 

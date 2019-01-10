@@ -15,18 +15,28 @@
  */
 package no.digipost.time;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
-import java.time.*;
-import java.time.temporal.*;
+import java.time.Duration;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.Period;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.Temporal;
+import java.time.temporal.TemporalAmount;
+import java.time.temporal.TemporalUnit;
+import java.time.temporal.UnsupportedTemporalTypeException;
 import java.util.List;
 
 import static java.time.Clock.systemUTC;
 import static java.util.Arrays.asList;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ControllableClockTest {
 
@@ -99,14 +109,10 @@ public class ControllableClockTest {
         assertThat(snapshot, lessThan(newTime.plusSeconds(5)));
     }
 
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
-
     @Test
     public void setClockToItselfIsAnError() {
         ControllableClock clock = ControllableClock.freezedAt(LocalDateTime.of(2015, 6, 24, 12, 15));
-        expectedException.expect(IllegalArgumentException.class);
-        clock.set(clock);
+        assertThrows(IllegalArgumentException.class, () ->clock.set(clock));
     }
 
     @Test

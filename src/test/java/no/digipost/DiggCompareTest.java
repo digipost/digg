@@ -15,7 +15,7 @@
  */
 package no.digipost;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.quicktheories.WithQuickTheories;
 import org.quicktheories.dsl.TheoryBuilder2;
 

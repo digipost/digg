@@ -17,9 +17,7 @@ package no.digipost;
 
 import co.unruly.matchers.OptionalMatchers;
 import co.unruly.matchers.StreamMatchers;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Optional;
@@ -29,15 +27,12 @@ import java.util.stream.Stream;
 import static no.digipost.DiggExceptions.mayThrow;
 import static no.digipost.DiggOptionals.toList;
 import static no.digipost.DiggOptionals.toStream;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
-//import static org.hamcrest.Matchers.empty;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class DiggOptionalsTest {
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void convertOptionalToList() {
@@ -49,16 +44,14 @@ public class DiggOptionalsTest {
     public void cannotAddToReturnedList() {
         List<Integer> list = toList(Optional.of(42));
 
-        expectedException.expect(UnsupportedOperationException.class);
-        list.add(43);
+        assertThrows(UnsupportedOperationException.class, () -> list.add(43));
     }
 
     @Test
     public void cannotRemoveFromReturnedList() {
         List<Integer> list = toList(Optional.of(42));
 
-        expectedException.expect(UnsupportedOperationException.class);
-        list.clear();
+        assertThrows(UnsupportedOperationException.class, list::clear);
     }
 
     @Test

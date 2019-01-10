@@ -20,9 +20,7 @@ import no.digipost.collection.ConflictingElementEncountered;
 import no.digipost.tuple.Tuple;
 import no.digipost.tuple.ViewableAsTuple;
 import no.digipost.util.ViewableAsOptional;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 import org.quicktheories.WithQuickTheories;
 import org.quicktheories.core.Gen;
 
@@ -48,6 +46,7 @@ import static no.digipost.DiggCollectors.asSuppressedExceptionsOf;
 import static no.digipost.DiggCollectors.toMultimap;
 import static no.digipost.DiggCollectors.toMultituple;
 import static no.digipost.DiggCollectors.toSingleExceptionWithSuppressed;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -56,15 +55,11 @@ import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
 public class DiggCollectorsTest implements WithQuickTheories {
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
     interface NumTranslation extends ViewableAsTuple<Integer, Optional<String>> {}
 
@@ -112,8 +107,7 @@ public class DiggCollectorsTest implements WithQuickTheories {
         NumTranslation twoInEnglish = () -> Tuple.of(2, Optional.of("two"));
 
         Stream<NumTranslation> translations = Stream.<NumTranslation>builder().add(oneInEnglish).add(missingOne).add(oneInEsperanto).add(twoInEnglish).build();
-        expectedException.expect(ConflictingElementEncountered.class);
-        translations.collect(toMultituple());
+        assertThrows(ConflictingElementEncountered.class, () -> translations.collect(toMultituple()));
     }
 
     @Test
@@ -125,8 +119,8 @@ public class DiggCollectorsTest implements WithQuickTheories {
 
     @Test
     public void allowAtMostOneFailsEvenIfExcessiveElementsAreNull() {
-        expectedException.expect(ViewableAsOptional.TooManyElements.class);
-        Stream.of("x", null).collect(allowAtMostOne());
+        Stream<String> xAndNull = Stream.of("x", null);
+        assertThrows(ViewableAsOptional.TooManyElements.class, () -> xAndNull.collect(allowAtMostOne()));
     }
 
     @Test
@@ -163,12 +157,12 @@ public class DiggCollectorsTest implements WithQuickTheories {
         doThrow(connectionCloseException).when(connection).close();
         doThrow(statementCloseException).when(pstmt).close();
 
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expect(where(Throwable::getSuppressed, arrayContaining(statementCloseException, connectionCloseException)));
         try {
             throw new IllegalStateException("main");
         } catch (IllegalStateException e) {
-            throw close(pstmt, connection).collect(asSuppressedExceptionsOf(e));
+            IllegalStateException collatedExceptions = close(pstmt, connection).collect(asSuppressedExceptionsOf(e));
+            assertThat(collatedExceptions, sameInstance(e));
+            assertThat(collatedExceptions, where(Throwable::getSuppressed, arrayContaining(statementCloseException, connectionCloseException)));
         }
 
     }
@@ -202,16 +196,13 @@ public class DiggCollectorsTest implements WithQuickTheories {
         qt()
             .forAll(listsWithAtLeastTwoElements)
             .checkAssert(list -> {
-                try {
-                    list.stream().collect(allowAtMostOneOrElseThrow((first, excess) -> {
-                        assertThat(first, is(list.get(0)));
-                        assertThat(excess, is(list.get(1)));
-                        return customException;
-                    }));
-                    fail("Should have thrown " + customException);
-                } catch (IllegalStateException e) {
-                    assertThat(e, sameInstance(customException));
-                }
+                IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                        () -> list.stream().collect(allowAtMostOneOrElseThrow((first, excess) -> {
+                            assertThat(first, is(list.get(0)));
+                            assertThat(excess, is(list.get(1)));
+                            return customException;
+                        })));
+                assertThat(thrown, sameInstance(customException));
             });
     }
 }

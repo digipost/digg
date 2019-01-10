@@ -17,10 +17,8 @@ package no.digipost.io;
 
 import com.google.common.io.ByteStreams;
 import no.digipost.io.ConsumingInputStream.ProducerFailed;
-import org.junit.AfterClass;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.Test;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -29,7 +27,11 @@ import java.io.OutputStream;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.*;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.LongAdder;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -38,8 +40,12 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import static java.time.Duration.ofMillis;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ConsumingInputStreamTest {
 
@@ -117,16 +123,12 @@ public class ConsumingInputStreamTest {
     }
 
 
-    @Rule
-    public ExpectedException expectedException = ExpectedException.none();
-
     @Test
     public void failFastForOutputStreamDecorator() {
         Function<OutputStream, OutputStream> failStreamWrapping = out -> {
             throw new IllegalStateException("unable to wrap piped stream");
         };
-        expectedException.expect(IllegalStateException.class);
-        input = new ConsumingInputStream(executorService, failStreamWrapping, out -> {});
+        assertThrows(IllegalStateException.class, () -> new ConsumingInputStream(executorService, failStreamWrapping, out -> {}));
     }
 
 
@@ -154,7 +156,7 @@ public class ConsumingInputStreamTest {
 
 
 
-    @AfterClass
+    @AfterAll
     public static void shutdownExecutorService() {
         executorService.shutdownNow();
     }

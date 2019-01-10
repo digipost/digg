@@ -15,34 +15,27 @@
  */
 package no.digipost.concurrent;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.Timeout;
+import org.junit.jupiter.api.Test;
 import org.quicktheories.WithQuickTheories;
 import org.quicktheories.api.Subject2;
 
+import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CountDownLatch;
 import java.util.stream.Stream;
 
 import static co.unruly.matchers.Java8Matchers.where;
-import static java.util.concurrent.TimeUnit.SECONDS;
+import static co.unruly.matchers.Java8Matchers.whereNot;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
+import static org.junit.jupiter.api.Assertions.fail;
+
 
 public class OneTimeAssignmentTest implements WithQuickTheories {
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
-
-    @Rule
-    public final Timeout timeout = new Timeout(2, SECONDS);
 
     @Test
     public void assignAndRetrieveAValue() {
@@ -71,8 +64,7 @@ public class OneTimeAssignmentTest implements WithQuickTheories {
     public void setValueTwiceThrowsException() {
         OneTimeAssignment<String> x = OneTimeAssignment.newInstance();
         x.set("x");
-        expectedException.expect(OneTimeAssignment.AlreadyAssigned.class);
-        x.set("x");
+        assertThrows(OneTimeAssignment.AlreadyAssigned.class, () -> x.set("x"));
     }
 
     @Test
@@ -91,8 +83,7 @@ public class OneTimeAssignmentTest implements WithQuickTheories {
     public void setNullTwiceThrowsException() {
         OneTimeAssignment<String> x = OneTimeAssignment.newInstance();
         x.set(null);
-        expectedException.expect(OneTimeAssignment.AlreadyAssigned.class);
-        x.set(null);
+        assertThrows(OneTimeAssignment.AlreadyAssigned.class, () -> x.set(null));
     }
 
     @Test
@@ -124,7 +115,7 @@ public class OneTimeAssignmentTest implements WithQuickTheories {
         }, (Runnable r) -> r);
 
         assignments.limit(concurrentAssignments).parallel().forEach(CompletableFuture::runAsync);
-        expectedFails.await();
+        assertTimeoutPreemptively(Duration.ofSeconds(2), () -> expectedFails.await());
         assertThat(x.get(), is("x"));
     }
 
@@ -134,15 +125,15 @@ public class OneTimeAssignmentTest implements WithQuickTheories {
         OneTimeAssignment<String> assignmentWithDefault = OneTimeAssignment.defaultTo("x");
 
 
-        assertFalse(assignment.isSet());
-        assertFalse(assignment.isSet());
-        assertFalse(assignmentWithDefault.isSet());
-        assertFalse(assignmentWithDefault.isSet());
+        assertThat(assignment, whereNot(OneTimeAssignment::isSet));
+        assertThat(assignment, whereNot(OneTimeAssignment::isSet));
+        assertThat(assignmentWithDefault, whereNot(OneTimeAssignment::isSet));
+        assertThat(assignmentWithDefault, whereNot(OneTimeAssignment::isSet));
 
         assignment.set("x");
-        assertTrue(assignment.isSet());
+        assertThat(assignment, where(OneTimeAssignment::isSet));
 
         assignmentWithDefault.get();
-        assertTrue(assignmentWithDefault.isSet());
+        assertThat(assignmentWithDefault, where(OneTimeAssignment::isSet));
     }
 }

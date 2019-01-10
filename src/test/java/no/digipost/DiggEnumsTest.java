@@ -15,7 +15,7 @@
  */
 package no.digipost;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.quicktheories.WithQuickTheories;
 import org.quicktheories.core.Gen;
 
@@ -32,8 +32,8 @@ import static no.digipost.DiggEnums.toStringOf;
 import static no.digipost.DiggEnumsTest.MyEnum.A;
 import static no.digipost.DiggEnumsTest.MyEnum.AA;
 import static no.digipost.DiggEnumsTest.MyEnum.ABA;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 public class DiggEnumsTest implements WithQuickTheories {
 

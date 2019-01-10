@@ -15,19 +15,18 @@
  */
 package no.digipost.function;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.Consumer;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class ThrowingRunnableTest {
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
     private final RuntimeException ex = new RuntimeException();
 
@@ -36,15 +35,13 @@ public class ThrowingRunnableTest {
     @Test
     public void rethrowOriginalRuntimeException() {
         ThrowingRunnable<Exception> fn = () -> {throw ex;};
-        expectedException.expect(sameInstance(ex));
-        fn.asUnchecked().run();
+        assertThat(assertThrows(RuntimeException.class, fn.asUnchecked()::run), sameInstance(ex));
     }
 
     @Test
     public void rethrowOriginalError() {
         ThrowingRunnable<Exception> fn = () -> {throw err;};
-        expectedException.expect(sameInstance(err));
-        fn.asUnchecked().run();
+        assertThat(assertThrows(Error.class, fn.asUnchecked()::run), sameInstance(err));
     }
 
     @Test

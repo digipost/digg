@@ -15,11 +15,19 @@
  */
 package no.digipost.jdbc;
 
-import no.digipost.tuple.*;
+import no.digipost.tuple.Decuple;
+import no.digipost.tuple.Hextuple;
+import no.digipost.tuple.Nonuple;
+import no.digipost.tuple.Octuple;
+import no.digipost.tuple.Pentuple;
+import no.digipost.tuple.Quadruple;
+import no.digipost.tuple.Septuple;
+import no.digipost.tuple.Triple;
+import no.digipost.tuple.Tuple;
 import no.digipost.util.Attribute;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -31,11 +39,19 @@ import java.util.Optional;
 
 import static co.unruly.matchers.OptionalMatchers.contains;
 import static java.time.Instant.EPOCH;
-import static no.digipost.jdbc.Mappers.*;
+import static no.digipost.jdbc.Mappers.getBigDecimal;
+import static no.digipost.jdbc.Mappers.getBoolean;
+import static no.digipost.jdbc.Mappers.getDouble;
+import static no.digipost.jdbc.Mappers.getFloat;
+import static no.digipost.jdbc.Mappers.getInt;
+import static no.digipost.jdbc.Mappers.getNullableString;
+import static no.digipost.jdbc.Mappers.getNullableURL;
+import static no.digipost.jdbc.Mappers.getString;
+import static no.digipost.jdbc.Mappers.getTimestamp;
 import static no.digipost.jdbc.ResultSetMock.mockSingleRowResult;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 public class RowMapperTest {
 
@@ -138,7 +154,7 @@ public class RowMapperTest {
 
     private ResultSetMock rs;
 
-    @Before
+    @BeforeEach
     public void mockDatabaseResultSet() {
         rs = mockSingleRowResult(
                 Tuple.of(name.name, "John Doe"),
@@ -273,7 +289,7 @@ public class RowMapperTest {
 
 
 
-    @After
+    @AfterEach
     public void closeDatabaseResultMock() {
         rs.close();
     }

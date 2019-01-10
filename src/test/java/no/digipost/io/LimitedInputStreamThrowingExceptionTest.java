@@ -15,9 +15,7 @@
  */
 package no.digipost.io;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -27,22 +25,20 @@ import java.security.DigestException;
 import java.security.GeneralSecurityException;
 import java.util.function.Supplier;
 
+import static co.unruly.matchers.Java8Matchers.where;
 import static com.google.common.io.ByteStreams.toByteArray;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static no.digipost.DiggIO.limit;
 import static no.digipost.io.DataSize.bytes;
-import static no.digipost.util.DiggMatchers.hasCause;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.either;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class LimitedInputStreamThrowingExceptionTest {
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void readsAnInputStreamToTheEnd() throws Exception {
@@ -52,23 +48,19 @@ public class LimitedInputStreamThrowingExceptionTest {
     @Test
     public void throwsIOExceptionIfTooManyBytes() throws Exception {
         IOException tooManyBytes = new IOException();
-        expectedException.expect(sameInstance(tooManyBytes));
-        testLimitedStream("xyz", () -> tooManyBytes);
+        assertThat(assertThrows(IOException.class, () -> testLimitedStream("xyz", () -> tooManyBytes)), sameInstance(tooManyBytes));
     }
 
     @Test
     public void throwsRuntimeExceptionIfTooManyBytes() throws Exception {
         RuntimeException tooManyBytes = new IllegalStateException();
-        expectedException.expect(sameInstance(tooManyBytes));
-        testLimitedStream("xyz", () -> tooManyBytes);
+        assertThat(assertThrows(RuntimeException.class, () -> testLimitedStream("xyz", () -> tooManyBytes)), sameInstance(tooManyBytes));
     }
 
     @Test
     public void wrapsOtherCheckedExceptionsThanIOExceptionAsRuntimeException() throws Exception {
         GeneralSecurityException tooManyBytes = new DigestException();
-        expectedException.expect(RuntimeException.class);
-        expectedException.expectCause(sameInstance(tooManyBytes));
-        testLimitedStream("xyz", () -> tooManyBytes);
+        assertThat(assertThrows(RuntimeException.class, () -> testLimitedStream("xyz", () -> tooManyBytes)), where(Exception::getCause, sameInstance(tooManyBytes)));
     }
 
 
@@ -104,7 +96,7 @@ public class LimitedInputStreamThrowingExceptionTest {
 
         if (e1 != null) {
             assertThat(e2, instanceOf(e1.getClass()));
-            assertThat(e2, either(sameInstance(e1)).or(hasCause(sameInstance(e1.getCause()))));
+            assertThat(e2, either(sameInstance(e1)).or(where(Exception::getCause, sameInstance(e1.getCause()))));
             throw e1;
         } else {
             assertThat(readUsingByteBuffers, equalTo(readUsingSingleBytes));

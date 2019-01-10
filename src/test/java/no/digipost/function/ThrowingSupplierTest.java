@@ -15,22 +15,20 @@
  */
 package no.digipost.function;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.Consumer;
 
 import static java.util.Optional.empty;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class ThrowingSupplierTest {
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
     private final RuntimeException ex = new RuntimeException();
 
@@ -39,15 +37,13 @@ public class ThrowingSupplierTest {
     @Test
     public void rethrowOriginalRuntimeException() {
         ThrowingSupplier<?, Exception> fn = () -> {throw ex;};
-        expectedException.expect(sameInstance(ex));
-        fn.asUnchecked().get();
+        assertThat(assertThrows(RuntimeException.class, fn.asUnchecked()::get), sameInstance(ex));
     }
 
     @Test
     public void rethrowOriginalError() {
         ThrowingSupplier<?, Exception> fn = () -> {throw err;};
-        expectedException.expect(sameInstance(err));
-        fn.asUnchecked().get();
+        assertThat(assertThrows(Error.class, fn.asUnchecked()::get), sameInstance(err));
     }
 
     @Test

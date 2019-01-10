@@ -17,9 +17,7 @@ package no.digipost.util;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
 import no.digipost.tuple.Tuple;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 import org.quicktheories.WithQuickTheories;
 import org.quicktheories.core.Gen;
 
@@ -28,17 +26,15 @@ import java.util.Map;
 import static co.unruly.matchers.Java8Matchers.where;
 import static no.digipost.util.AttributesMap.Config.ALLOW_NULL_VALUES;
 import static no.digipost.util.DiggMatchers.isEffectivelySerializable;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 
 public class AttributesMapTest implements WithQuickTheories {
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
     private final Gen<Attribute<Integer>> attributes() {
         return strings().ascii().ofLengthBetween(0, 40).map(Attribute::new);
@@ -121,8 +117,7 @@ public class AttributesMapTest implements WithQuickTheories {
         AttributesMap attributes = AttributesMap.with(text, null, ALLOW_NULL_VALUES).build();
         assertThat(attributes.get(text), nullValue());
 
-        expectedException.expect(GetsNamedValue.NotFound.class);
-        attributes.get(num);
+        assertThrows(GetsNamedValue.NotFound.class, () -> attributes.get(num));
     }
 
     private static <V> AttributesMap toAttributesMap(Map<? extends SetsNamedValue<V>, V> namesAndValues) {

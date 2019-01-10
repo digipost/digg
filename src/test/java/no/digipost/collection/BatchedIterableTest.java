@@ -15,7 +15,7 @@
  */
 package no.digipost.collection;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -26,8 +26,10 @@ import java.util.function.Supplier;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static no.digipost.collection.BatchedIterable.batched;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.emptyIterable;
+import static org.hamcrest.Matchers.is;
 
 
 public class BatchedIterableTest {

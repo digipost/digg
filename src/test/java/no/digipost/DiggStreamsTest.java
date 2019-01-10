@@ -15,7 +15,7 @@
  */
 package no.digipost;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.quicktheories.WithQuickTheories;
 import org.quicktheories.core.Gen;
 
@@ -35,8 +35,8 @@ import static no.digipost.DiggStreams.streamByIntIndex;
 import static no.digipost.DiggStreams.streamByKey;
 import static no.digipost.DiggStreams.streamByLongIndex;
 import static no.digipost.DiggStreams.streamWhileNonEmpty;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 public class DiggStreamsTest implements WithQuickTheories {
 

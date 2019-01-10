@@ -15,17 +15,13 @@
  */
 package no.digipost.concurrent;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class OneTimeToggleTest {
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
     private final OneTimeToggle done = new OneTimeToggle();
 
@@ -44,7 +40,6 @@ public class OneTimeToggleTest {
         done.nowOrIfAlreadyThenThrow(IllegalStateException::new);
         assertThat(done.yet(), is(true));
 
-        expectedException.expect(IllegalStateException.class);
-        done.nowOrIfAlreadyThenThrow(IllegalStateException::new);
+        assertThrows(IllegalStateException.class, () -> done.nowOrIfAlreadyThenThrow(IllegalStateException::new));
     }
 }

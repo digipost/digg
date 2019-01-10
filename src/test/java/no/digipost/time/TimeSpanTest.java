@@ -16,9 +16,8 @@
 package no.digipost.time;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import no.digipost.time.TimeSpan.Started;
+import org.junit.jupiter.api.Test;
 import org.quicktheories.WithQuickTheories;
 import org.quicktheories.api.Pair;
 import org.quicktheories.core.Gen;
@@ -33,20 +32,18 @@ import static java.time.Duration.ofMinutes;
 import static java.time.Duration.ofSeconds;
 import static java.time.Instant.now;
 import static java.time.Period.ofDays;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TimeSpanTest implements WithQuickTheories {
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void notValidToConstructNegativeTimeSpan() {
         Instant now = Instant.now();
         Instant thirtySecondsAgo = now.minusSeconds(30);
-        expectedException.expect(IllegalArgumentException.class);
-        TimeSpan.from(now).until(thirtySecondsAgo);
+        Started timeSpanFromNow = TimeSpan.from(now);
+        assertThrows(IllegalArgumentException.class, () -> timeSpanFromNow.until(thirtySecondsAgo));
     }
 
     @Test

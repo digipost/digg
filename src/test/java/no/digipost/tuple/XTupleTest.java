@@ -16,10 +16,10 @@
 package no.digipost.tuple;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static no.digipost.util.DiggMatchers.isEffectivelySerializable;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.MatcherAssert.assertThat;
 
 public class XTupleTest {
     @Test

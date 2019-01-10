@@ -15,7 +15,7 @@
  */
 package no.digipost.io;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.quicktheories.core.Gen;
 
 import java.io.ByteArrayInputStream;
@@ -26,7 +26,7 @@ import java.util.Arrays;
 import static com.google.common.io.ByteStreams.toByteArray;
 import static no.digipost.DiggIO.limit;
 import static no.digipost.io.LimitedInputStreamThrowingExceptionTest.toByteArrayUsingSingleByteReads;
-import static org.junit.Assert.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.quicktheories.QuickTheory.qt;
 import static org.quicktheories.generators.SourceDSL.integers;
 import static org.quicktheories.generators.SourceDSL.strings;

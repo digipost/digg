@@ -15,7 +15,7 @@
  */
 package no.digipost.time;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.quicktheories.WithQuickTheories;
 import org.quicktheories.core.Gen;
 
@@ -28,9 +28,9 @@ import static co.unruly.matchers.OptionalMatchers.empty;
 import static java.time.Duration.ofSeconds;
 import static no.digipost.time.ConditionalTimer.timeWhen;
 import static no.digipost.time.ConditionalTimer.using;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
 
 
 public class ConditionalTimerTest implements WithQuickTheories {

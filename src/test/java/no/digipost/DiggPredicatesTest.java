@@ -15,7 +15,7 @@
  */
 package no.digipost;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.quicktheories.WithQuickTheories;
 
 import static co.unruly.matchers.StreamMatchers.contains;
@@ -23,8 +23,8 @@ import static java.lang.Integer.MIN_VALUE;
 import static java.util.stream.Stream.iterate;
 import static no.digipost.DiggBase.forceOnAll;
 import static no.digipost.DiggPredicates.nth;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
-import static org.junit.Assert.assertThat;
 
 public class DiggPredicatesTest implements WithQuickTheories {
 

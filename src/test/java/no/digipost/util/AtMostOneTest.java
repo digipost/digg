@@ -16,9 +16,7 @@
 package no.digipost.util;
 
 import no.digipost.concurrent.OneTimeToggle;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,10 +24,11 @@ import java.util.Optional;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singleton;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class AtMostOneTest {
 
@@ -62,17 +61,12 @@ public class AtMostOneTest {
         assertTrue(excessiveElements.yet());
     }
 
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
-
     @Test
     public void throwsExceptionsIfRemainingItemsWhishWouldBeDiscarded() {
         AtMostOne<String> atMostOne = AtMostOne.from(asList("a", "b"));
 
         RuntimeException e = new RuntimeException();
-        expectedException.expect(sameInstance(e));
-        atMostOne.orIfExcessiveThrow(() -> e);
+        assertThat(assertThrows(RuntimeException.class, () -> atMostOne.orIfExcessiveThrow(() -> e)), sameInstance(e));
     }
 
     @Test
@@ -80,7 +74,6 @@ public class AtMostOneTest {
         List<String> elements = asList("a", "b");
         AtMostOne<String> atMostOne = AtMostOne.from(elements);
 
-        expectedException.expect(ViewableAsOptional.TooManyElements.class);
-        atMostOne.toOptional();
+        assertThrows(ViewableAsOptional.TooManyElements.class, atMostOne::toOptional);
     }
 }
