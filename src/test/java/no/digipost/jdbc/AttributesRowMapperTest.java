@@ -20,15 +20,14 @@ import no.digipost.tuple.Tuple;
 import no.digipost.util.Attribute;
 import no.digipost.util.AttributesMap;
 import no.digipost.util.GetsNamedValue.NotFound;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Optional;
 
+import static co.unruly.matchers.Java8Matchers.where;
 import static java.util.Arrays.asList;
 import static java.util.function.Function.identity;
 import static no.digipost.jdbc.Mappers.getLong;
@@ -38,10 +37,10 @@ import static no.digipost.jdbc.Mappers.getTimestamp;
 import static no.digipost.jdbc.ResultSetMock.mockResult;
 import static no.digipost.jdbc.ResultSetMock.mockSingleRowResult;
 import static no.digipost.util.AttributesMap.Config.ALLOW_NULL_VALUES;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class AttributesRowMapperTest {
     @FunctionalInterface interface WithId { Long getId(); }
@@ -62,7 +61,7 @@ public class AttributesRowMapperTest {
     public void resultSetWithNoApplicableColumns() throws SQLException {
         try (MockResultSet rs = mockResult(Tuple.of("a", asList("valueA1")), Tuple.of("b", asList("valueB1")))) {
             AttributesMap attributes = rowMapper.map(rs);
-            assertTrue(attributes.isEmpty());
+            assertThat(attributes, where(AttributesMap::isEmpty));
         }
     }
 
@@ -74,11 +73,6 @@ public class AttributesRowMapperTest {
             assertThat(attributes.get(myLong), is(42L));
             assertThat(attributes.size(), is(2));
         }
-    }
-
-    @Test
-    public void populatesNon() {
-
     }
 
     @Test
@@ -112,16 +106,11 @@ public class AttributesRowMapperTest {
         }
     }
 
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
-
     @Test
     public void doesNotIncludeNullValuesByDefault() throws SQLException {
         try (MockResultSet rs = mockResult(myString.withValue(null).map(a -> a.name, Arrays::asList))) {
             AttributesMap attributes = rowMapper.map(rs);
-            expectedException.expect(NotFound.class);
-            attributes.get(myString);
+            assertThrows(NotFound.class, () -> attributes.get(myString));
         }
     }
 

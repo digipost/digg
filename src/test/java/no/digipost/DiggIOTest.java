@@ -16,13 +16,15 @@
 package no.digipost;
 
 import no.digipost.function.ThrowingConsumer;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.Consumer;
 
 import static no.digipost.DiggIO.autoClosing;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class DiggIOTest {
 
@@ -37,13 +39,8 @@ public class DiggIOTest {
     public void closesResourceAfterFailure() throws Exception {
         AutoCloseable resource = mock(AutoCloseable.class);
         Consumer<AutoCloseable> autoClosingConsumer = autoClosing((ThrowingConsumer<AutoCloseable, Exception>) r -> { throw new Exception(); });
-        try {
-            autoClosingConsumer.accept(resource);
-        } catch (RuntimeException e) {
-            verify(resource, times(1)).close();
-            return;
-        }
-        fail("Should throw exception");
+        assertThrows(RuntimeException.class, () -> autoClosingConsumer.accept(resource));
+        verify(resource, times(1)).close();
     }
 
 }

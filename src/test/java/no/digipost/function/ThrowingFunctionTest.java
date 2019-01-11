@@ -15,22 +15,22 @@
  */
 package no.digipost.function;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 import static java.util.Optional.empty;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.assertThat;
-import static org.mockito.Mockito.*;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 public class ThrowingFunctionTest {
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
     private final RuntimeException ex = new RuntimeException("fail");
 
@@ -39,8 +39,7 @@ public class ThrowingFunctionTest {
     @Test
     public void rethrowOriginalRuntimeException() {
         ThrowingFunction<Integer, ?, Exception> fn = i -> {throw ex;};
-        expectedException.expect(sameInstance(ex));
-        fn.asUnchecked().apply(42);
+        assertThat(assertThrows(RuntimeException.class, () -> fn.asUnchecked().apply(42)), sameInstance(ex));
     }
 
     @Test
@@ -52,8 +51,7 @@ public class ThrowingFunctionTest {
     @Test
     public void rethrowOriginalError() {
         ThrowingFunction<Integer, ?, Exception> fn = i -> {throw err;};
-        expectedException.expect(sameInstance(err));
-        fn.asUnchecked().apply(42);
+        assertThat(assertThrows(Error.class, () -> fn.asUnchecked().apply(42)), sameInstance(err));
     }
 
     @Test

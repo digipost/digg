@@ -15,23 +15,22 @@
  */
 package no.digipost;
 
-import com.pholser.junit.quickcheck.Property;
-import com.pholser.junit.quickcheck.When;
-import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import no.digipost.util.AutoClosed;
 import no.digipost.util.ThrowingAutoClosed;
 import org.hamcrest.Matchers;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.mockito.InOrder;
+import org.quicktheories.WithQuickTheories;
+import org.quicktheories.core.Gen;
+import org.quicktheories.dsl.TheoryBuilder;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static co.unruly.matchers.Java8Matchers.where;
 import static co.unruly.matchers.StreamMatchers.contains;
 import static co.unruly.matchers.StreamMatchers.empty;
 import static java.util.Arrays.asList;
@@ -42,12 +41,12 @@ import static no.digipost.DiggBase.close;
 import static no.digipost.DiggBase.friendlyName;
 import static no.digipost.DiggBase.nonNull;
 import static no.digipost.DiggBase.throwingAutoClose;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assume.assumeThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
@@ -56,39 +55,36 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
-@RunWith(JUnitQuickcheck.class)
-public class DiggBaseTest {
+public class DiggBaseTest implements WithQuickTheories {
 
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
+    @Test
+    public void nonNullReferences() {
+        TheoryBuilder<String> anyValue = qt()
+            .forAll(strings().allPossible().ofLengthBetween(0, 100));
 
-    @Property
-    public void yieldsSameInstanceOnNonNullReferences(String value) {
-        assertThat(nonNull("my value", value), sameInstance(value));
-        assertThat(nonNull(value, d -> d), sameInstance(value));
-        assertThat(DiggBase.<String, NullPointerException>nonNull("my value", value, NullPointerException::new), sameInstance(value));
-        assertThat(DiggBase.<String, NullPointerException>nonNull(value, d -> d, d -> new NullPointerException()), sameInstance(value));
+        anyValue.check(value -> nonNull("my value", value) == value);
+        anyValue.check(value -> nonNull(value, d -> d) == value);
+        anyValue.check(value -> nonNull("my value", value, NullPointerException::new) == value);
+        anyValue.check(value -> nonNull(value, d -> d, d -> new NullPointerException()) == value);
     }
 
     @Test
     public void throwsNullPointerForNullReference() {
-        expectedException.expect(NullPointerException.class);
-        expectedException.expectMessage("my value");
-        nonNull("my value", (Object) null);
+        assertThat(assertThrows(NullPointerException.class, () -> nonNull("my value", (Object) null)),
+                where(Exception::getMessage, containsString("my value")));
     }
 
     @Test
     public void throwsCustomExceptionForNullReference() {
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expectMessage("my value");
-        nonNull("my value", (Object) null, IllegalStateException::new);
+        assertThat(assertThrows(IllegalStateException.class, () -> nonNull("my value", (Object) null, IllegalStateException::new)),
+                where(Exception::getMessage, containsString("my value")));
     }
 
     @Test
     public void throwsExceptionWithDescriptionInMessage() {
         String resourceName = "all/your/base/is/belong/to/us";
-        expectedException.expectMessage(resourceName);
-        nonNull(resourceName, getClass()::getResource);
+        assertThat(assertThrows(NullPointerException.class, () -> nonNull(resourceName, getClass()::getResource)),
+                where(Exception::getMessage, containsString(resourceName)));
     }
 
     @Test
@@ -102,11 +98,12 @@ public class DiggBaseTest {
         assertThat(DiggBase.<String, Character>extract("abc", s -> s.charAt(0), s -> null), contains('a', null));
     }
 
-    @Property
-    public void friendlyClassNameIsJustTheSimpleName(@When(satisfies = "#_ != null") Object anyInstanceOfNonNestedClass) {
-        Class<?> anyNonNestedClass = anyInstanceOfNonNestedClass.getClass();
-        assumeThat(anyNonNestedClass.getEnclosingClass(), nullValue());
-        assertThat(friendlyName(anyNonNestedClass), is(anyNonNestedClass.getSimpleName()));
+    @Test
+    public void friendlyClassNameOfNonNestedClassIsJustTheSimpleName() {
+        Gen<Class<?>> nonNestedClasses = arbitrary().pick(asList(String.class, InputStream.class, List.class, Integer.class));
+        qt()
+            .forAll(nonNestedClasses)
+            .check(cls -> friendlyName(cls).equals(cls.getSimpleName()));
     }
 
     @Test

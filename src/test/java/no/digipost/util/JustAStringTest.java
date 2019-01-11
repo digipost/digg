@@ -16,13 +16,13 @@
 package no.digipost.util;
 
 import nl.jqno.equalsverifier.EqualsVerifier;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static nl.jqno.equalsverifier.Warning.NULL_FIELDS;
 import static no.digipost.util.DiggMatchers.isEffectivelySerializable;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.assertThat;
 
 public class JustAStringTest {
 

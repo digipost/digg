@@ -15,27 +15,18 @@
  */
 package no.digipost.concurrent;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.rules.Timeout;
+import org.junit.jupiter.api.Test;
 
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static no.digipost.concurrent.TargetState.TaskControl.EXIT;
 import static no.digipost.concurrent.TargetState.TaskControl.TRY_REPEAT;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class TargetStateTest {
-
-    @Rule
-    public final Timeout timeout = new Timeout(1, TimeUnit.SECONDS);
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void loopUntilTargetStateIsReached() {
@@ -57,7 +48,6 @@ public class TargetStateTest {
     @Test
     public void returningNullFromTaskIsInvalid() {
         TargetState isDone = () -> false;
-        expectedException.expect(IllegalStateException.class);
-        isDone.untilThen(() -> null, exception -> { throw (RuntimeException) exception; });
+        assertThrows(IllegalStateException.class, () -> isDone.untilThen(() -> null, exception -> { throw (RuntimeException) exception; }));
     }
 }

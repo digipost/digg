@@ -15,7 +15,7 @@
  */
 package no.digipost.concurrent;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicReference;
@@ -23,10 +23,10 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 
 import static no.digipost.concurrent.CompletionHandler.onSuccess;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class CompletionHandlerTest {
 

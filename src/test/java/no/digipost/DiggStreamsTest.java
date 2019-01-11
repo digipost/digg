@@ -15,17 +15,14 @@
  */
 package no.digipost;
 
-import com.pholser.junit.quickcheck.Property;
-import com.pholser.junit.quickcheck.generator.InRange;
-import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.quicktheories.WithQuickTheories;
+import org.quicktheories.core.Gen;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
-import java.util.function.IntFunction;
 import java.util.stream.Stream;
 
 import static co.unruly.matchers.StreamMatchers.contains;
@@ -38,15 +35,17 @@ import static no.digipost.DiggStreams.streamByIntIndex;
 import static no.digipost.DiggStreams.streamByKey;
 import static no.digipost.DiggStreams.streamByLongIndex;
 import static no.digipost.DiggStreams.streamWhileNonEmpty;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
-@RunWith(JUnitQuickcheck.class)
-public class DiggStreamsTest {
+public class DiggStreamsTest implements WithQuickTheories {
 
-    @Property
-    public void streamAllElementsByIntIndex(List<String> anyListOfStrings) {
-        assertThat(streamByIntIndex(anyListOfStrings, anyListOfStrings.size(), List::get).collect(toList()), is(anyListOfStrings));
+    @Test
+    public void streamAllElementsByIntIndex() {
+        Gen<List<String>> listsOfStrings = lists().of(strings().allPossible().ofLengthBetween(0, 100)).ofSizeBetween(0, 20);
+        qt()
+            .forAll(listsOfStrings)
+            .checkAssert(list -> assertThat(streamByIntIndex(list, list.size(), List::get).collect(toList()), is(list)));
     }
 
     @Test
@@ -67,16 +66,37 @@ public class DiggStreamsTest {
         }
     }
 
-    @Property
-    public void streamPagesWhilePageHasContent(@InRange(minInt = 10, maxInt = 200) int alphabetLength, @InRange(minInt = 1, maxInt = 13) int pageSize) {
-        IntFunction<Collection<Character>> pagedAlphabet = page -> iterate('A' + pageSize * page, chr -> chr + 1)
-                .limit(pageSize)
-                .filter(chr -> chr < 'A' + alphabetLength)
-                .mapToObj(chr -> Character.valueOf((char) chr))
-                .collect(toList());
+    @Test
+    public void streamPagesWhilePageHasContent() {
+        Gen<Integer> alphabetLengths = integers().between(10, 200);
+        Gen<Integer> pageSizes = integers().between(1, 13);
 
-        Stream<Character> expectedAlphabet = iterate('A', chr -> chr + 1).limit(alphabetLength).mapToObj(chr -> Character.valueOf((char) chr));
+        qt()
+            .forAll(alphabetLengths, pageSizes)
+            .as(PagedAlphabet::new)
+            .checkAssert(pagedAlphabet -> assertThat(streamWhileNonEmpty(pagedAlphabet::getPage), equalTo(pagedAlphabet.getEntireAlphabet())));
+    }
 
-        assertThat(streamWhileNonEmpty(pagedAlphabet), equalTo(expectedAlphabet));
+    private static final class PagedAlphabet {
+        final char firstChar = 'A';
+        final int length;
+        final int pageSize;
+
+        public PagedAlphabet(int length, int pageSize) {
+            this.length = length;
+            this.pageSize = pageSize;
+        }
+
+        Collection<Character> getPage(int page) {
+            return iterate(firstChar + pageSize * page, chr -> chr + 1)
+                    .limit(pageSize)
+                    .filter(chr -> chr < firstChar + length)
+                    .mapToObj(chr -> Character.valueOf((char) chr))
+                    .collect(toList());
+        }
+
+        Stream<Character> getEntireAlphabet() {
+            return iterate(firstChar, chr -> chr + 1).limit(length).mapToObj(chr -> Character.valueOf((char) chr));
+        }
     }
 }

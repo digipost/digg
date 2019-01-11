@@ -15,24 +15,22 @@
  */
 package no.digipost.io;
 
-import com.pholser.junit.quickcheck.Property;
-import com.pholser.junit.quickcheck.generator.InRange;
-import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.quicktheories.core.Gen;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 import static com.google.common.io.ByteStreams.toByteArray;
 import static no.digipost.DiggIO.limit;
 import static no.digipost.io.LimitedInputStreamThrowingExceptionTest.toByteArrayUsingSingleByteReads;
-import static org.hamcrest.Matchers.lessThanOrEqualTo;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.quicktheories.QuickTheory.qt;
+import static org.quicktheories.generators.SourceDSL.integers;
+import static org.quicktheories.generators.SourceDSL.strings;
 
-@RunWith(JUnitQuickcheck.class)
 public class LimitedInputStreamYieldingEofTest {
 
     @Test
@@ -50,16 +48,23 @@ public class LimitedInputStreamYieldingEofTest {
     }
 
 
-    @Property
-    public void neverReadsMoreThanTheSetLimit(String dataString, @InRange(minInt=0, maxInt=16) int byteLimit) throws IOException {
-        byte[] data = dataString.getBytes();
-        DataSize limit = DataSize.bytes(byteLimit);
-        try (InputStream in1 = limit(new ByteArrayInputStream(data), limit);
-             InputStream in2 = limit(new ByteArrayInputStream(data), limit)) {
-            byte[] readBytes = toByteArray(in1);
-            byte[] fromSingleByteReads = toByteArrayUsingSingleByteReads(in2, DataSize.bytes(readBytes.length));
-            assertThat(readBytes.length, lessThanOrEqualTo(byteLimit));
-            assertArrayEquals(readBytes, fromSingleByteReads);
-        }
+    @Test
+    public void neverReadsMoreThanTheSetLimit() {
+        Gen<byte[]> byteData = strings().allPossible().ofLengthBetween(0, 256).map(s -> s.getBytes());
+        Gen<DataSize> limits = integers().between(0, 16).map(DataSize::bytes);
+
+        qt()
+            .forAll(byteData, limits)
+            .check((data, limit) -> {
+                try (InputStream in1 = limit(new ByteArrayInputStream(data), limit);
+                     InputStream in2 = limit(new ByteArrayInputStream(data), limit)) {
+                    byte[] readBytes = toByteArray(in1);
+                    byte[] fromSingleByteReads = toByteArrayUsingSingleByteReads(in2, DataSize.bytes(readBytes.length));
+                    return readBytes.length <= limit.toBytes() &&
+                           Arrays.equals(readBytes, fromSingleByteReads);
+                } catch (IOException e) {
+                    throw new RuntimeException(e.getMessage(), e);
+                }
+            });
     }
 }

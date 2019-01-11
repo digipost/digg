@@ -15,16 +15,18 @@
  */
 package no.digipost;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static no.digipost.DiggCollectors.allowAtMostOne;
-import static no.digipost.DiggMaps.*;
+import static no.digipost.DiggMaps.unMap;
+import static no.digipost.DiggMaps.unMapToKeys;
+import static no.digipost.DiggMaps.unMapToValues;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
 public class DiggMapsTest {
 

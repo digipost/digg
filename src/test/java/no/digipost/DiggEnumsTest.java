@@ -15,17 +15,15 @@
  */
 package no.digipost;
 
-import com.pholser.junit.quickcheck.Property;
-import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.quicktheories.WithQuickTheories;
+import org.quicktheories.core.Gen;
 
-import java.util.List;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
+import static co.unruly.matchers.StreamMatchers.contains;
 import static co.unruly.matchers.StreamMatchers.empty;
-import static co.unruly.matchers.StreamMatchers.equalTo;
-import static com.pholser.junit.quickcheck.Mode.EXHAUSTIVE;
 import static java.util.stream.Collectors.joining;
 import static no.digipost.DiggEnums.fromCommaSeparatedNames;
 import static no.digipost.DiggEnums.toCommaSeparatedNames;
@@ -34,20 +32,29 @@ import static no.digipost.DiggEnums.toStringOf;
 import static no.digipost.DiggEnumsTest.MyEnum.A;
 import static no.digipost.DiggEnumsTest.MyEnum.AA;
 import static no.digipost.DiggEnumsTest.MyEnum.ABA;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
 
-@RunWith(JUnitQuickcheck.class)
-public class DiggEnumsTest {
+public class DiggEnumsTest implements WithQuickTheories {
 
     enum MyEnum {
         A, AA, ABA, ABC
     }
 
-    @Property(mode = EXHAUSTIVE)
-    public void convertFromCommaSeparatedListOfEnumNames(List<MyEnum> enums) {
-        assertThat(fromCommaSeparatedNames(enums.stream().map(Enum::name).collect(joining(",")), MyEnum.class), equalTo(enums.stream()));
-        assertThat(fromCommaSeparatedNames(enums.stream().map(Enum::name).collect(joining(" , ", "  ", "   ")), MyEnum.class), equalTo(enums.stream()));
+    private final Gen<MyEnum[]> multipleEnums = arrays().ofClass(arbitrary().enumValues(MyEnum.class), MyEnum.class).withLengthBetween(0, 30);
+
+    @Test
+    public void convertFromCommaSeparatedListOfEnumNames() {
+        qt()
+            .forAll(multipleEnums)
+            .asWithPrecursor(DiggEnums::toCommaSeparatedNames)
+            .checkAssert((enums, commaSeparatedNames) -> assertThat(fromCommaSeparatedNames(commaSeparatedNames, MyEnum.class), contains(enums)));
+
+        qt()
+            .forAll(multipleEnums)
+            .asWithPrecursor(enums -> Stream.of(enums).map(Enum::name).collect(joining(" , ", "  ", "   ")))
+            .checkAssert((enums, commaSeparatedNames) -> assertThat(fromCommaSeparatedNames(commaSeparatedNames, MyEnum.class), contains(enums)));
+
     }
 
     @Test
@@ -61,11 +68,20 @@ public class DiggEnumsTest {
         assertThat(toStringOf(lowerCasedEnumName, joining(": ", "[", "]"), A, ABA, AA), is("[a: aba: aa]"));
     }
 
-    @Property(mode = EXHAUSTIVE)
-    public void toStringConversionsAreSpecialCasesOfTheGenericBaseCase(MyEnum ... enums) {
-        assertThat(toCommaSeparatedNames(enums), is(toStringOf(Enum::name, joining(","), enums)));
-        assertThat(toNames(": ", enums), is(toStringOf(Enum::name, joining(": "), enums)));
-        assertThat(toStringOf(e -> e.name().toLowerCase(), "#", enums), is(toStringOf(e -> e.name().toLowerCase(), joining("#"), enums)));
+    @Test
+    public void toStringConversionsAreSpecialCasesOfTheGenericBaseCase() {
+        qt()
+            .forAll(multipleEnums)
+            .check(enums -> toCommaSeparatedNames(enums).equals(toStringOf(Enum::name, joining(","), enums)));
+
+        qt()
+            .forAll(multipleEnums)
+            .check(enums -> toNames(": ", enums).equals(toStringOf(Enum::name, joining(": "), enums)));
+
+        qt()
+            .forAll(multipleEnums)
+            .check(enums -> toStringOf(e -> e.name().toLowerCase(), "#", enums).equals(toStringOf(e -> e.name().toLowerCase(), joining("#"), enums)));
+
     }
 
 }

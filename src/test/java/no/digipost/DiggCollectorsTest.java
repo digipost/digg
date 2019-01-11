@@ -16,17 +16,13 @@
 package no.digipost;
 
 import co.unruly.matchers.OptionalMatchers;
-import com.pholser.junit.quickcheck.Property;
-import com.pholser.junit.quickcheck.When;
-import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
 import no.digipost.collection.ConflictingElementEncountered;
 import no.digipost.tuple.Tuple;
 import no.digipost.tuple.ViewableAsTuple;
 import no.digipost.util.ViewableAsOptional;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.quicktheories.WithQuickTheories;
+import org.quicktheories.core.Gen;
 
 import java.io.IOException;
 import java.sql.BatchUpdateException;
@@ -50,6 +46,7 @@ import static no.digipost.DiggCollectors.asSuppressedExceptionsOf;
 import static no.digipost.DiggCollectors.toMultimap;
 import static no.digipost.DiggCollectors.toMultituple;
 import static no.digipost.DiggCollectors.toSingleExceptionWithSuppressed;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.arrayContaining;
 import static org.hamcrest.Matchers.arrayWithSize;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -57,15 +54,12 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 
-@RunWith(JUnitQuickcheck.class)
-public class DiggCollectorsTest {
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
+public class DiggCollectorsTest implements WithQuickTheories {
 
     interface NumTranslation extends ViewableAsTuple<Integer, Optional<String>> {}
 
@@ -113,8 +107,7 @@ public class DiggCollectorsTest {
         NumTranslation twoInEnglish = () -> Tuple.of(2, Optional.of("two"));
 
         Stream<NumTranslation> translations = Stream.<NumTranslation>builder().add(oneInEnglish).add(missingOne).add(oneInEsperanto).add(twoInEnglish).build();
-        expectedException.expect(ConflictingElementEncountered.class);
-        translations.collect(toMultituple());
+        assertThrows(ConflictingElementEncountered.class, () -> translations.collect(toMultituple()));
     }
 
     @Test
@@ -126,8 +119,8 @@ public class DiggCollectorsTest {
 
     @Test
     public void allowAtMostOneFailsEvenIfExcessiveElementsAreNull() {
-        expectedException.expect(ViewableAsOptional.TooManyElements.class);
-        Stream.of("x", null).collect(allowAtMostOne());
+        Stream<String> xAndNull = Stream.of("x", null);
+        assertThrows(ViewableAsOptional.TooManyElements.class, () -> xAndNull.collect(allowAtMostOne()));
     }
 
     @Test
@@ -164,12 +157,12 @@ public class DiggCollectorsTest {
         doThrow(connectionCloseException).when(connection).close();
         doThrow(statementCloseException).when(pstmt).close();
 
-        expectedException.expect(IllegalStateException.class);
-        expectedException.expect(where(Throwable::getSuppressed, arrayContaining(statementCloseException, connectionCloseException)));
         try {
             throw new IllegalStateException("main");
         } catch (IllegalStateException e) {
-            throw close(pstmt, connection).collect(asSuppressedExceptionsOf(e));
+            IllegalStateException collatedExceptions = close(pstmt, connection).collect(asSuppressedExceptionsOf(e));
+            assertThat(collatedExceptions, sameInstance(e));
+            assertThat(collatedExceptions, where(Throwable::getSuppressed, arrayContaining(statementCloseException, connectionCloseException)));
         }
 
     }
@@ -180,19 +173,36 @@ public class DiggCollectorsTest {
         assertThat(noException, whereNot(Optional::isPresent));
     }
 
-    @Property
-    public void allowAtMostOneFails(@When(satisfies = " #_.size() > 1") List<?> tooManyElements) {
-        expectedException.expect(ViewableAsOptional.TooManyElements.class);
-        tooManyElements.stream().parallel().collect(allowAtMostOne());
+
+    private final Gen<List<String>> listsWithAtLeastTwoElements = lists().of(strings().allPossible().ofLengthBetween(0, 10)).ofSizeBetween(2, 40);
+
+    @Test
+    public void allowAtMostOneFails() {
+        qt()
+            .forAll(listsWithAtLeastTwoElements)
+            .check(list -> {
+                try {
+                    list.stream().parallel().collect(allowAtMostOne());
+                    return false;
+                } catch (ViewableAsOptional.TooManyElements e) {
+                    return true;
+                }
+            });
     }
 
-    @Property
-    public void allowAtMostOneFailsWithCustomException(@When(satisfies = " #_.size() > 1") List<?> tooManyElements) {
-        expectedException.expect(IllegalStateException.class);
-        tooManyElements.stream().collect(allowAtMostOneOrElseThrow((first, excess) -> {
-            assertThat(first, is(tooManyElements.get(0)));
-            assertThat(excess, is(tooManyElements.get(1)));
-            return new IllegalStateException();
-        }));
+    @Test
+    public void allowAtMostOneFailsWithCustomException() {
+        IllegalStateException customException = new IllegalStateException();
+        qt()
+            .forAll(listsWithAtLeastTwoElements)
+            .checkAssert(list -> {
+                IllegalStateException thrown = assertThrows(IllegalStateException.class,
+                        () -> list.stream().collect(allowAtMostOneOrElseThrow((first, excess) -> {
+                            assertThat(first, is(list.get(0)));
+                            assertThat(excess, is(list.get(1)));
+                            return customException;
+                        })));
+                assertThat(thrown, sameInstance(customException));
+            });
     }
 }

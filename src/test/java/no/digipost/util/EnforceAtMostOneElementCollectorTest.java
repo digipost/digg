@@ -17,20 +17,16 @@ package no.digipost.util;
 
 import no.digipost.collection.EnforceAtMostOneElementCollector;
 import no.digipost.concurrent.OneTimeAssignment;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.util.function.BinaryOperator;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class EnforceAtMostOneElementCollectorTest {
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
     private final BinaryOperator<OneTimeAssignment<String>> combiner = new EnforceAtMostOneElementCollector<String>(ViewableAsOptional.TooManyElements::new).combiner();
 
@@ -45,7 +41,6 @@ public class EnforceAtMostOneElementCollectorTest {
 
         OneTimeAssignment<String> v2 = OneTimeAssignment.newInstance();
         v2.set("2");
-        expectedException.expect(ViewableAsOptional.TooManyElements.class);
-        combiner.apply(v1, v2);
+        assertThrows(ViewableAsOptional.TooManyElements.class, ()-> combiner.apply(v1, v2));
     }
 }

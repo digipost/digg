@@ -15,29 +15,25 @@
  */
 package no.digipost.collection;
 
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.fail;
 
 public class SimpleIteratorTest {
 
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
-
-    @Test(expected = NoSuchElementException.class)
+    @Test
     public void nextThrowsNoSuchElement() {
-        empty.iterator().next();
+        assertThrows(NoSuchElementException.class, empty.iterator()::next);
     }
 
     @Test
@@ -76,8 +72,7 @@ public class SimpleIteratorTest {
     public void removeIsUnsupported() {
         Iterator<String> iterator = oneElement.iterator();
         iterator.next();
-        expectedException.expect(UnsupportedOperationException.class);
-        iterator.remove();
+        assertThrows(UnsupportedOperationException.class, iterator::remove);
     }
 
 

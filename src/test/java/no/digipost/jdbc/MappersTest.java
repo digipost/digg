@@ -16,7 +16,7 @@
 package no.digipost.jdbc;
 
 import com.mockrunner.mock.jdbc.MockResultSet;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
 import java.util.Optional;
@@ -24,11 +24,24 @@ import java.util.stream.Stream;
 
 import static co.unruly.matchers.StreamMatchers.allMatch;
 import static no.digipost.DiggExceptions.applyUnchecked;
-import static no.digipost.jdbc.Mappers.*;
+import static no.digipost.jdbc.Mappers.getBoolean;
+import static no.digipost.jdbc.Mappers.getByte;
+import static no.digipost.jdbc.Mappers.getDouble;
+import static no.digipost.jdbc.Mappers.getFloat;
+import static no.digipost.jdbc.Mappers.getInt;
+import static no.digipost.jdbc.Mappers.getLong;
+import static no.digipost.jdbc.Mappers.getNullableBoolean;
+import static no.digipost.jdbc.Mappers.getNullableByte;
+import static no.digipost.jdbc.Mappers.getNullableDouble;
+import static no.digipost.jdbc.Mappers.getNullableFloat;
+import static no.digipost.jdbc.Mappers.getNullableInt;
+import static no.digipost.jdbc.Mappers.getNullableLong;
+import static no.digipost.jdbc.Mappers.getNullableShort;
+import static no.digipost.jdbc.Mappers.getShort;
 import static no.digipost.jdbc.ResultSetMock.mockSingleColumnResult;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
-import static org.junit.Assert.assertThat;
 
 public class MappersTest {
 

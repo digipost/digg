@@ -16,27 +16,32 @@
 package no.digipost;
 
 import no.digipost.concurrent.OneTimeToggle;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
+import static co.unruly.matchers.Java8Matchers.where;
 import static java.util.stream.Collectors.toList;
-import static no.digipost.DiggExceptions.*;
-import static org.hamcrest.Matchers.*;
-import static org.junit.Assert.*;
+import static no.digipost.DiggExceptions.applyUnchecked;
+import static no.digipost.DiggExceptions.causalChainOf;
+import static no.digipost.DiggExceptions.getUnchecked;
+import static no.digipost.DiggExceptions.mayThrow;
+import static no.digipost.DiggExceptions.runUnchecked;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.contains;
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.instanceOf;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
+import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 public class DiggExceptionsTest {
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
-
 
     @Test
     public void causalChainOfNullIsEmptyStream() {
@@ -44,7 +49,6 @@ public class DiggExceptionsTest {
     }
 
     @Test
-    @SuppressWarnings("unchecked")
     public void returnsTheCausalChainOfExceptions() {
         List<Throwable> exception = causalChainOf(new Exception(new IllegalStateException(new IOException()))).collect(toList());
         assertThat(exception, contains(instanceOf(Exception.class), instanceOf(IllegalStateException.class), instanceOf(IOException.class)));
@@ -54,16 +58,10 @@ public class DiggExceptionsTest {
     public void runAThrowingRunnableUnchecked() {
         OneTimeToggle toggled = new OneTimeToggle();
         DiggExceptions.runUnchecked(() -> toggled.nowOrIfAlreadyThenThrow(() -> new AssertionError("should not be run twice!")));
-        assertTrue(toggled.yet());
+        assertThat(toggled, where(OneTimeToggle::yet));
 
         Exception e = new Exception();
-        try {
-            runUnchecked(() -> { throw e; });
-        } catch (RuntimeException ex) {
-            assertThat(ex.getCause(), sameInstance(e));
-            return;
-        }
-        fail("Should throw exception");
+        assertThat(assertThrows(RuntimeException.class, () -> runUnchecked(() -> { throw e; })), where(Exception::getCause, sameInstance(e)));
     }
 
     @Test
@@ -71,13 +69,7 @@ public class DiggExceptionsTest {
         assertThat(getUnchecked(() -> 42), is(42));
 
         Exception e = new Exception();
-        try {
-            getUnchecked(() -> { throw e; });
-        } catch (RuntimeException ex) {
-            assertThat(ex.getCause(), sameInstance(e));
-            return;
-        }
-        fail("Should throw exception");
+        assertThat(assertThrows(RuntimeException.class, () -> getUnchecked(() -> { throw e; })), where(Exception::getCause, sameInstance(e)));
     }
 
     @Test
@@ -87,13 +79,7 @@ public class DiggExceptionsTest {
         assertThat(applyUnchecked(n -> n, Optional.empty()), is(Optional.empty()));
 
         Exception e = new Exception();
-        try {
-            applyUnchecked(t -> { throw e; }, "anything");
-        } catch (RuntimeException ex) {
-            assertThat(ex.getCause(), sameInstance(e));
-            return;
-        }
-        fail("Should throw exception");
+        assertThat(assertThrows(RuntimeException.class, () -> applyUnchecked(t -> { throw e; }, "anything")), where(Exception::getCause, sameInstance(e)));
     }
 
     @Test
@@ -108,8 +94,7 @@ public class DiggExceptionsTest {
         mayThrow(t -> { if (t == null) throw ex; }).ifException(exceptionHandler).accept(null);
         verify(exceptionHandler).accept(ex);
 
-        expectedException.expect(sameInstance(ex));
-        mayThrow((t, u) -> { if (t == null) throw ex; }).accept(null, null);
+        assertThat(assertThrows(Exception.class, () -> mayThrow((t, u) -> { if (t == null) throw ex; }).accept(null, null)), sameInstance(ex));
     }
 
 

@@ -18,9 +18,7 @@ package no.digipost.jaxb;
 import no.digipost.jaxb.testdomain.MyCustomBoundType;
 import no.digipost.jaxb.testdomain.MyJaxbReadEntity;
 import no.digipost.jaxb.testdomain.MyJaxbWriteEntity;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.ExpectedException;
+import org.junit.jupiter.api.Test;
 import org.xmlmatchers.transform.StringResult;
 
 import javax.xml.bind.JAXBContext;
@@ -33,19 +31,16 @@ import static no.digipost.DiggCollectors.allowAtMostOne;
 import static no.digipost.DiggExceptions.asUnchecked;
 import static no.digipost.DiggExceptions.causalChainOf;
 import static no.digipost.DiggExceptions.getUnchecked;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
-import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
+import static org.junit.jupiter.api.Assertions.fail;
 import static org.xmlmatchers.XmlMatchers.isEquivalentTo;
 import static org.xmlmatchers.transform.XmlConverters.the;
 
 public class SimpleXmlAdapterTest {
 
     private static final JAXBContext jaxbContext = getUnchecked(() -> JAXBContext.newInstance(MyJaxbReadEntity.class, MyJaxbWriteEntity.class));
-
-    @Rule
-    public final ExpectedException expectedException = ExpectedException.none();
 
     @Test
     public void supportsReadingAndWritingXmlWithJaxb() throws JAXBException {

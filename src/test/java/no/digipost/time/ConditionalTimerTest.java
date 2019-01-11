@@ -15,26 +15,25 @@
  */
 package no.digipost.time;
 
-import com.pholser.junit.quickcheck.Property;
-import com.pholser.junit.quickcheck.runner.JUnitQuickcheck;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.quicktheories.WithQuickTheories;
+import org.quicktheories.core.Gen;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
 
+import static co.unruly.matchers.Java8Matchers.where;
+import static co.unruly.matchers.OptionalMatchers.contains;
+import static co.unruly.matchers.OptionalMatchers.empty;
 import static java.time.Duration.ofSeconds;
-import static java.time.Instant.now;
-import static java.time.temporal.ChronoUnit.MILLIS;
-import static java.util.Optional.empty;
 import static no.digipost.time.ConditionalTimer.timeWhen;
 import static no.digipost.time.ConditionalTimer.using;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
-import static org.junit.Assert.*;
 
-@RunWith(JUnitQuickcheck.class)
-public class ConditionalTimerTest {
+
+public class ConditionalTimerTest implements WithQuickTheories {
 
     @Test
     public void aNewConditionalTimerYieldsNoDuration() {
@@ -42,20 +41,41 @@ public class ConditionalTimerTest {
         assertThat(timeFromFirstInspection.getDuration(), is(empty()));
     }
 
-    @Property
-    public void comparingDurationsForConditionsMet(boolean conditionMet, long ms) {
-        ControllableClock clock = ControllableClock.freezedAt(now());
-        ConditionalTimer<Object> timer = using(clock).timeWhen(v -> conditionMet);
-        Duration duration = Duration.of(ms, MILLIS);
-        assertTrue(timer.sameOrlessThan(duration));
-        assertFalse(timer.longerThan(duration));
+    final ControllableClock clock = ControllableClock.freezedAt(LocalDateTime.of(2015, 6, 24, 12, 15));
+
+    @Test
+    public void comparingDurationsForConditionsMet() {
+        Gen<ConditionalTimer<Object>> timers = arbitrary().pick(true, false, true, true).map(conditionMet -> using(clock).timeWhen(v -> conditionMet));
+        Gen<Duration> durations = integers().all().map(Duration::ofMillis);
+
+        qt()
+            .forAll(timers, durations)
+            .check((timer, duration) -> {
+                clock.timePasses(duration);
+                return timer.sameOrlessThan(duration) && !timer.longerThan(duration);
+            });
+
+
+        qt()
+            .forAll(timers, durations)
+            .check((timer, duration) -> inspectAndPassTime(timer, duration.minusMillis(1)).sameOrlessThan(duration));
+
+
+        qt()
+            .forAll(timers, durations)
+            .check((timer, duration) -> inspectAndPassTime(timer, duration).sameOrlessThan(duration));
+
+        qt()
+            .forAll(timers, durations)
+            .assuming((timer, duration) -> inspectAndPassTime(timer, duration.plusMillis(1)).getDuration().isPresent())
+            .check(ConditionalTimer::longerThan);
+
+    }
+
+    private ConditionalTimer<Object> inspectAndPassTime(ConditionalTimer<Object> timer, Duration duration) {
         timer.inspect(42);
-        clock.timePasses(duration.minus(1, MILLIS));
-        assertThat(timer.sameOrlessThan(duration), not(timer.longerThan(duration)));
-        clock.timePasses(Duration.of(1, MILLIS));
-        assertThat(timer.sameOrlessThan(duration), not(timer.longerThan(duration)));
-        clock.timePasses(Duration.of(1, MILLIS));
-        assertThat(timer.sameOrlessThan(duration), not(timer.longerThan(duration)));
+        clock.timePasses(duration);
+        return timer;
     }
 
 
@@ -70,15 +90,15 @@ public class ConditionalTimerTest {
         clock.timePasses(ofSeconds(1));
         timeWhenNegative.inspect(-42);
         clock.timePasses(ofSeconds(1));
-        assertThat(timeWhenNegative.getDuration().get(), is(Duration.ofSeconds(2)));
+        assertThat(timeWhenNegative, where(ConditionalTimer::getDuration, contains(Duration.ofSeconds(2))));
     }
 
     @Test
     public void whenInspectingAndConditionIsNotMetTheDurationIsReset() {
         ConditionalTimer<Integer> timeWhenNegative = timeWhen(i -> i < 0);
         timeWhenNegative.inspect(-1);
-        assertTrue(timeWhenNegative.getDuration().isPresent());
+        assertThat(timeWhenNegative, where(ConditionalTimer::getDuration, not(empty())));
         timeWhenNegative.inspect(1);
-        assertFalse(timeWhenNegative.getDuration().isPresent());
+        assertThat(timeWhenNegative, where(ConditionalTimer::getDuration, empty()));
     }
 }
