@@ -17,7 +17,6 @@ package no.digipost.time;
 
 import java.io.Serializable;
 import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -25,6 +24,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.UnaryOperator;
 
 /**
  * A controllable {@link Clock}, typically intended for use in testing. A {@code ControllableClock}
@@ -35,7 +35,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @see #set(Instant)
  * @see #setToSystemClock()
  */
-public final class ControllableClock extends Clock implements TimeControllable, Serializable {
+public final class ControllableClock extends Clock implements TimeControllable, ClockSnapshot.ResolveFromJavaClock, Serializable {
 
 
     /**
@@ -63,7 +63,7 @@ public final class ControllableClock extends Clock implements TimeControllable, 
      * @return the new {@code ControllableClock}
      */
     public static ControllableClock freezedAt(ZonedDateTime dateTime) {
-        return control(Clock.fixed(dateTime.toInstant(), dateTime.getZone()));
+        return freezedAt(dateTime.toInstant(), dateTime.getZone());
     }
 
 
@@ -78,7 +78,7 @@ public final class ControllableClock extends Clock implements TimeControllable, 
      * @return the new {@code ControllableClock}
      */
     public static ControllableClock freezedAt(Instant instant) {
-        return control(Clock.fixed(instant, ZoneId.systemDefault()));
+        return freezedAt(instant, ZoneId.systemDefault());
     }
 
 
@@ -120,7 +120,11 @@ public final class ControllableClock extends Clock implements TimeControllable, 
 
     @Override
     public ControllableClock withZone(ZoneId zone) {
-        return new ControllableClock(delegate.get().withZone(zone));
+        Clock currentDelegate = delegate.get();
+        if (zone.equals(currentDelegate.getZone())) {
+            return this;
+        }
+        return new ControllableClock(currentDelegate.withZone(zone));
     }
 
     @Override
@@ -134,51 +138,14 @@ public final class ControllableClock extends Clock implements TimeControllable, 
     }
 
     @Override
-    public void timePasses(TemporalAmount amountOfTime) {
-        Duration duration;
-        if (amountOfTime instanceof Duration) {
-            duration = (Duration) amountOfTime;
-        } else {
-            Instant now = this.instant();
-            duration = Duration.between(now, now.atZone(getZone()).plus(amountOfTime));
-        }
-        timePasses(duration);
-    }
-
-    @Override
-    public void timePasses(Duration amountOfTime) {
-        delegate.getAndUpdate(previous -> Clock.offset(previous, amountOfTime));
-    }
-
-    @Override
-    public void set(LocalDateTime dateTime) {
-        set(dateTime.atZone(getZone()));
-    }
-
-    @Override
-    public void set(Instant newInstant) {
-        delegate.getAndUpdate(previous -> Clock.offset(previous, Duration.between(previous.instant(), newInstant)));
-    }
-
-    public void set(Clock newDelegate) {
-        if (this.equals(newDelegate)) {
-            throw new IllegalArgumentException("Cycle detected! Tried to set " + this + " with same instance as itself!");
-        }
-        delegate.set(newDelegate);
-    }
-
-    @Override
-    public void freeze() {
-        set(Clock.fixed(delegate.get().instant(), delegate.get().getZone()));
-    }
-
-    @Override
-    public void setToSystemClock() {
-        setToSystemClock(getZone());
-    }
-
-    public void setToSystemClock(ZoneId zoneId) {
-        set(Clock.system(zoneId));
+    public void set(UnaryOperator<Clock> createNewClock) {
+        delegate.getAndUpdate(previous -> {
+            Clock newClock = createNewClock.apply(previous);
+            if (ControllableClock.this.equals(newClock)) {
+                throw new IllegalArgumentException("Cycle detected! Tried to set " + this + " with same instance as itself!");
+            }
+            return newClock;
+        });
     }
 
     @Override
@@ -199,6 +166,5 @@ public final class ControllableClock extends Clock implements TimeControllable, 
     public int hashCode() {
         return Objects.hash(delegate.get());
     }
-
 
 }

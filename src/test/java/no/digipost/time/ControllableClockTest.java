@@ -15,8 +15,10 @@
  */
 package no.digipost.time;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -30,12 +32,16 @@ import java.time.temporal.TemporalUnit;
 import java.time.temporal.UnsupportedTemporalTypeException;
 import java.util.List;
 
+import static co.unruly.matchers.Java8Matchers.where;
 import static java.time.Clock.systemUTC;
+import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
+import static nl.jqno.equalsverifier.Warning.NULL_FIELDS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ControllableClockTest {
@@ -112,7 +118,7 @@ public class ControllableClockTest {
     @Test
     public void setClockToItselfIsAnError() {
         ControllableClock clock = ControllableClock.freezedAt(LocalDateTime.of(2015, 6, 24, 12, 15));
-        assertThrows(IllegalArgumentException.class, () ->clock.set(clock));
+        assertThrows(IllegalArgumentException.class, () -> clock.set(previous -> clock));
     }
 
     @Test
@@ -128,6 +134,30 @@ public class ControllableClockTest {
         Instant freezedInstant = clock.instant();
         Thread.sleep(10);
         assertThat(clock.instant(), is(freezedInstant));
+    }
+
+    @Test
+    public void correctEqualsAndHashcode() {
+        EqualsVerifier.forClass(ControllableClock.class)
+            .suppress(NULL_FIELDS)
+            .withRedefinedSuperclass()
+            .verify();
+    }
+
+    @Test
+    void changeToSameZoneReturnsSameInstance() {
+        Clock clock = ControllableClock.freezedAt(Instant.now());
+        assertThat(clock.withZone(clock.getZone()), sameInstance(clock));
+    }
+
+    @Test
+    void changeToOtherZone() {
+        Clock utcClock = ControllableClock.freezedAt(Instant.now(), UTC);
+        ZoneId OSLO_ZONE = ZoneId.of("Europe/Oslo");
+        Clock osloClock = utcClock.withZone(OSLO_ZONE);
+        assertThat(utcClock, where(Clock::getZone, is(UTC)));
+        assertThat(osloClock, where(Clock::getZone, is(OSLO_ZONE)));
+        assertThat(utcClock, where(Clock::instant, is(osloClock.instant())));
     }
 
 }
