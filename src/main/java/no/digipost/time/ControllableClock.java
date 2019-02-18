@@ -142,6 +142,24 @@ public final class ControllableClock extends Clock implements TimeControllable, 
     }
 
     /**
+     * Gets the current {@link ZonedDateTime} resolved with the zone of the clock.
+     *
+     * @return the current time as a zoned date and time.
+     */
+    public ZonedDateTime zonedDateTime() {
+        return instant().atZone(getZone());
+    }
+
+    /**
+     * Gets the current {@link LocalDateTime} resolved for the zone of the clock.
+     *
+     * @return the current time as a local date and time.
+     */
+    public LocalDateTime localDateTime() {
+        return LocalDateTime.ofInstant(instant(), getZone());
+    }
+
+    /**
      * Perform an action with the clock adjusted, and have the clock reset to it's original state
      * after the action has finished.
      *

@@ -52,12 +52,12 @@ public class ControllableClockTest {
         ControllableClock clock = ControllableClock.freezedAt(start);
 
         clock.timePasses((TemporalAmount) Duration.ofSeconds(45));
-        assertThat(clock.instant(), is(start.atZone(clock.getZone()).plusSeconds(45).toInstant()));
+        assertThat(clock.zonedDateTime(), is(start.atZone(clock.getZone()).plusSeconds(45)));
 
         LocalDateTime aug14 = LocalDateTime.of(2016, 8, 14, 12, 00);
         clock.set(aug14);
         clock.timePasses(Period.ofDays(1));
-        assertThat(clock.instant(), is(aug14.plusDays(1).atZone(clock.getZone()).toInstant()));
+        assertThat(clock.zonedDateTime(), is(aug14.plusDays(1).atZone(clock.getZone())));
     }
 
     @Test
@@ -91,7 +91,7 @@ public class ControllableClockTest {
         LocalDateTime start = LocalDateTime.of(2015, 6, 24, 12, 15);
         ControllableClock clock = ControllableClock.freezedAt(start);
         clock.timePasses(slack);
-        assertThat(clock.instant(), is(LocalDateTime.of(2015, 6, 24, 12, 30).atZone(clock.getZone()).toInstant()));
+        assertThat(clock.localDateTime(), is(LocalDateTime.of(2015, 6, 24, 12, 30)));
     }
 
     @Test
