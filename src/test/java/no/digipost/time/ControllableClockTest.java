@@ -160,4 +160,27 @@ public class ControllableClockTest {
         assertThat(utcClock, where(Clock::instant, is(osloClock.instant())));
     }
 
+    @Test
+    void successfulOperationWithAdjustedClockIsResetAfterwards() {
+        ZonedDateTime initialTime = ZonedDateTime.of(2020, 1, 4, 12, 30, 0, 0, UTC);
+        ControllableClock clock = ControllableClock.freezedAt(initialTime);
+        clock.doWithTimeAdjusted(adjust -> adjust.timePasses(Period.ofYears(2)), twoYearsLater -> {
+            assertThat(LocalDateTime.ofInstant(twoYearsLater, UTC), is(LocalDateTime.of(2022, 1, 4, 12, 30)));
+            assertThat(clock.instant(), is(twoYearsLater));
+        });
+        assertThat(clock.instant().atZone(UTC), is(initialTime));
+    }
+
+    @Test
+    void failingOperationWithAdjustedClockIsResetAfterwards() {
+        ZonedDateTime initialTime = ZonedDateTime.of(2020, 1, 4, 12, 30, 0, 0, UTC);
+        ControllableClock clock = ControllableClock.freezedAt(initialTime);
+        assertThrows(Exception.class, () -> clock.doWithTimeAdjusted(adjust -> adjust.timePasses(Period.ofYears(2)), twoYearsLater -> {
+            throw new Exception();
+        }));
+        assertThat(clock.instant().atZone(UTC), is(initialTime));
+    }
+
+
+
 }

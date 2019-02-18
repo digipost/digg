@@ -15,6 +15,9 @@
  */
 package no.digipost.time;
 
+import no.digipost.function.ThrowingConsumer;
+import no.digipost.function.ThrowingFunction;
+
 import java.io.Serializable;
 import java.time.Clock;
 import java.time.Instant;
@@ -24,6 +27,7 @@ import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
 /**
@@ -135,6 +139,45 @@ public final class ControllableClock extends Clock implements TimeControllable, 
     @Override
     public ZoneId getZone() {
         return delegate.get().getZone();
+    }
+
+    /**
+     * Perform an action with the clock adjusted, and have the clock reset to it's original state
+     * after the action has finished.
+     *
+     * @param adjustClock how to adjust the clock before running the action
+     * @param action the action to perform, which is given an instant resolved from the adjusted clock
+     * @param <X> Exception the may be thrown from the given action
+     *
+     * @throws X if the given action throws an exception
+     */
+    public <X extends Exception> void doWithTimeAdjusted(Consumer<TimeControllable> adjustClock, ThrowingConsumer<Instant, X> action) throws X {
+        getWithTimeAdjusted(adjustClock, time -> {
+            action.accept(time);
+            return null;
+        });
+    }
+
+    /**
+     * Resolve a value with the clock adjusted, and have the clock reset to it's original state
+     * after the operation has finished.
+     *
+     * @param adjustClock how to adjust the clock before running the action
+     * @param resolveValue the operation which resolves the value, which is given an instant resolved from the adjusted clock
+     * @param <T> The returned type
+     * @param <X> Exception the may be thrown from the given function
+     *
+     * @return the value returned from the given {@code resolveValue} function
+     * @throws X if the function throws an exception while resolving the value.
+     */
+    public <T, X extends Exception> T getWithTimeAdjusted(Consumer<TimeControllable> adjustClock, ThrowingFunction<Instant, T, X> resolveValue) throws X {
+        Clock originalClock = delegate.get();
+        try {
+            adjustClock.accept(this);
+            return resolveValue.apply(this.instant());
+        } finally {
+            set(temporary -> originalClock);
+        }
     }
 
     @Override
