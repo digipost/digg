@@ -39,7 +39,7 @@ import java.util.function.UnaryOperator;
  * @see #set(Instant)
  * @see #setToSystemClock()
  */
-public final class ControllableClock extends Clock implements TimeControllable, ClockSnapshot.ResolveFromJavaClock, Serializable {
+public final class ControllableClock extends Clock implements TimeControllable, ClockSnapshot.ResolverForJavaClock, Serializable {
 
 
     /**

@@ -60,7 +60,7 @@ public interface TimeControllable extends ClockSnapshot.Resolver {
         if (amountOfTime instanceof Duration) {
             duration = (Duration) amountOfTime;
         } else {
-            duration = clockSnapshot().apply((instant, zone) -> Duration.between(instant, instant.atZone(zone).plus(amountOfTime)));
+            duration = clockSnapshot().as((instant, zone) -> Duration.between(instant, instant.atZone(zone).plus(amountOfTime)));
         }
         timePasses(duration);
     }
@@ -105,7 +105,7 @@ public interface TimeControllable extends ClockSnapshot.Resolver {
      * Signal that the clock should freeze at the instant it is currently at.
      */
     default void freeze() {
-        clockSnapshot().accept(this::freezeAt);
+        clockSnapshot().to(this::freezeAt);
     }
 
 
