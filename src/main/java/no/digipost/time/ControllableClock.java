@@ -39,7 +39,7 @@ import java.util.function.UnaryOperator;
  * @see #set(Instant)
  * @see #setToSystemClock()
  */
-public final class ControllableClock extends Clock implements TimeControllable, ClockSnapshot.ResolverForJavaClock, Serializable {
+public final class ControllableClock extends Clock implements JavaClockAdjuster, JavaClockAdditionalAccessors, Serializable {
 
 
     /**
@@ -141,23 +141,6 @@ public final class ControllableClock extends Clock implements TimeControllable, 
         return delegate.get().getZone();
     }
 
-    /**
-     * Gets the current {@link ZonedDateTime} resolved with the zone of the clock.
-     *
-     * @return the current time as a zoned date and time.
-     */
-    public ZonedDateTime zonedDateTime() {
-        return instant().atZone(getZone());
-    }
-
-    /**
-     * Gets the current {@link LocalDateTime} resolved for the zone of the clock.
-     *
-     * @return the current time as a local date and time.
-     */
-    public LocalDateTime localDateTime() {
-        return LocalDateTime.ofInstant(instant(), getZone());
-    }
 
     /**
      * Perform an action with the clock adjusted, and have the clock reset to it's original state
@@ -169,7 +152,7 @@ public final class ControllableClock extends Clock implements TimeControllable, 
      *
      * @throws X if the given action throws an exception
      */
-    public <X extends Exception> void doWithTimeAdjusted(Consumer<TimeControllable> adjustClock, ThrowingConsumer<Instant, X> action) throws X {
+    public <X extends Exception> void doWithTimeAdjusted(Consumer<ClockAdjuster> adjustClock, ThrowingConsumer<Instant, X> action) throws X {
         getWithTimeAdjusted(adjustClock, time -> {
             action.accept(time);
             return null;
@@ -188,7 +171,7 @@ public final class ControllableClock extends Clock implements TimeControllable, 
      * @return the value returned from the given {@code resolveValue} function
      * @throws X if the function throws an exception while resolving the value.
      */
-    public <T, X extends Exception> T getWithTimeAdjusted(Consumer<TimeControllable> adjustClock, ThrowingFunction<Instant, T, X> resolveValue) throws X {
+    public <T, X extends Exception> T getWithTimeAdjusted(Consumer<ClockAdjuster> adjustClock, ThrowingFunction<Instant, T, X> resolveValue) throws X {
         Clock originalClock = delegate.get();
         try {
             adjustClock.accept(this);
