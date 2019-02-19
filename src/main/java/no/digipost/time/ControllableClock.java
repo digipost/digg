@@ -15,9 +15,11 @@
  */
 package no.digipost.time;
 
+import no.digipost.function.ThrowingConsumer;
+import no.digipost.function.ThrowingFunction;
+
 import java.io.Serializable;
 import java.time.Clock;
-import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -25,6 +27,8 @@ import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
+import java.util.function.UnaryOperator;
 
 /**
  * A controllable {@link Clock}, typically intended for use in testing. A {@code ControllableClock}
@@ -35,7 +39,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * @see #set(Instant)
  * @see #setToSystemClock()
  */
-public final class ControllableClock extends Clock implements TimeControllable, Serializable {
+public final class ControllableClock extends Clock implements TimeControllable, ClockSnapshot.ResolverForJavaClock, Serializable {
 
 
     /**
@@ -63,7 +67,7 @@ public final class ControllableClock extends Clock implements TimeControllable, 
      * @return the new {@code ControllableClock}
      */
     public static ControllableClock freezedAt(ZonedDateTime dateTime) {
-        return control(Clock.fixed(dateTime.toInstant(), dateTime.getZone()));
+        return freezedAt(dateTime.toInstant(), dateTime.getZone());
     }
 
 
@@ -78,7 +82,7 @@ public final class ControllableClock extends Clock implements TimeControllable, 
      * @return the new {@code ControllableClock}
      */
     public static ControllableClock freezedAt(Instant instant) {
-        return control(Clock.fixed(instant, ZoneId.systemDefault()));
+        return freezedAt(instant, ZoneId.systemDefault());
     }
 
 
@@ -120,7 +124,11 @@ public final class ControllableClock extends Clock implements TimeControllable, 
 
     @Override
     public ControllableClock withZone(ZoneId zone) {
-        return new ControllableClock(delegate.get().withZone(zone));
+        Clock currentDelegate = delegate.get();
+        if (zone.equals(currentDelegate.getZone())) {
+            return this;
+        }
+        return new ControllableClock(currentDelegate.withZone(zone));
     }
 
     @Override
@@ -133,52 +141,72 @@ public final class ControllableClock extends Clock implements TimeControllable, 
         return delegate.get().getZone();
     }
 
-    @Override
-    public void timePasses(TemporalAmount amountOfTime) {
-        Duration duration;
-        if (amountOfTime instanceof Duration) {
-            duration = (Duration) amountOfTime;
-        } else {
-            Instant now = this.instant();
-            duration = Duration.between(now, now.atZone(getZone()).plus(amountOfTime));
+    /**
+     * Gets the current {@link ZonedDateTime} resolved with the zone of the clock.
+     *
+     * @return the current time as a zoned date and time.
+     */
+    public ZonedDateTime zonedDateTime() {
+        return instant().atZone(getZone());
+    }
+
+    /**
+     * Gets the current {@link LocalDateTime} resolved for the zone of the clock.
+     *
+     * @return the current time as a local date and time.
+     */
+    public LocalDateTime localDateTime() {
+        return LocalDateTime.ofInstant(instant(), getZone());
+    }
+
+    /**
+     * Perform an action with the clock adjusted, and have the clock reset to it's original state
+     * after the action has finished.
+     *
+     * @param adjustClock how to adjust the clock before running the action
+     * @param action the action to perform, which is given an instant resolved from the adjusted clock
+     * @param <X> Exception the may be thrown from the given action
+     *
+     * @throws X if the given action throws an exception
+     */
+    public <X extends Exception> void doWithTimeAdjusted(Consumer<TimeControllable> adjustClock, ThrowingConsumer<Instant, X> action) throws X {
+        getWithTimeAdjusted(adjustClock, time -> {
+            action.accept(time);
+            return null;
+        });
+    }
+
+    /**
+     * Resolve a value with the clock adjusted, and have the clock reset to it's original state
+     * after the operation has finished.
+     *
+     * @param adjustClock how to adjust the clock before running the action
+     * @param resolveValue the operation which resolves the value, which is given an instant resolved from the adjusted clock
+     * @param <T> The returned type
+     * @param <X> Exception the may be thrown from the given function
+     *
+     * @return the value returned from the given {@code resolveValue} function
+     * @throws X if the function throws an exception while resolving the value.
+     */
+    public <T, X extends Exception> T getWithTimeAdjusted(Consumer<TimeControllable> adjustClock, ThrowingFunction<Instant, T, X> resolveValue) throws X {
+        Clock originalClock = delegate.get();
+        try {
+            adjustClock.accept(this);
+            return resolveValue.apply(this.instant());
+        } finally {
+            set(temporary -> originalClock);
         }
-        timePasses(duration);
     }
 
     @Override
-    public void timePasses(Duration amountOfTime) {
-        delegate.getAndUpdate(previous -> Clock.offset(previous, amountOfTime));
-    }
-
-    @Override
-    public void set(LocalDateTime dateTime) {
-        set(dateTime.atZone(getZone()));
-    }
-
-    @Override
-    public void set(Instant newInstant) {
-        delegate.getAndUpdate(previous -> Clock.offset(previous, Duration.between(previous.instant(), newInstant)));
-    }
-
-    public void set(Clock newDelegate) {
-        if (this.equals(newDelegate)) {
-            throw new IllegalArgumentException("Cycle detected! Tried to set " + this + " with same instance as itself!");
-        }
-        delegate.set(newDelegate);
-    }
-
-    @Override
-    public void freeze() {
-        set(Clock.fixed(delegate.get().instant(), delegate.get().getZone()));
-    }
-
-    @Override
-    public void setToSystemClock() {
-        setToSystemClock(getZone());
-    }
-
-    public void setToSystemClock(ZoneId zoneId) {
-        set(Clock.system(zoneId));
+    public void set(UnaryOperator<Clock> createNewClock) {
+        delegate.getAndUpdate(previous -> {
+            Clock newClock = createNewClock.apply(previous);
+            if (ControllableClock.this.equals(newClock)) {
+                throw new IllegalArgumentException("Cycle detected! Tried to set " + this + " with same instance as itself!");
+            }
+            return newClock;
+        });
     }
 
     @Override
@@ -199,6 +227,5 @@ public final class ControllableClock extends Clock implements TimeControllable, 
     public int hashCode() {
         return Objects.hash(delegate.get());
     }
-
 
 }

@@ -15,8 +15,10 @@
  */
 package no.digipost.time;
 
+import nl.jqno.equalsverifier.EqualsVerifier;
 import org.junit.jupiter.api.Test;
 
+import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -30,12 +32,16 @@ import java.time.temporal.TemporalUnit;
 import java.time.temporal.UnsupportedTemporalTypeException;
 import java.util.List;
 
+import static co.unruly.matchers.Java8Matchers.where;
 import static java.time.Clock.systemUTC;
+import static java.time.ZoneOffset.UTC;
 import static java.util.Arrays.asList;
+import static nl.jqno.equalsverifier.Warning.NULL_FIELDS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class ControllableClockTest {
@@ -46,12 +52,12 @@ public class ControllableClockTest {
         ControllableClock clock = ControllableClock.freezedAt(start);
 
         clock.timePasses((TemporalAmount) Duration.ofSeconds(45));
-        assertThat(clock.instant(), is(start.atZone(clock.getZone()).plusSeconds(45).toInstant()));
+        assertThat(clock.zonedDateTime(), is(start.atZone(clock.getZone()).plusSeconds(45)));
 
         LocalDateTime aug14 = LocalDateTime.of(2016, 8, 14, 12, 00);
         clock.set(aug14);
         clock.timePasses(Period.ofDays(1));
-        assertThat(clock.instant(), is(aug14.plusDays(1).atZone(clock.getZone()).toInstant()));
+        assertThat(clock.zonedDateTime(), is(aug14.plusDays(1).atZone(clock.getZone())));
     }
 
     @Test
@@ -85,7 +91,7 @@ public class ControllableClockTest {
         LocalDateTime start = LocalDateTime.of(2015, 6, 24, 12, 15);
         ControllableClock clock = ControllableClock.freezedAt(start);
         clock.timePasses(slack);
-        assertThat(clock.instant(), is(LocalDateTime.of(2015, 6, 24, 12, 30).atZone(clock.getZone()).toInstant()));
+        assertThat(clock.localDateTime(), is(LocalDateTime.of(2015, 6, 24, 12, 30)));
     }
 
     @Test
@@ -112,7 +118,7 @@ public class ControllableClockTest {
     @Test
     public void setClockToItselfIsAnError() {
         ControllableClock clock = ControllableClock.freezedAt(LocalDateTime.of(2015, 6, 24, 12, 15));
-        assertThrows(IllegalArgumentException.class, () ->clock.set(clock));
+        assertThrows(IllegalArgumentException.class, () -> clock.set(previous -> clock));
     }
 
     @Test
@@ -129,5 +135,52 @@ public class ControllableClockTest {
         Thread.sleep(10);
         assertThat(clock.instant(), is(freezedInstant));
     }
+
+    @Test
+    public void correctEqualsAndHashcode() {
+        EqualsVerifier.forClass(ControllableClock.class)
+            .suppress(NULL_FIELDS)
+            .withRedefinedSuperclass()
+            .verify();
+    }
+
+    @Test
+    void changeToSameZoneReturnsSameInstance() {
+        Clock clock = ControllableClock.freezedAt(Instant.now());
+        assertThat(clock.withZone(clock.getZone()), sameInstance(clock));
+    }
+
+    @Test
+    void changeToOtherZone() {
+        Clock utcClock = ControllableClock.freezedAt(Instant.now(), UTC);
+        ZoneId OSLO_ZONE = ZoneId.of("Europe/Oslo");
+        Clock osloClock = utcClock.withZone(OSLO_ZONE);
+        assertThat(utcClock, where(Clock::getZone, is(UTC)));
+        assertThat(osloClock, where(Clock::getZone, is(OSLO_ZONE)));
+        assertThat(utcClock, where(Clock::instant, is(osloClock.instant())));
+    }
+
+    @Test
+    void successfulOperationWithAdjustedClockIsResetAfterwards() {
+        ZonedDateTime initialTime = ZonedDateTime.of(2020, 1, 4, 12, 30, 0, 0, UTC);
+        ControllableClock clock = ControllableClock.freezedAt(initialTime);
+        clock.doWithTimeAdjusted(adjust -> adjust.timePasses(Period.ofYears(2)), twoYearsLater -> {
+            assertThat(LocalDateTime.ofInstant(twoYearsLater, UTC), is(LocalDateTime.of(2022, 1, 4, 12, 30)));
+            assertThat(clock.instant(), is(twoYearsLater));
+        });
+        assertThat(clock.instant().atZone(UTC), is(initialTime));
+    }
+
+    @Test
+    void failingOperationWithAdjustedClockIsResetAfterwards() {
+        ZonedDateTime initialTime = ZonedDateTime.of(2020, 1, 4, 12, 30, 0, 0, UTC);
+        ControllableClock clock = ControllableClock.freezedAt(initialTime);
+        assertThrows(Exception.class, () -> clock.doWithTimeAdjusted(adjust -> adjust.timePasses(Period.ofYears(2)), twoYearsLater -> {
+            throw new Exception();
+        }));
+        assertThat(clock.instant().atZone(UTC), is(initialTime));
+    }
+
+
 
 }
