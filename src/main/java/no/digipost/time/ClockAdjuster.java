@@ -26,11 +26,11 @@ import java.time.temporal.TemporalAmount;
 import java.util.function.UnaryOperator;
 
 /**
- * The clock <em>mutation</em> operations, e.g. offered by a {@link ControllableClock}.
+ * A clock <em>adjusting</em> API, e.g. offered by a {@link ControllableClock}.
  * This interface can for instance be used to easily expose time manipulation through another API,
- * but you do not want to expose a {@link Clock} instance.
+ * but you do not want to expose a {@link Clock} or {@code ControllableClock} instance.
  */
-public interface TimeControllable extends ClockSnapshot.Resolver {
+public interface ClockAdjuster {
 
     /**
      * Set a new clock to resolve the time from.
@@ -46,67 +46,51 @@ public interface TimeControllable extends ClockSnapshot.Resolver {
      *
      * @param amountOfTime the amount of time which are passing.
      */
-    default void timePasses(Duration amountOfTime) {
-        set(previous -> Clock.offset(previous, amountOfTime));
-    }
+    void timePasses(Duration amountOfTime);
+
 
     /**
      * Signal that time is passing a given amount of time.
      *
      * @param amountOfTime the amount of time which are passing.
      */
-    default void timePasses(TemporalAmount amountOfTime) {
-        Duration duration;
-        if (amountOfTime instanceof Duration) {
-            duration = (Duration) amountOfTime;
-        } else {
-            duration = clockSnapshot().as((instant, zone) -> Duration.between(instant, instant.atZone(zone).plus(amountOfTime)));
-        }
-        timePasses(duration);
-    }
+    void timePasses(TemporalAmount amountOfTime);
 
 
     /**
      * Freeze the clock at given instant and {@link ZoneId zone}.
      */
-    default void freezeAt(Instant instant, ZoneId zone) {
-        set(previous -> Clock.fixed(instant, zone));
-    }
+    void freezeAt(Instant instant, ZoneId zone);
+
 
     /**
      * Freeze the clock at given instant.
      */
-    default void freezeAt(Instant instant) {
-        freezeAt(instant, clockSnapshot().zone);
-    }
+    void freezeAt(Instant instant);
+
 
     /**
      * Freeze the clock at given date and time.
      */
-    default void freezeAt(ZonedDateTime zonedDateTime) {
-        freezeAt(zonedDateTime.toInstant(), zonedDateTime.getZone());
-    }
+    void freezeAt(ZonedDateTime zonedDateTime);
+
 
     /**
      * Freeze the clock at given date and time.
      */
-    default void freezeAt(OffsetDateTime offsetDateTime) {
-        freezeAt(offsetDateTime.toInstant(), offsetDateTime.getOffset());
-    }
+    void freezeAt(OffsetDateTime offsetDateTime);
+
 
     /**
      * Freeze the clock at given date and time.
      */
-    default void freezeAt(LocalDateTime offsetDateTime) {
-        freezeAt(offsetDateTime.atZone(clockSnapshot().zone));
-    }
+    void freezeAt(LocalDateTime offsetDateTime);
+
 
     /**
      * Signal that the clock should freeze at the instant it is currently at.
      */
-    default void freeze() {
-        clockSnapshot().to(this::freezeAt);
-    }
+    void freeze();
 
 
     /**
@@ -115,18 +99,15 @@ public interface TimeControllable extends ClockSnapshot.Resolver {
      *
      * @see Clock#system(ZoneId)
      */
-    default void setToSystemClock(ZoneId zoneId) {
-        set(previous -> Clock.system(zoneId));
-    }
+    void setToSystemClock(ZoneId zoneId);
+
 
     /**
      * Set the time to freely progressing system time.
      *
      * @see Clock#system(ZoneId)
      */
-    default void setToSystemClock() {
-        setToSystemClock(clockSnapshot().zone);
-    }
+    void setToSystemClock();
 
 
     /**
@@ -135,36 +116,31 @@ public interface TimeControllable extends ClockSnapshot.Resolver {
      * @param instant the instant to set.
      * @param zone the zone to set.
      */
-    default void set(Instant instant, ZoneId zone) {
-        set(previous -> Clock.offset(previous, Duration.between(previous.instant(), instant)).withZone(zone));
-    }
+    void set(Instant instant, ZoneId zone);
+
 
     /**
      * Set the time to the given instant.
      *
      * @param instant the instant to set.
      */
-    default void set(Instant instant) {
-        set(instant, clockSnapshot().zone);
-    }
+    void set(Instant instant);
+
 
     /**
      * Set the time to the given <em>zoned</em> date and time.
      *
      * @param zonedDateTime the date and time to set.
      */
-    default void set(ZonedDateTime zonedDateTime) {
-        set(zonedDateTime.toInstant(), zonedDateTime.getZone());
-    }
+    void set(ZonedDateTime zonedDateTime);
+
 
     /**
      * Set the time to the given <em>offset</em> date and time.
      *
      * @param offsetDateTime the date and time to set.
      */
-    default void set(OffsetDateTime offsetDateTime) {
-        set(offsetDateTime.toInstant(), offsetDateTime.getOffset());
-    }
+    void set(OffsetDateTime offsetDateTime);
 
 
     /**
@@ -172,8 +148,6 @@ public interface TimeControllable extends ClockSnapshot.Resolver {
      *
      * @param localDateTime the date and time to set.
      */
-    default void set(LocalDateTime localDateTime) {
-        set(localDateTime.atZone(clockSnapshot().zone));
-    }
+    void set(LocalDateTime localDateTime);
 
 }
