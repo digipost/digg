@@ -140,6 +140,17 @@ public final class DiggExceptions {
         return e -> { throw createUnchecked.apply(e); };
     }
 
+    /**
+     * Creates a function, which is similar to the function supplied, except for unchecking any exception it would throw
+     *
+     * Useful for when you want to use map/flatMap in a java stream, but the function throws checked exceptions
+     *
+     * @param function a function to convert a (typically) checked exception to {@link RuntimeException}.
+     * @return the ({@link Function}) which rethrows any given exception.
+     */
+    static <T, R, E extends Throwable> Function<T, R> uncheckFunction(ThrowingFunction<T, R, E> function) {
+        return t -> function.asUnchecked().apply(t);
+    }
 
 
     private DiggExceptions() {}

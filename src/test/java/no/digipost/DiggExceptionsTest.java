@@ -19,17 +19,16 @@ import no.digipost.concurrent.OneTimeToggle;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
 import static co.unruly.matchers.Java8Matchers.where;
 import static java.util.stream.Collectors.toList;
-import static no.digipost.DiggExceptions.applyUnchecked;
-import static no.digipost.DiggExceptions.causalChainOf;
-import static no.digipost.DiggExceptions.getUnchecked;
-import static no.digipost.DiggExceptions.mayThrow;
-import static no.digipost.DiggExceptions.runUnchecked;
+import static no.digipost.DiggExceptions.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
@@ -95,6 +94,21 @@ public class DiggExceptionsTest {
         verify(exceptionHandler).accept(ex);
 
         assertThat(assertThrows(Exception.class, () -> mayThrow((t, u) -> { if (t == null) throw ex; }).accept(null, null)), sameInstance(ex));
+    }
+
+    @Test
+    public void testUncheckedFunction() {
+        String goodURL = "https://elg.no";
+        String badURL = "baaaadurl";
+
+        assertThrows(RuntimeException.class, () -> {
+            ArrayList<String> urlsToCrawl = new ArrayList<>();
+            urlsToCrawl.add(goodURL);
+            urlsToCrawl.add(badURL);
+            urlsToCrawl.stream()
+                    .map(uncheckFunction(URL::new))
+                    .forEach(url -> assertThat("All passing urls should be good urls", url.toString(), is(goodURL)));
+        });
     }
 
 

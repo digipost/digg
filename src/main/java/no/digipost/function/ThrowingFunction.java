@@ -45,12 +45,10 @@ public interface ThrowingFunction<T, R, X extends Throwable> {
     }
 
     default Function<T, Optional<R>> ifException(BiConsumer<? super T, Exception> exceptionHandler) {
-        return t -> {
-            return Optional.ofNullable(ifExceptionApply((failingT, e) -> {
-                exceptionHandler.accept(failingT, e);
-                return null;
-            }).apply(t));
-        };
+        return t -> Optional.ofNullable(ifExceptionApply((failingT, e) -> {
+            exceptionHandler.accept(failingT, e);
+            return null;
+        }).apply(t));
     }
 
     default Function<T, R> ifExceptionApply(Function<Exception, ? extends R> exceptionMapper) {
