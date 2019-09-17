@@ -231,14 +231,7 @@ public final class Mappers {
      * @see #getIntArray
      * @see #getLongArray
      */
-    public static final BasicColumnMapper<Object> getArray = (name, rs) -> {
-        Array sqlArray = getSqlArray.map(name, rs);
-        try {
-            return sqlArray.getArray();
-        } finally {
-            sqlArray.free();
-        }
-    };
+    public static final BasicColumnMapper<Object> getArray = (name, rs) -> getSqlArray.andThen(SqlArray::of).map(name, rs).consume(Array::getArray);
 
     /**
      * Gets the value of a given SQL {@code ARRAY} column as an {@code String[]} array.
