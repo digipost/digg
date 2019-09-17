@@ -72,7 +72,11 @@ public interface ThrowingFunction<T, R, X extends Throwable> {
     }
 
     default <V> ThrowingFunction<T, V, X> andThen(ThrowingFunction<? super R, V, ? extends X> after) {
-        return (t) -> after.apply(apply(t));
+        return t -> after.apply(apply(t));
+    }
+
+    default <V> ThrowingFunction<V, R, X> compose(ThrowingFunction<? super V, ? extends T, ? extends X> before) {
+        return t -> apply(before.apply(t));
     }
 
 }

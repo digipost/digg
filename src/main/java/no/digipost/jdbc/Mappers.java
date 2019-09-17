@@ -19,6 +19,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.net.URL;
+import java.sql.Array;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
@@ -218,6 +219,34 @@ public final class Mappers {
     public static final BasicColumnMapper<Reader> getCharacterStream = (name, rs) -> rs.getCharacterStream(name);
     /** @see ResultSet#getCharacterStream(String) */
     public static final NullableColumnMapper<Reader> getNullableCharacterStream = (name, rs) -> ofNullable(rs.getCharacterStream(name));
+
+    /** @see ResultSet#getArray(String) */
+    public static final BasicColumnMapper<Array> getSqlArray = (name, rs) -> rs.getArray(name);
+
+    /**
+     * Gets the value of a given SQL {@code ARRAY} column as an uncasted Java array object. The result should be casted to
+     * the applicable specific array type.
+     *
+     * @see #getStringArray
+     * @see #getIntArray
+     * @see #getLongArray
+     */
+    public static final BasicColumnMapper<Object> getArray = (name, rs) -> getSqlArray.andThen(SqlArray::of).map(name, rs).consume(Array::getArray);
+
+    /**
+     * Gets the value of a given SQL {@code ARRAY} column as an {@code String[]} array.
+     */
+    public static final BasicColumnMapper<String[]> getStringArray = getArray.andThen(String[].class::cast);
+
+    /**
+     * Gets the value of a given SQL {@code ARRAY} column as an {@code int[]} array.
+     */
+    public static final BasicColumnMapper<int[]> getIntArray = getArray.andThen(int[].class::cast);
+
+    /**
+     * Gets the value of a given SQL {@code ARRAY} column as an {@code long[]} array.
+     */
+    public static final BasicColumnMapper<long[]> getLongArray = getArray.andThen(long[].class::cast);
 
 
     private Mappers() {}
