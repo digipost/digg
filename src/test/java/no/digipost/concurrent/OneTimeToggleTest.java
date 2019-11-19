@@ -59,8 +59,8 @@ public class OneTimeToggleTest {
     @Test
     void toggleAndExecuteAtMostOnce() {
         AtomicInteger counter = new AtomicInteger(0);
-        done.nowAndUnlessAlreadyToggled(counter::incrementAndGet);
-        done.nowAndUnlessAlreadyToggled(counter::incrementAndGet);
+        done.nowAndUnlessAlreadyToggled(() -> { counter.incrementAndGet(); });
+        done.nowAndUnlessAlreadyToggled(() -> { counter.incrementAndGet(); });
         assertThat(done, where(OneTimeToggle::yet));
         assertThat(counter, where(Number::intValue, is(1)));
 
