@@ -17,6 +17,8 @@ package no.digipost.concurrent;
 
 import org.junit.jupiter.api.Test;
 
+import static co.unruly.matchers.Java8Matchers.where;
+import static co.unruly.matchers.Java8Matchers.whereNot;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -27,18 +29,18 @@ public class OneTimeToggleTest {
 
     @Test
     public void toggleIsAllowedSeveralTimes() {
-        assertThat(done.yet(), is(false));
+        assertThat(done, whereNot(OneTimeToggle::yet));
         done.now();
-        assertThat(done.yet(), is(true));
+        assertThat(done, where(OneTimeToggle::yet));
         done.now();
-        assertThat(done.yet(), is(true));
+        assertThat(done, where(OneTimeToggle::yet));
     }
 
     @Test
     public void toggleOnceOrThrowException() {
-        assertThat(done.yet(), is(false));
+        assertThat(done, whereNot(OneTimeToggle::yet));
         done.nowOrIfAlreadyThenThrow(IllegalStateException::new);
-        assertThat(done.yet(), is(true));
+        assertThat(done, where(OneTimeToggle::yet));
 
         assertThrows(IllegalStateException.class, () -> done.nowOrIfAlreadyThenThrow(IllegalStateException::new));
     }
