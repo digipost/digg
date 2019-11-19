@@ -15,10 +15,21 @@
  */
 package no.digipost.concurrent;
 
+import no.digipost.DiggConcurrent;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
+
+import java.time.Duration;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static co.unruly.matchers.Java8Matchers.where;
 import static co.unruly.matchers.Java8Matchers.whereNot;
+import static java.util.stream.Stream.generate;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -44,4 +55,45 @@ public class OneTimeToggleTest {
 
         assertThrows(IllegalStateException.class, () -> done.nowOrIfAlreadyThenThrow(IllegalStateException::new));
     }
+
+    @Test
+    void toggleAndExecuteAtMostOnce() {
+        AtomicInteger counter = new AtomicInteger(0);
+        done.nowAndUnlessAlreadyToggled(counter::incrementAndGet);
+        done.nowAndUnlessAlreadyToggled(counter::incrementAndGet);
+        assertThat(done, where(OneTimeToggle::yet));
+        assertThat(counter, where(Number::intValue, is(1)));
+
+    }
+
+
+    private static final ExecutorService executor = Executors.newWorkStealingPool(20);
+
+    @RepeatedTest(200)
+    @Timeout(10)
+    void threadSafeToggleAndExecuteAtMostOnce() {
+        OneTimeToggle done = new OneTimeToggle();
+        AtomicInteger counter = new AtomicInteger(0);
+
+        @SuppressWarnings("rawtypes")
+        CompletableFuture[] allToggles = generate(() -> (Runnable) () -> done.nowAndUnlessAlreadyToggled(counter::incrementAndGet))
+            .parallel()
+            .limit(1000)
+            .map(toggler -> CompletableFuture.runAsync(toggler, executor))
+            .toArray(CompletableFuture[]::new);
+
+        CompletableFuture.allOf(allToggles).join();
+
+        assertThat(done, where(OneTimeToggle::yet));
+        assertThat(counter, where(Number::intValue, is(1)));
+    }
+
+    @AfterAll
+    static void shutdownExecutor() {
+        DiggConcurrent.ensureShutdown(executor, Duration.ofSeconds(3));
+    }
+
+
+
+
 }

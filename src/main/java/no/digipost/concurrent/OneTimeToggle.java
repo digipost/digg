@@ -15,6 +15,7 @@
  */
 package no.digipost.concurrent;
 
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Supplier;
 
@@ -47,14 +48,58 @@ public final class OneTimeToggle implements TargetState {
      * @param exceptionSupplier supply exception to throw if it was already toggled.
      */
     public <E extends Throwable> void nowOrIfAlreadyThenThrow(Supplier<E> exceptionSupplier) throws E {
-        if (toggled.getAndSet(true)) {
-            throw exceptionSupplier.get();
+        E exceptionIfAlreadyToggled = toggleAndExecuteIfPreviouslyWas(true, exceptionSupplier);
+        if (exceptionIfAlreadyToggled != null) {
+            throw exceptionIfAlreadyToggled;
         }
     }
 
     @Override
     public boolean yet() {
         return toggled.get();
+    }
+
+    /**
+     * Toggle it, to make {@link #yet()} return <code>true</code>, <em>and</em> if
+     * a toggle was actually done (i.e. the {@code OneTimeToggle} has not already been toggled),
+     * execute the provided action. This can be used to facilitate at-most-once
+     * execution semantics, even in a multi-threaded context.
+     *
+     * @param action the action to run <em>if</em> the toggle was actually switched.
+     */
+    public void nowAndUnlessAlreadyToggled(Runnable action) {
+        toggleAndExecuteIfPreviouslyWas(false, () -> {
+            action.run();
+            return null;
+        });
+    }
+
+    /**
+     * Toggle it, to make {@link #yet()} return <code>true</code>, <em>and</em> if
+     * a toggle was actually done (i.e. the {@code OneTimeToggle} has not already been toggled),
+     * use the given supplier to resolve a value. This can be used to facilitate at-most-once
+     * execution semantics, even in a multi-threaded context.
+     * <p>
+     * The given supplier <em>may</em> resolve a {@code null} value, and in that case the return
+     * value from this method will be indistinguishable from an invocation on an already toggled
+     * {@code OneTimeToggle}.
+     *
+     * @param <T> the type of the value resolved by the given supplier.
+     * @param supplier the supplier to resolve a value <em>if</em> the toggle was actually switched.
+     *
+     * @return An {@link Optional} containing the value from the given supplier, <em>if</em> it was
+     *         executed, otherwise always {@link Optional#empty()}.
+     */
+    public <T> Optional<T> nowAndUnlessAlreadyToggled(Supplier<T> supplier) {
+        return Optional.ofNullable(toggleAndExecuteIfPreviouslyWas(false, supplier));
+    }
+
+    private <T> T toggleAndExecuteIfPreviouslyWas(boolean existing, Supplier<T> supplier) {
+        if (toggled.getAndSet(true) == existing) {
+            return supplier.get();
+        } else {
+            return null;
+        }
     }
 
 }
