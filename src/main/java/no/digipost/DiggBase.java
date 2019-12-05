@@ -117,7 +117,7 @@ public final class DiggBase {
 
     /**
      * The "friendly name" of a class is defined as its {@link Class#getSimpleName() simple name}, with
-     * all enclosing classes prepended and joined with a <tt>'.'</tt> delimiter. This name is typically
+     * all enclosing classes prepended and joined with a <code>'.'</code> delimiter. This name is typically
      * useful for logging, naming based on classes, where the fully qualified name would be too verbose
      * and the simple name is not specific enough.
      * <p>
@@ -200,8 +200,8 @@ public final class DiggBase {
      * in {@code DiggCollectors}.
      * <p>
      * If you have non-AutoCloseable related actions that need to be performed as well, this can be achieved
-     * by using <tt><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#concat-java.util.stream.Stream-java.util.stream.Stream-">Stream.concat(</a>close(..),
-     * {@link #forceOnAll(ThrowingConsumer, Object...) forceOnAll(T::action, T ... instances)})</tt>
+     * by using <code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/stream/Stream.html#concat-java.util.stream.Stream-java.util.stream.Stream-">Stream.concat(</a>close(..),
+     * {@link #forceOnAll(ThrowingConsumer, Object...) forceOnAll(T::action, T ... instances)})</code>
      *
      *
      * @param closeables The {@code AutoCloseable} instances to close.
