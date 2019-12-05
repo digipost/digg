@@ -21,7 +21,7 @@ _Digg_ is available in [![Maven Central Repository](https://maven-badges.herokua
 <dependency>
     <groupId>no.digipost</groupId>
     <artifactId>digg</artifactId>
-    <version>0.21</version>
+    <version>0.22</version>
 </dependency>
 ```
 
@@ -46,6 +46,3 @@ Javadocs are available at [javadoc.io/doc/no.digipost/digg](http://www.javadoc.i
 ## License
 
 Digipost Digg is licensed under [Apache 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
-
-
-[![Build Status](https://travis-ci.org/digipost/digg.svg?branch=master)](https://travis-ci.org/digipost/digg)
