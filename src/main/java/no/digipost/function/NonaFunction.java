@@ -29,8 +29,8 @@ import java.util.function.Function;
  * @param <X> the type of the fifth argument to the function
  * @param <Y> the type of the sixth argument to the function
  * @param <Z> the type of the seventh argument to the function
- * @param <Z> the type of the eight argument to the function
- * @param <Z> the type of the ninth argument to the function
+ * @param <A> the type of the eight argument to the function
+ * @param <B> the type of the ninth argument to the function
  * @param <R> the type of the result of the function
  *
  * @see OctoFunction
