@@ -1,3 +1,7 @@
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/no.digipost/digg/badge.svg)](https://maven-badges.herokuapp.com/maven-central/no.digipost/digg)
+![](https://github.com/digipost/digg/workflows/Build%20snapshot/badge.svg)
+[![License](https://img.shields.io/badge/license-Apache%202-blue)](https://github.com/digipost/digg/blob/master/LICENCE)
+
 Digipost Digg 🍬
 ===============================
 
