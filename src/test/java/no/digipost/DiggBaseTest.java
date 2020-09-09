@@ -52,8 +52,8 @@ import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.verifyZeroInteractions;
 
 public class DiggBaseTest implements WithQuickTheories {
 
@@ -131,7 +131,7 @@ public class DiggBaseTest implements WithQuickTheories {
         }
         MyResource resource = mock(MyResource.class);
         try (ThrowingAutoClosed<MyResource, RuntimeException> managedResource = throwingAutoClose(resource, MyResource::done)) {
-            verifyZeroInteractions(resource);
+            verifyNoInteractions(resource);
         }
         verify(resource, times(1)).done();
         verifyNoMoreInteractions(resource);
@@ -144,7 +144,7 @@ public class DiggBaseTest implements WithQuickTheories {
         }
         MyResource resource = mock(MyResource.class);
         try (ThrowingAutoClosed<MyResource, IOException> managedResource = throwingAutoClose(resource, MyResource::done)) {
-            verifyZeroInteractions(resource);
+            verifyNoInteractions(resource);
         }
         InOrder inOrder = inOrder(resource);
         inOrder.verify(resource, times(1)).done();
@@ -159,7 +159,7 @@ public class DiggBaseTest implements WithQuickTheories {
         }
         MyResource resource = mock(MyResource.class);
         try (AutoClosed<MyResource> managedResource = autoClose(resource, MyResource::done)) {
-            verifyZeroInteractions(resource);
+            verifyNoInteractions(resource);
         }
         verify(resource, times(1)).done();
         verifyNoMoreInteractions(resource);
@@ -177,7 +177,7 @@ public class DiggBaseTest implements WithQuickTheories {
             .when(closeable).close();
 
         Stream<Exception> closeExceptionsStream = close(generate(() -> closeable).limit(5).toArray(AutoCloseable[]::new));
-        verifyZeroInteractions(closeable);
+        verifyNoInteractions(closeable);
         List<Exception> closeExceptions = closeExceptionsStream.collect(toList());
         assertThat(closeExceptions, Matchers.contains(asList(instanceOf(IOException.class), instanceOf(IllegalStateException.class))));
         verify(closeable, times(5)).close();
