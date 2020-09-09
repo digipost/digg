@@ -15,6 +15,8 @@
  */
 package no.digipost.tuple;
 
+import no.digipost.function.TriFunction;
+
 import java.util.function.Function;
 
 import static no.digipost.tuple.XTuple.TERMINATOR;
@@ -105,4 +107,16 @@ public interface Triple<T1, T2, T3> extends ViewableAsTriple<T1, T2, T3> {
      */
     @Override
     Triple<T1, T2, T3> asTriple();
+
+
+    /**
+     * Convert this triple to an instance of an arbitrary type.
+     *
+     * @param <R> The type of the resulting instance
+     * @param convertor the function used to convert the contained
+     *                  values to a resulting compound instance.
+     * @return the result from the given function
+     */
+    <R> R to(TriFunction<? super T1, ? super T2, ? super T3, R> convertor);
+
 }

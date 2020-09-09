@@ -15,6 +15,7 @@
  */
 package no.digipost.tuple;
 
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static no.digipost.tuple.XTuple.TERMINATOR;
@@ -92,5 +93,16 @@ public interface Tuple<T1, T2> extends ViewableAsTuple<T1, T2> {
      */
     @Override
     Tuple<T1, T2> asTuple();
+
+
+    /**
+     * Convert this tuple to an instance of an arbitrary type.
+     *
+     * @param <R> The type of the resulting instance
+     * @param convertor the function used to convert the contained
+     *                  values to a resulting compound instance.
+     * @return the result from the given function
+     */
+    <R> R to(BiFunction<? super T1, ? super T2, R> convertor);
 
 }

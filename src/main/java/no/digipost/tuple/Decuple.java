@@ -15,6 +15,8 @@
  */
 package no.digipost.tuple;
 
+import no.digipost.function.DecaFunction;
+
 import java.util.function.Function;
 
 /**
@@ -237,5 +239,16 @@ public interface Decuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> extends Viewab
      */
     @Override
     Decuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asDecuple();
+
+
+    /**
+     * Convert this decuple to an instance of an arbitrary type.
+     *
+     * @param <R> The type of the resulting instance
+     * @param convertor the function used to convert the contained
+     *                  values to a resulting compound instance.
+     * @return the result from the given function
+     */
+    <R> R to(DecaFunction<? super T1, ? super T2, ? super T3, ? super T4, ? super T5, ? super T6, ? super T7, ? super T8, ? super T9, ? super T10, R> convertor);
 
 }

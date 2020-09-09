@@ -15,9 +15,19 @@
  */
 package no.digipost.tuple;
 
+import no.digipost.function.DecaFunction;
+import no.digipost.function.HexaFunction;
+import no.digipost.function.NonaFunction;
+import no.digipost.function.OctoFunction;
+import no.digipost.function.PentaFunction;
+import no.digipost.function.QuadFunction;
+import no.digipost.function.SeptiFunction;
+import no.digipost.function.TriFunction;
+
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static java.util.function.Function.identity;
@@ -276,48 +286,93 @@ final class XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> implements Tuple<T1,
 
 
     @Override
-    public XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asDecuple() {
+    public Decuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asDecuple() {
         return this;
     }
 
     @Override
-    public XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asNonuple() {
+    public Nonuple<T1, T2, T3, T4, T5, T6, T7, T8, T9> asNonuple() {
         return this;
     }
 
     @Override
-    public XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asOctuple() {
+    public Octuple<T1, T2, T3, T4, T5, T6, T7, T8> asOctuple() {
         return this;
     }
 
     @Override
-    public XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asSeptuple() {
+    public Septuple<T1, T2, T3, T4, T5, T6, T7> asSeptuple() {
         return this;
     }
 
     @Override
-    public XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asHextuple() {
+    public Hextuple<T1, T2, T3, T4, T5, T6> asHextuple() {
         return this;
     }
 
     @Override
-    public XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asPentuple() {
+    public Pentuple<T1, T2, T3, T4, T5> asPentuple() {
         return this;
     }
 
     @Override
-    public XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asQuadruple() {
+    public Quadruple<T1, T2, T3, T4> asQuadruple() {
         return this;
     }
 
     @Override
-    public XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asTriple() {
+    public Triple<T1, T2, T3> asTriple() {
         return this;
     }
 
     @Override
-    public XTuple<T1, T2, T3, T4, T5, T6, T7, T8, T9, T10> asTuple() {
+    public Tuple<T1, T2> asTuple() {
         return this;
+    }
+
+    @Override
+    public <R> R to(BiFunction<? super T1, ? super T2, R> convertor) {
+        return convertor.apply(_1, _2);
+    }
+
+    @Override
+    public <R> R to(TriFunction<? super T1, ? super T2, ? super T3, R> convertor) {
+        return convertor.apply(_1, _2, _3);
+    }
+
+    @Override
+    public <R> R to(QuadFunction<? super T1, ? super T2, ? super T3, ? super T4, R> convertor) {
+        return convertor.apply(_1, _2, _3, _4);
+    }
+
+    @Override
+    public <R> R to(PentaFunction<? super T1, ? super T2, ? super T3, ? super T4, ? super T5, R> convertor) {
+        return convertor.apply(_1, _2, _3, _4, _5);
+    }
+
+    @Override
+    public <R> R to(HexaFunction<? super T1, ? super T2, ? super T3, ? super T4, ? super T5, ? super T6, R> convertor) {
+        return convertor.apply(_1, _2, _3, _4, _5, _6);
+    }
+
+    @Override
+    public <R> R to(SeptiFunction<? super T1, ? super T2, ? super T3, ? super T4, ? super T5, ? super T6, ? super T7, R> convertor) {
+        return convertor.apply(_1, _2, _3, _4, _5, _6, _7);
+    }
+
+    @Override
+    public <R> R to(OctoFunction<? super T1, ? super T2, ? super T3, ? super T4, ? super T5, ? super T6, ? super T7, ? super T8, R> convertor) {
+        return convertor.apply(_1, _2, _3, _4, _5, _6, _7, _8);
+    }
+
+    @Override
+    public <R> R to(NonaFunction<? super T1, ? super T2, ? super T3, ? super T4, ? super T5, ? super T6, ? super T7, ? super T8, ? super T9, R> convertor) {
+        return convertor.apply(_1, _2, _3, _4, _5, _6, _7, _8, _9);
+    }
+
+    @Override
+    public <R> R to(DecaFunction<? super T1, ? super T2, ? super T3, ? super T4, ? super T5, ? super T6, ? super T7, ? super T8, ? super T9, ? super T10, R> convertor) {
+        return convertor.apply(_1, _2, _3, _4, _5, _6, _7, _8, _9, _10);
     }
 
 

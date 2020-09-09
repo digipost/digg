@@ -15,6 +15,8 @@
  */
 package no.digipost.tuple;
 
+import no.digipost.function.QuadFunction;
+
 import java.util.function.Function;
 
 import static no.digipost.tuple.XTuple.TERMINATOR;
@@ -124,5 +126,16 @@ public interface Quadruple<T1, T2, T3, T4> extends ViewableAsQuadruple<T1, T2, T
      */
     @Override
     Quadruple<T1, T2, T3, T4> asQuadruple();
+
+
+    /**
+     * Convert this quadruple to an instance of an arbitrary type.
+     *
+     * @param <R> The type of the resulting instance
+     * @param convertor the function used to convert the contained
+     *                  values to a resulting compound instance.
+     * @return the result from the given function
+     */
+    <R> R to(QuadFunction<? super T1, ? super T2, ? super T3, ? super T4, R> convertor);
 
 }
