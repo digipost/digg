@@ -136,7 +136,7 @@
                 <plugin>
                     <groupId>com.mycila</groupId>
                     <artifactId>license-maven-plugin</artifactId>
-                    <version>3.0</version>
+                    <version>4.0.rc2</version>
                     <configuration>
                         <header>src/main/license-header.txt</header>
                         <excludes>
