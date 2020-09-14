@@ -13,25 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package no.digipost;
+package no.digipost.tuple;
 
 import org.junit.jupiter.api.Test;
-import org.quicktheories.WithQuickTheories;
-import org.quicktheories.dsl.TheoryBuilder2;
 
-import static no.digipost.DiggCompare.max;
-import static no.digipost.DiggCompare.min;
+import java.util.HashMap;
+import java.util.Map;
 
-public class DiggCompareTest implements WithQuickTheories {
+import static co.unruly.matchers.StreamMatchers.contains;
+import static org.hamcrest.MatcherAssert.assertThat;
+
+class TuplesTest {
 
     @Test
-    public void minAndMax() {
-        TheoryBuilder2<Integer, Integer> forNonEqualsInts = qt()
-            .forAll(integers().all(), integers().all())
-            .assuming((x, y) -> !x.equals(y));
-
-        forNonEqualsInts.check((x, y) -> min(x, y) != max(x, y));
-        forNonEqualsInts.check((x, y) -> min(x, y) == min(y, x));
-        forNonEqualsInts.check((x, y) -> max(x, y) == max(y, x));
+    void convertMapToTuples() {
+        Map<Integer, String> map = new HashMap<>();
+        map.put(1, "one");
+        map.put(2, "two");
+        assertThat(Tuples.ofMap(map), contains(Tuple.of(1, "one"), Tuple.of(2, "two")));
     }
+
 }

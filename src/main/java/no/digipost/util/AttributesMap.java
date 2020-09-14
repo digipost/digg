@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) Posten Norge AS
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,6 @@
  */
 package no.digipost.util;
 
-import no.digipost.tuple.Tuple;
 import no.digipost.tuple.ViewableAsTuple;
 
 import java.io.Serializable;
@@ -105,8 +104,7 @@ public final class AttributesMap implements Serializable {
          * @return the builder
          */
         public <V> Builder and(ViewableAsTuple<? extends SetsNamedValue<V>, V> attributeWithValue) {
-            Tuple<? extends SetsNamedValue<V>, V> t = attributeWithValue.asTuple();
-            return and(t.first(), t.second());
+            return attributeWithValue.asTuple().to(this::and);
         }
 
 

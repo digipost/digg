@@ -1,4 +1,4 @@
-/**
+/*
  * Copyright (C) Posten Norge AS
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +15,8 @@
  */
 package no.digipost.tuple;
 
+import java.util.Map;
+import java.util.function.BiFunction;
 import java.util.function.Function;
 
 import static no.digipost.tuple.XTuple.TERMINATOR;
@@ -30,6 +32,10 @@ import static no.digipost.tuple.XTuple.TERMINATOR;
  * @param <T2> The type of the second value
  */
 public interface Tuple<T1, T2> extends ViewableAsTuple<T1, T2> {
+
+    static <T1, T2> Tuple<T1, T2> ofMapEntry(Map.Entry<T1, T2> mapEntry) {
+        return of(mapEntry.getKey(), mapEntry.getValue());
+    }
 
     static <T1, T2> Tuple<T1, T2> of(T1 first, T2 second) {
         return new XTuple<>(first, second, TERMINATOR, null, null, null, null, null, null, null);
@@ -92,5 +98,16 @@ public interface Tuple<T1, T2> extends ViewableAsTuple<T1, T2> {
      */
     @Override
     Tuple<T1, T2> asTuple();
+
+
+    /**
+     * Convert this tuple to an instance of an arbitrary type.
+     *
+     * @param <R> The type of the resulting instance
+     * @param convertor the function used to convert the contained
+     *                  values to a resulting compound instance.
+     * @return the result from the given function
+     */
+    <R> R to(BiFunction<? super T1, ? super T2, R> convertor);
 
 }
