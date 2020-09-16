@@ -16,9 +16,11 @@
 package no.digipost;
 
 import java.util.Comparator;
+import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 
+import static java.util.Arrays.asList;
 import static java.util.Comparator.comparing;
 
 
@@ -26,6 +28,7 @@ import static java.util.Comparator.comparing;
  * Utilities for comparing values.
  */
 public final class DiggCompare {
+
 
     /**
      * Choose the lesser of two {@link Comparable} objects.
@@ -39,6 +42,7 @@ public final class DiggCompare {
         return t1.compareTo(t2) > 0 ? t2 : t1;
     }
 
+
     /**
      * Choose the greater of two {@link Comparable} objects.
      * In the case where the objects are considered equal by
@@ -50,6 +54,7 @@ public final class DiggCompare {
     public static <T extends Comparable<T>> T max(T t1, T t2) {
         return t2.compareTo(t1) > 0 ? t2 : t1;
     }
+
 
     /**
      * Choose the lesser of two objects by using a given {@link Comparator}.
@@ -67,6 +72,7 @@ public final class DiggCompare {
     public static <T> T minBy(Comparator<? super T> propertyComparator, T t1, T t2) {
         return propertyComparator.compare(t1, t2) > 0 ? t2 : t1;
     }
+
 
     /**
      * Choose the lesser of two objects by comparing a
@@ -106,6 +112,7 @@ public final class DiggCompare {
         return comparator.compare(t2, t1) > 0 ? t2 : t1;
     }
 
+
     /**
      * Choose the greater of two objects by comparing a
      * {@link Comparable} value resolved from each object.
@@ -124,6 +131,53 @@ public final class DiggCompare {
      */
     public static <T, U extends Comparable<? super U>> T maxBy(Function<? super T, U> propertyExtractor, T t1, T t2) {
         return maxBy(comparing(propertyExtractor), t1, t2);
+    }
+
+
+    /**
+     * Create a comparator which will use a given list of already prioritized elements
+     * to determine the order of given elements. Two elements present in the prioritized list
+     * are compared according to their position in the list. An element not present in the
+     * elements is always considered lesser than a present element. Two elements not present
+     * are considered equal.
+     *
+     * @param elementsOrderedByPriority The elements which order is used to determine the order
+     *                                  of elements given to the comparator.
+     *
+     * @return the comparator
+     *
+     * @see #prioritize(List)
+     */
+    @SafeVarargs
+    public static <T> Comparator<T> prioritize(T ... elementsOrderedByPriority) {
+        return prioritize(asList(elementsOrderedByPriority));
+    }
+
+
+    /**
+     * Create a comparator which will use a given list of already prioritized elements
+     * to determine the order of given elements. Two elements present in the prioritized list
+     * are compared according to their position in the list. An element not present in the
+     * elements is always considered lesser than a present element. Two elements not present
+     * are considered equal.
+     *
+     * @param elementsOrderedByPriority The elements which order is used to determine the order
+     *                                  of elements given to the comparator.
+     *
+     * @return the comparator
+     */
+    public static <T> Comparator<T> prioritize(List<T> elementsOrderedByPriority) {
+        return (t1, t2) -> {
+            int firstIndex = elementsOrderedByPriority.indexOf(t1);
+            int secondIndex = elementsOrderedByPriority.indexOf(t2);
+            if (firstIndex < 0 && secondIndex >= 0) {
+                return 1;
+            } else if (secondIndex < 0 && firstIndex >= 0) {
+                return -1;
+            } else {
+                return Integer.compare(firstIndex, secondIndex);
+            }
+        };
     }
 
     private DiggCompare() {}
