@@ -22,7 +22,9 @@ import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAmount;
+import java.time.temporal.TemporalUnit;
 import java.util.function.UnaryOperator;
 
 /**
@@ -88,9 +90,21 @@ public interface ClockAdjuster {
 
 
     /**
-     * Signal that the clock should freeze at the instant it is currently at.
+     * Freeze the clock at its current instant in time.
      */
     void freeze();
+
+
+    /**
+     * Freeze the clock at its current instant in time, which will be truncated
+     * to the given unit.
+     *
+     * @param unit the unit the freezed instant will be truncated to
+     *
+     * @see ChronoUnit
+     * @see Instant#truncatedTo(TemporalUnit)
+     */
+    void freezeTruncatedTo(TemporalUnit unit);
 
 
     /**

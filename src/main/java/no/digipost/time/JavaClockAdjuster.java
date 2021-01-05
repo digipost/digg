@@ -23,6 +23,7 @@ import java.time.OffsetDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAmount;
+import java.time.temporal.TemporalUnit;
 import java.util.function.UnaryOperator;
 
 /**
@@ -77,6 +78,11 @@ interface JavaClockAdjuster extends JavaClockAccessors, ClockAdjuster {
     @Override
     default void freeze() {
         freezeAt(instant(), getZone());
+    }
+
+    @Override
+    default void freezeTruncatedTo(TemporalUnit unit) {
+        freezeAt(instant().truncatedTo(unit), getZone());
     }
 
     @Override
