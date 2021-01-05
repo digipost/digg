@@ -35,12 +35,15 @@ import java.util.List;
 import static co.unruly.matchers.Java8Matchers.where;
 import static java.time.Clock.systemUTC;
 import static java.time.ZoneOffset.UTC;
+import static java.time.temporal.ChronoField.MILLI_OF_SECOND;
+import static java.time.temporal.ChronoUnit.MINUTES;
 import static java.util.Arrays.asList;
 import static nl.jqno.equalsverifier.Warning.NULL_FIELDS;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.greaterThan;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.lessThan;
+import static org.hamcrest.Matchers.not;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -180,6 +183,21 @@ public class ControllableClockTest {
         }));
         assertThat(clock.instant().atZone(UTC), is(initialTime));
     }
+
+    @Test
+    void truncateInstantOfFreezedClock() {
+        Instant now = Instant.now().with(MILLI_OF_SECOND, 672);
+
+        ControllableClock clock = ControllableClock.freezedAt(now);
+        ZonedDateTime preciseTime = clock.zonedDateTime();
+        clock.freezeTruncatedTo(MINUTES);
+        ZonedDateTime truncatedTime = clock.zonedDateTime();
+        assertThat(truncatedTime, not(preciseTime));
+        assertThat(truncatedTime, where(ZonedDateTime::getSecond, is(0)));
+        assertThat(truncatedTime, where(ZonedDateTime::getNano, is(0)));
+        assertThat(truncatedTime, where(ZonedDateTime::getMinute, is(preciseTime.getMinute())));
+    }
+
 
 
 
