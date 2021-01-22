@@ -200,4 +200,32 @@ public interface NonEmptyList<E> extends List<E> {
         return false;
     }
 
+    /**
+     * Checks if the non-empty list contains <em>only</em> the required
+     * singular element, i.e. if the size of the list is exactly 1.
+     *
+     * @return {@code true} if the list contains only one element,
+     *         {@code false} otherwise.
+     */
+    default boolean isSingular() {
+        return !hasMultipleElements();
+    }
+
+    /**
+     * Checks if this non-empty list has multiple elements, i.e. 2 or
+     * more elements. This is functionally equivalent of checking if
+     * {@code NonEmptyList.size() > 1}, but this method should be preferred
+     * as implementations may provide more efficient way than checking the
+     * actual amount.
+     *
+     * @implNote Implementations of {@code NonEmptyList} should override this
+     *           default method if they can provide a more efficient way to
+     *           determine if there are more than one element.
+     * @return {@code true} if the list contains more than one element,
+     *         or {@code false} if only a {@link #isSingular() single} element is contained.
+     */
+    default boolean hasMultipleElements() {
+        return size() > 1;
+    }
+
 }

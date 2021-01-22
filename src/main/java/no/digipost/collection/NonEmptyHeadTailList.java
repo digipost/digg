@@ -51,4 +51,9 @@ final class NonEmptyHeadTailList<E> extends AbstractList<E> implements NonEmptyL
         return tail.size() + 1;
     }
 
+    @Override
+    public boolean hasMultipleElements() {
+        return !tail.isEmpty();
+    }
+
 }
