@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
+import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.collectingAndThen;
 import static java.util.stream.Collectors.toList;
 
@@ -60,6 +61,22 @@ public interface NonEmptyList<E> extends List<E> {
      */
     static <E> NonEmptyList<E> of(E singleElement) {
         return new NonEmptyHeadTailList<>(singleElement);
+    }
+
+
+    /**
+     * Construct a non-empty list containing a specific object as its
+     * first element, and any provided remaining elements.
+     *
+     * @param <E> the type of the elements
+     * @param firstElement the first element to include
+     * @param remainingElements the remaining elements to include
+     *
+     * @return the non-empty list
+     */
+    @SafeVarargs
+    public static <E> NonEmptyList<E> of(E firstElement, E ... remainingElements) {
+        return of(firstElement, asList(remainingElements));
     }
 
 
