@@ -15,6 +15,9 @@
  */
 package no.digipost.collection;
 
+import no.digipost.stream.EmptyIfEmptySourceCollector;
+import no.digipost.stream.NonEmptyStream;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -174,10 +177,15 @@ public interface NonEmptyList<E> extends List<E> {
         return collectingAndThen(toNonEmptyList(), result -> result.orElseThrow(exceptionSupplier));
     }
 
-    static <T> Collector<T, ?, Optional<NonEmptyList<T>>> toNonEmptyList() {
-        return collectingAndThen(toList(), NonEmptyList::of);
+    static <T> EmptyIfEmptySourceCollector<T, ?, NonEmptyList<T>> toNonEmptyList() {
+        return new NonEmptyListCollector<>(collectingAndThen(toList(), NonEmptyList::of));
     }
 
+
+    @Override
+    default NonEmptyStream<E> stream() {
+        return NonEmptyStream.<E>of(this::first, this.subList(1, size()).stream());
+    }
 
 
     /**
