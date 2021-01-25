@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static java.util.stream.Collectors.reducing;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 import static java.util.stream.Stream.iterate;
@@ -61,6 +62,16 @@ public class NonEmptyStreamTest {
         List<String> strings = NonEmptyStream.of("x", iterate("xx", "x"::concat)).limitToNonEmpty(8).collect(toList());
         assertThat(strings, contains("x", "xx", "xxx", "xxxx", "xxxxx", "xxxxxx", "xxxxxxx", "xxxxxxxx"));
     }
+
+    @Test
+    void useExistingCollectorToOptionalAsAlwaysProducingAResult() {
+        int sumFromSingle = NonEmptyStream.of(1).collect(EmptyIfEmptySourceCollector.from(reducing(Math::addExact)));
+        assertThat(sumFromSingle, is(1));
+
+        int sum = NonEmptyStream.of(1, 2, 3, 4).collect(EmptyIfEmptySourceCollector.from(reducing(Math::addExact)));
+        assertThat(sum, is(10));
+    }
+
 
 
 }
