@@ -42,6 +42,7 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
+        <project.previousVersion>set_with_-Dproject.previousVersion=X.Y</project.previousVersion>
     </properties>
 
     <dependencyManagement>
@@ -235,13 +236,13 @@
                 <plugin>
                     <groupId>com.github.siom79.japicmp</groupId>
                     <artifactId>japicmp-maven-plugin</artifactId>
-                    <version>0.14.3</version>
+                    <version>0.15.2</version>
                     <configuration>
                         <oldVersion>
                             <dependency>
                                 <groupId>${project.groupId}</groupId>
                                 <artifactId>${project.artifactId}</artifactId>
-                                <version>${japicmp.oldversion}</version>
+                                <version>${project.previousVersion}</version>
                             </dependency>
                         </oldVersion>
                         <newVersion>
