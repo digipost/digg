@@ -46,7 +46,7 @@ import static no.digipost.DiggBase.friendlyName;
  * <ul>
  *   <li>{@link #first()} and {@link #any()}</li>
  *   <li>{@link #limitToNonEmpty(long)}</li>
- *   <li>{@link #collect(EmptyIfEmptySourceCollector)}</li>
+ *   <li>{@link #collect(EmptyResultIfEmptySourceCollector)}</li>
  *   <li>{@link #reduceFromFirst(BinaryOperator)}</li>
  * </ul>
  *
@@ -108,7 +108,7 @@ public class NonEmptyStream<T> implements Stream<T> {
     }
 
     /**
-     * Collect the stream elements by using a {@link EmptyIfEmptySourceCollector}.
+     * Collect the stream elements by using a {@link EmptyResultIfEmptySourceCollector}.
      * <p>
      * This is an extension to the general {@link Stream} API, as a non-empty stream can always produce
      * a value without needing a provided initial "identity" value.
@@ -116,9 +116,9 @@ public class NonEmptyStream<T> implements Stream<T> {
      * @param collector the {@code Collector} describing the reduction
      * @return the result from collecting the elements
      *
-     * @see EmptyIfEmptySourceCollector
+     * @see EmptyResultIfEmptySourceCollector
      */
-    public <A, R> R collect(EmptyIfEmptySourceCollector<? super T, A, R> collector) {
+    public <A, R> R collect(EmptyResultIfEmptySourceCollector<? super T, A, R> collector) {
         @SuppressWarnings("unchecked")
         Collector<Object, A, Optional<R>> generalCollector = Collector.class.cast(collector);
         return collect(generalCollector)

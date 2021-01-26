@@ -20,7 +20,7 @@ import no.digipost.collection.EnforceAtMostOneElementCollector;
 import no.digipost.collection.EnforceDistinctFirstTupleElementCollector;
 import no.digipost.collection.NonEmptyList;
 import no.digipost.concurrent.OneTimeAssignment;
-import no.digipost.stream.EmptyIfEmptySourceCollector;
+import no.digipost.stream.EmptyResultIfEmptySourceCollector;
 import no.digipost.stream.NonEmptyStream;
 import no.digipost.tuple.Tuple;
 import no.digipost.tuple.ViewableAsTuple;
@@ -127,7 +127,7 @@ public final class DiggCollectors {
      *
      * @return the collector
      */
-    public static <T> EmptyIfEmptySourceCollector<T, OneTimeAssignment<T>, T> allowAtMostOne() {
+    public static <T> EmptyResultIfEmptySourceCollector<T, OneTimeAssignment<T>, T> allowAtMostOne() {
         return allowAtMostOneOrElseThrow(ViewableAsOptional.TooManyElements::new);
     }
 
@@ -142,7 +142,7 @@ public final class DiggCollectors {
      * @return the collector
      * @see #allowAtMostOne()
      */
-    public static <T> EmptyIfEmptySourceCollector<T, OneTimeAssignment<T>, T> allowAtMostOneOrElseThrow(BiFunction<? super T, ? super T, ? extends RuntimeException> exceptionOnExcessiveElements) {
+    public static <T> EmptyResultIfEmptySourceCollector<T, OneTimeAssignment<T>, T> allowAtMostOneOrElseThrow(BiFunction<? super T, ? super T, ? extends RuntimeException> exceptionOnExcessiveElements) {
         return new EnforceAtMostOneElementCollector<>(exceptionOnExcessiveElements);
     }
 
@@ -168,8 +168,8 @@ public final class DiggCollectors {
      *
      * @return the collector
      */
-    public static <X extends Throwable> EmptyIfEmptySourceCollector<X, ?, X> toSingleExceptionWithSuppressed() {
-        return EmptyIfEmptySourceCollector.from(collectingAndThen(toCollection(() -> new ConcurrentLinkedQueue<X>()),
+    public static <X extends Throwable> EmptyResultIfEmptySourceCollector<X, ?, X> toSingleExceptionWithSuppressed() {
+        return EmptyResultIfEmptySourceCollector.from(collectingAndThen(toCollection(() -> new ConcurrentLinkedQueue<X>()),
                 exceptions -> Optional.ofNullable(exceptions.poll()).map(firstException -> {
                     exceptions.forEach(firstException::addSuppressed);
                     return firstException;
@@ -180,7 +180,7 @@ public final class DiggCollectors {
     /**
      * Collect element(s) to a {@link NonEmptyList}. If this collector is used with a
      * {@link NonEmptyStream}, the resulting list will be directly yielded by the
-     * {@link NonEmptyStream#collect(EmptyIfEmptySourceCollector) collect} operation,
+     * {@link NonEmptyStream#collect(EmptyResultIfEmptySourceCollector) collect} operation,
      * otherwise with regular {@link Stream streams}, the result will be an
      * {@link Optional Optional&lt;NonEmptyList&gt;}, which can be appropriately handled
      * in the event of a non-empty list being impossible to contruct because there
@@ -189,8 +189,8 @@ public final class DiggCollectors {
      * @param <T> the type of elements contained in the resulting {@code NonEmptyList}
      * @return the collector
      */
-    public static <T> EmptyIfEmptySourceCollector<T, ?, NonEmptyList<T>> toNonEmptyList() {
-        return EmptyIfEmptySourceCollector.from(collectingAndThen(toList(), NonEmptyList::of));
+    public static <T> EmptyResultIfEmptySourceCollector<T, ?, NonEmptyList<T>> toNonEmptyList() {
+        return EmptyResultIfEmptySourceCollector.from(collectingAndThen(toList(), NonEmptyList::of));
     }
 
 

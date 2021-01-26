@@ -28,13 +28,13 @@ import java.util.stream.Stream;
  * @param <T> the type of input elements to the reduction operation
  * @param <R> the type of value contained in the resulting Optional, if not source is empty.
  */
-public interface EmptyIfEmptySourceCollector<T, A, R> extends Collector<T, A, Optional<R>> {
+public interface EmptyResultIfEmptySourceCollector<T, A, R> extends Collector<T, A, Optional<R>> {
 
-    static <T, A, R> EmptyIfEmptySourceCollector<T, A, R> from(Collector<T, A, Optional<R>> collector) {
-        if (collector instanceof EmptyIfEmptySourceCollector) {
-            return (EmptyIfEmptySourceCollector<T, A, R>) collector;
+    static <T, A, R> EmptyResultIfEmptySourceCollector<T, A, R> from(Collector<T, A, Optional<R>> collector) {
+        if (collector instanceof EmptyResultIfEmptySourceCollector) {
+            return (EmptyResultIfEmptySourceCollector<T, A, R>) collector;
         }
-        class Impl extends CollectorDecorator<T, A, Optional<R>> implements EmptyIfEmptySourceCollector<T, A, R> {
+        class Impl extends CollectorDecorator<T, A, Optional<R>> implements EmptyResultIfEmptySourceCollector<T, A, R> {
             Impl(Collector<T, A, Optional<R>> collector) {
                 super(collector);
             }

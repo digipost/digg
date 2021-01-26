@@ -17,7 +17,7 @@ package no.digipost.collection;
 
 import no.digipost.concurrent.OneTimeAssignment;
 import no.digipost.concurrent.OneTimeAssignment.AlreadyAssigned;
-import no.digipost.stream.EmptyIfEmptySourceCollector;
+import no.digipost.stream.EmptyResultIfEmptySourceCollector;
 import no.digipost.util.ViewableAsOptional;
 
 import java.util.EnumSet;
@@ -31,7 +31,7 @@ import java.util.function.Supplier;
 
 import static java.util.Collections.unmodifiableSet;
 
-public class EnforceAtMostOneElementCollector<T> implements EmptyIfEmptySourceCollector<T, OneTimeAssignment<T>, T> {
+public class EnforceAtMostOneElementCollector<T> implements EmptyResultIfEmptySourceCollector<T, OneTimeAssignment<T>, T> {
 
     private static final Set<Characteristics> CHARACTERISTICS = unmodifiableSet(EnumSet.of(Characteristics.CONCURRENT));
 

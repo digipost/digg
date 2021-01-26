@@ -65,10 +65,10 @@ public class NonEmptyStreamTest {
 
     @Test
     void useExistingCollectorToOptionalAsAlwaysProducingAResult() {
-        int sumFromSingle = NonEmptyStream.of(1).collect(EmptyIfEmptySourceCollector.from(reducing(Math::addExact)));
+        int sumFromSingle = NonEmptyStream.of(1).collect(EmptyResultIfEmptySourceCollector.from(reducing(Math::addExact)));
         assertThat(sumFromSingle, is(1));
 
-        int sum = NonEmptyStream.of(1, 2, 3, 4).collect(EmptyIfEmptySourceCollector.from(reducing(Math::addExact)));
+        int sum = NonEmptyStream.of(1, 2, 3, 4).collect(EmptyResultIfEmptySourceCollector.from(reducing(Math::addExact)));
         assertThat(sum, is(10));
     }
 
