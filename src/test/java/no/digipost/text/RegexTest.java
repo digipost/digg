@@ -19,8 +19,8 @@ import org.junit.jupiter.api.Test;
 
 import java.util.regex.Pattern;
 
-import static co.unruly.matchers.StreamMatchers.contains;
-import static co.unruly.matchers.StreamMatchers.empty;
+import static uk.co.probablyfine.matchers.StreamMatchers.contains;
+import static uk.co.probablyfine.matchers.StreamMatchers.empty;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 public class RegexTest {

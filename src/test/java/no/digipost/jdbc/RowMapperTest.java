@@ -37,7 +37,7 @@ import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Optional;
 
-import static co.unruly.matchers.OptionalMatchers.contains;
+import static uk.co.probablyfine.matchers.OptionalMatchers.contains;
 import static java.time.Instant.EPOCH;
 import static no.digipost.jdbc.Mappers.getBigDecimal;
 import static no.digipost.jdbc.Mappers.getBoolean;

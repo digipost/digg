@@ -22,9 +22,9 @@ import org.quicktheories.core.Gen;
 import java.time.Duration;
 import java.time.LocalDateTime;
 
-import static co.unruly.matchers.Java8Matchers.where;
-import static co.unruly.matchers.OptionalMatchers.contains;
-import static co.unruly.matchers.OptionalMatchers.empty;
+import static uk.co.probablyfine.matchers.Java8Matchers.where;
+import static uk.co.probablyfine.matchers.OptionalMatchers.contains;
+import static uk.co.probablyfine.matchers.OptionalMatchers.empty;
 import static java.time.Duration.ofSeconds;
 import static no.digipost.time.ConditionalTimer.timeWhen;
 import static no.digipost.time.ConditionalTimer.using;

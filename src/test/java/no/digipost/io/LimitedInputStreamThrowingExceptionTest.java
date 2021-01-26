@@ -25,7 +25,7 @@ import java.security.DigestException;
 import java.security.GeneralSecurityException;
 import java.util.function.Supplier;
 
-import static co.unruly.matchers.Java8Matchers.where;
+import static uk.co.probablyfine.matchers.Java8Matchers.where;
 import static com.google.common.io.ByteStreams.toByteArray;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static no.digipost.DiggIO.limit;

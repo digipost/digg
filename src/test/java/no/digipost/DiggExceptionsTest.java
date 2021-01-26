@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-import static co.unruly.matchers.Java8Matchers.where;
+import static uk.co.probablyfine.matchers.Java8Matchers.where;
 import static java.util.stream.Collectors.toList;
 import static no.digipost.DiggExceptions.applyUnchecked;
 import static no.digipost.DiggExceptions.causalChainOf;

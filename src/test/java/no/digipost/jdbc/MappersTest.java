@@ -22,7 +22,7 @@ import java.sql.SQLException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static co.unruly.matchers.StreamMatchers.allMatch;
+import static uk.co.probablyfine.matchers.StreamMatchers.allMatch;
 import static no.digipost.DiggExceptions.applyUnchecked;
 import static no.digipost.jdbc.Mappers.getBoolean;
 import static no.digipost.jdbc.Mappers.getByte;

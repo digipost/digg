@@ -20,8 +20,8 @@ import org.junit.jupiter.api.Test;
 import java.sql.SQLException;
 import java.util.Optional;
 
-import static co.unruly.matchers.OptionalMatchers.contains;
-import static co.unruly.matchers.OptionalMatchers.empty;
+import static uk.co.probablyfine.matchers.OptionalMatchers.contains;
+import static uk.co.probablyfine.matchers.OptionalMatchers.empty;
 import static java.util.function.Function.identity;
 import static no.digipost.jdbc.ResultSetMock.mockResult;
 import static org.hamcrest.MatcherAssert.assertThat;

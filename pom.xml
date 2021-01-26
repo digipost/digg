@@ -94,9 +94,9 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>co.unruly</groupId>
+            <groupId>uk.co.probablyfine</groupId>
             <artifactId>java-8-matchers</artifactId>
-            <version>1.6</version>
+            <version>1.9</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>

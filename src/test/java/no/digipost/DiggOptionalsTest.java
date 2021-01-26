@@ -15,8 +15,8 @@
  */
 package no.digipost;
 
-import co.unruly.matchers.OptionalMatchers;
-import co.unruly.matchers.StreamMatchers;
+import uk.co.probablyfine.matchers.OptionalMatchers;
+import uk.co.probablyfine.matchers.StreamMatchers;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;

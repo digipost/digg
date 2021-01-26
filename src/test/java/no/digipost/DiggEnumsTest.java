@@ -22,8 +22,8 @@ import org.quicktheories.core.Gen;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static co.unruly.matchers.StreamMatchers.contains;
-import static co.unruly.matchers.StreamMatchers.empty;
+import static uk.co.probablyfine.matchers.StreamMatchers.contains;
+import static uk.co.probablyfine.matchers.StreamMatchers.empty;
 import static java.util.stream.Collectors.joining;
 import static no.digipost.DiggEnums.fromCommaSeparatedNames;
 import static no.digipost.DiggEnums.toCommaSeparatedNames;

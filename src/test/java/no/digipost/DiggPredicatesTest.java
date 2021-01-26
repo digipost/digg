@@ -18,7 +18,7 @@ package no.digipost;
 import org.junit.jupiter.api.Test;
 import org.quicktheories.WithQuickTheories;
 
-import static co.unruly.matchers.StreamMatchers.contains;
+import static uk.co.probablyfine.matchers.StreamMatchers.contains;
 import static java.lang.Integer.MIN_VALUE;
 import static java.util.stream.Stream.iterate;
 import static no.digipost.DiggBase.forceOnAll;
