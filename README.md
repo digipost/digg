@@ -1,6 +1,8 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/no.digipost/digg/badge.svg)](https://maven-badges.herokuapp.com/maven-central/no.digipost/digg)
-![](https://github.com/digipost/digg/workflows/Build%20and%20deploy/badge.svg)
+[![javadoc](https://javadoc.io/badge2/no.digipost/digg/javadoc.svg?logo=java&color=yellow)](https://javadoc.io/doc/no.digipost/digg)
+[![Build and deploy](https://github.com/digipost/digg/workflows/Build%20and%20deploy/badge.svg)](https://github.com/digipost/digg/actions)
 [![License](https://img.shields.io/badge/license-Apache%202-blue)](https://github.com/digipost/digg/blob/main/LICENCE)
+
 
 Digipost Digg 🍬
 ===============================
@@ -37,7 +39,7 @@ _Digg_ contains a lot of useful utilities implemented as static methods. The "en
 
 ![Auto-complete in an IDE](https://digipost.github.io/digg/img/digg-autocomplete.png?nocache=1)
 
-Javadocs are available at [javadoc.io/doc/no.digipost/digg](http://www.javadoc.io/doc/no.digipost/digg)
+Javadocs are available at [javadoc.io/doc/no.digipost/digg](https://www.javadoc.io/doc/no.digipost/digg)
 
 
 
