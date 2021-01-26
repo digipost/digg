@@ -127,7 +127,7 @@ public final class DiggCollectors {
      *
      * @return the collector
      */
-    public static <T> Collector<T, OneTimeAssignment<T>, Optional<T>> allowAtMostOne() {
+    public static <T> EmptyIfEmptySourceCollector<T, OneTimeAssignment<T>, T> allowAtMostOne() {
         return allowAtMostOneOrElseThrow(ViewableAsOptional.TooManyElements::new);
     }
 
@@ -142,7 +142,7 @@ public final class DiggCollectors {
      * @return the collector
      * @see #allowAtMostOne()
      */
-    public static <T> Collector<T, OneTimeAssignment<T>, Optional<T>> allowAtMostOneOrElseThrow(BiFunction<? super T, ? super T, ? extends RuntimeException> exceptionOnExcessiveElements) {
+    public static <T> EmptyIfEmptySourceCollector<T, OneTimeAssignment<T>, T> allowAtMostOneOrElseThrow(BiFunction<? super T, ? super T, ? extends RuntimeException> exceptionOnExcessiveElements) {
         return new EnforceAtMostOneElementCollector<>(exceptionOnExcessiveElements);
     }
 
@@ -168,12 +168,12 @@ public final class DiggCollectors {
      *
      * @return the collector
      */
-    public static <X extends Throwable> Collector<X, ?, Optional<X>> toSingleExceptionWithSuppressed() {
-        return collectingAndThen(toCollection(() -> new ConcurrentLinkedQueue<X>()),
+    public static <X extends Throwable> EmptyIfEmptySourceCollector<X, ?, X> toSingleExceptionWithSuppressed() {
+        return EmptyIfEmptySourceCollector.from(collectingAndThen(toCollection(() -> new ConcurrentLinkedQueue<X>()),
                 exceptions -> Optional.ofNullable(exceptions.poll()).map(firstException -> {
                     exceptions.forEach(firstException::addSuppressed);
                     return firstException;
-                }));
+                })));
     }
 
 
