@@ -18,7 +18,10 @@ package no.digipost;
 import no.digipost.collection.ConflictingElementEncountered;
 import no.digipost.collection.EnforceAtMostOneElementCollector;
 import no.digipost.collection.EnforceDistinctFirstTupleElementCollector;
+import no.digipost.collection.NonEmptyList;
 import no.digipost.concurrent.OneTimeAssignment;
+import no.digipost.stream.EmptyIfEmptySourceCollector;
+import no.digipost.stream.NonEmptyStream;
 import no.digipost.tuple.Tuple;
 import no.digipost.tuple.ViewableAsTuple;
 import no.digipost.util.ViewableAsOptional;
@@ -45,6 +48,7 @@ import static java.util.stream.Collectors.toList;
  */
 public final class DiggCollectors {
 
+
     /**
      * A <em>multituple</em> is similar to a <em>multimap</em> in that it consists of one {@link Tuple#first() first} value and a List of
      * values as the {@link Tuple#second() second} value,
@@ -63,6 +67,7 @@ public final class DiggCollectors {
         return toMultitupleOrThrowIfNonDistinct((alreadyCollected, conflicting) -> new ConflictingElementEncountered(alreadyCollected, conflicting,
                 "the first element '" + conflicting.first() + "' of " + conflicting + " differs from the already collected first element '" + alreadyCollected.first() + "'"));
     }
+
 
     /**
      * A <em>multituple</em> is similar to a <em>multimap</em> in that it consists of one {@link Tuple#first() first} value and a List of
@@ -86,6 +91,7 @@ public final class DiggCollectors {
 
         return new EnforceDistinctFirstTupleElementCollector<T1, T2>(exceptionOnNonDistinctFirstElement);
     }
+
 
     /**
      * A multimap maps from keys to lists, and this collector will arrange {@link ViewableAsTuple tuples}
@@ -125,6 +131,7 @@ public final class DiggCollectors {
         return allowAtMostOneOrElseThrow(ViewableAsOptional.TooManyElements::new);
     }
 
+
     /**
      * This is a collector for accessing the <em>expected singular only</em> element of a {@link Stream}, as
      * it will throw the exception yielded from the given function if more than one element is processed.
@@ -154,6 +161,7 @@ public final class DiggCollectors {
         });
     }
 
+
     /**
      * Collapse exceptions by taking the first (if any) and add every exception after the first
      * as {@link Throwable#addSuppressed(Throwable) suppressed} to the first one.
@@ -169,6 +177,21 @@ public final class DiggCollectors {
     }
 
 
+    /**
+     * Collect element(s) to a {@link NonEmptyList}. If this collector is used with a
+     * {@link NonEmptyStream}, the resulting list will be directly yielded by the
+     * {@link NonEmptyStream#collect(EmptyIfEmptySourceCollector) collect} operation,
+     * otherwise with regular {@link Stream streams}, the result will be an
+     * {@link Optional Optional&lt;NonEmptyList&gt;}, which can be appropriately handled
+     * in the event of a non-empty list being impossible to contruct because there
+     * are no elements available to collect.
+     *
+     * @param <T> the type of elements contained in the resulting {@code NonEmptyList}
+     * @return the collector
+     */
+    public static <T> EmptyIfEmptySourceCollector<T, ?, NonEmptyList<T>> toNonEmptyList() {
+        return EmptyIfEmptySourceCollector.from(collectingAndThen(toList(), NonEmptyList::of));
+    }
 
 
 

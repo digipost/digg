@@ -15,18 +15,13 @@
  */
 package no.digipost.collection;
 
-import no.digipost.stream.EmptyIfEmptySourceCollector;
 import no.digipost.stream.NonEmptyStream;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Supplier;
-import java.util.stream.Collector;
 
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.collectingAndThen;
-import static java.util.stream.Collectors.toList;
 
 /**
  * A non-empty list. Implementations of this interface must
@@ -170,15 +165,6 @@ public interface NonEmptyList<E> extends List<E> {
      */
     static <E> NonEmptyList<E> copyOfUnsafe(List<E> nonEmptyList) {
         return copyOf(nonEmptyList).orElseThrow(() -> new IllegalArgumentException("empty list"));
-    }
-
-
-    static <T> Collector<T, ?, NonEmptyList<T>> toNonEmptyListOrIfEmptyThrow(Supplier<? extends RuntimeException> exceptionSupplier) {
-        return collectingAndThen(toNonEmptyList(), result -> result.orElseThrow(exceptionSupplier));
-    }
-
-    static <T> EmptyIfEmptySourceCollector<T, ?, NonEmptyList<T>> toNonEmptyList() {
-        return new NonEmptyListCollector<>(collectingAndThen(toList(), NonEmptyList::of));
     }
 
 

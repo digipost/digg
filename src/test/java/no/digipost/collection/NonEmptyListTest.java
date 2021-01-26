@@ -15,15 +15,13 @@
  */
 package no.digipost.collection;
 
-import uk.co.probablyfine.matchers.OptionalMatchers;
 import org.junit.jupiter.api.Test;
+import uk.co.probablyfine.matchers.OptionalMatchers;
 
 import java.util.Optional;
 
-import static uk.co.probablyfine.matchers.Java8Matchers.where;
-import static uk.co.probablyfine.matchers.Java8Matchers.whereNot;
 import static java.util.Collections.emptyList;
-import static no.digipost.collection.NonEmptyList.toNonEmptyList;
+import static no.digipost.DiggCollectors.toNonEmptyList;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -32,6 +30,8 @@ import static org.quicktheories.QuickTheory.qt;
 import static org.quicktheories.generators.SourceDSL.integers;
 import static org.quicktheories.generators.SourceDSL.lists;
 import static org.quicktheories.generators.SourceDSL.strings;
+import static uk.co.probablyfine.matchers.Java8Matchers.where;
+import static uk.co.probablyfine.matchers.Java8Matchers.whereNot;
 
 public class NonEmptyListTest {
 
