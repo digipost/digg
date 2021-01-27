@@ -26,8 +26,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.stream.Stream;
 
-import static co.unruly.matchers.StreamMatchers.contains;
-import static co.unruly.matchers.StreamMatchers.equalTo;
+import static uk.co.probablyfine.matchers.StreamMatchers.contains;
+import static uk.co.probablyfine.matchers.StreamMatchers.equalTo;
 import static java.time.Duration.ofMinutes;
 import static java.time.Duration.ofSeconds;
 import static java.time.Instant.now;

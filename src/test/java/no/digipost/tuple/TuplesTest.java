@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static co.unruly.matchers.StreamMatchers.contains;
+import static uk.co.probablyfine.matchers.StreamMatchers.contains;
 import static org.hamcrest.MatcherAssert.assertThat;
 
 class TuplesTest {

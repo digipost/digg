@@ -23,7 +23,7 @@ import org.quicktheories.core.Gen;
 
 import java.util.Map;
 
-import static co.unruly.matchers.Java8Matchers.where;
+import static uk.co.probablyfine.matchers.Java8Matchers.where;
 import static no.digipost.util.AttributesMap.Config.ALLOW_NULL_VALUES;
 import static no.digipost.util.DiggMatchers.isEffectivelySerializable;
 import static org.hamcrest.MatcherAssert.assertThat;

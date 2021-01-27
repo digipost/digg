@@ -15,7 +15,7 @@
  */
 package no.digipost;
 
-import co.unruly.matchers.OptionalMatchers;
+import uk.co.probablyfine.matchers.OptionalMatchers;
 import no.digipost.collection.ConflictingElementEncountered;
 import no.digipost.tuple.Tuple;
 import no.digipost.tuple.ViewableAsTuple;
@@ -34,9 +34,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static co.unruly.matchers.Java8Matchers.where;
-import static co.unruly.matchers.Java8Matchers.whereNot;
-import static co.unruly.matchers.OptionalMatchers.contains;
+import static uk.co.probablyfine.matchers.Java8Matchers.where;
+import static uk.co.probablyfine.matchers.Java8Matchers.whereNot;
+import static uk.co.probablyfine.matchers.OptionalMatchers.contains;
 import static java.util.Arrays.asList;
 import static java.util.stream.IntStream.range;
 import static no.digipost.DiggBase.close;

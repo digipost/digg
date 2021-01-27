@@ -27,7 +27,7 @@ import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Optional;
 
-import static co.unruly.matchers.Java8Matchers.where;
+import static uk.co.probablyfine.matchers.Java8Matchers.where;
 import static java.util.Arrays.asList;
 import static java.util.function.Function.identity;
 import static no.digipost.jdbc.Mappers.getLong;
