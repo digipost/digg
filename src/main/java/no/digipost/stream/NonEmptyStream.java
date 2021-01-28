@@ -83,6 +83,65 @@ public class NonEmptyStream<T> implements Stream<T> {
     }
 
     /**
+     * Create a stream by concatenating a {@link NonEmptyStream}
+     * followed by a regular {@link Stream}, in the same manner as
+     * {@link Stream#concat(Stream, Stream)}. The resulting stream
+     * is also non-empty.
+     *
+     * @param <T> The type of stream elements
+     * @param a the first stream, non-empty
+     * @param b the second stream
+     *
+     * @return the concatenation of the two input streams
+     *
+     * @see Stream#concat(Stream, Stream)
+     */
+    public static <T> NonEmptyStream<T> concat(NonEmptyStream<? extends T> a, Stream<? extends T> b) {
+        return new NonEmptyStream<>(Stream.concat(a, b));
+    }
+
+    /**
+     * Create a stream by concatenating a regular {@link Stream}
+     * followed by a {@link NonEmptyStream}, in the same manner as
+     * {@link Stream#concat(Stream, Stream)}. The resulting stream
+     * is also non-empty.
+     *
+     * @param <T> The type of stream elements
+     * @param a the first stream
+     * @param b the second stream, non-empty
+     *
+     * @return the concatenation of the two input streams
+     *
+     * @see Stream#concat(Stream, Stream)
+     */
+    public static <T> NonEmptyStream<T> concat(Stream<? extends T> a, NonEmptyStream<? extends T> b) {
+        return new NonEmptyStream<>(Stream.concat(a, b));
+    }
+
+    /**
+     * Create a stream by concatenating two non-empty streams,
+     * in the same manner as {@link Stream#concat(Stream, Stream)}.
+     * The resulting stream is also non-empty.
+     * <p>
+     * This method overload is needed to avoid ambiguity with
+     * {@link #concat(NonEmptyStream, Stream)} and
+     * {@link #concat(Stream, NonEmptyStream)} when concatenating
+     * two non-empty streams.
+     *
+     * @param <T> The type of stream elements
+     * @param a the first non-empty stream
+     * @param b the second non-empty stream
+     *
+     * @return the concatenation of the two input streams
+     *
+     * @see Stream#concat(Stream, Stream)
+     */
+    public static <T> NonEmptyStream<T> concat(NonEmptyStream<? extends T> a, NonEmptyStream<? extends T> b) {
+        return new NonEmptyStream<>(Stream.concat(a, b));
+    }
+
+
+    /**
      * Create the same stream as produced by {@link Stream#iterate(Object, UnaryOperator)},
      * but typed as {@link NonEmptyStream}.
      *

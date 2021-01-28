@@ -24,6 +24,8 @@ import static java.util.stream.Collectors.reducing;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.IntStream.range;
 import static java.util.stream.Stream.iterate;
+import static no.digipost.DiggCollectors.toNonEmptyList;
+import static no.digipost.stream.NonEmptyStream.concat;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.is;
@@ -82,6 +84,16 @@ public class NonEmptyStreamTest {
 
         assertThat(sumOfNumsAndTheirSquares, is(40));
     }
+
+    @Test
+    void concatenateTwoStreams() {
+        assertThat(concat(NonEmptyStream.of("a"), NonEmptyStream.of("b")).collect(toNonEmptyList()), contains("a", "b"));
+        assertThat(concat(Stream.of("a"), NonEmptyStream.of("b")).collect(toNonEmptyList()), contains("a", "b"));
+        assertThat(concat(NonEmptyStream.of("a"), Stream.of("b")).collect(toNonEmptyList()), contains("a", "b"));
+    }
+
+
+
 
 
 }
