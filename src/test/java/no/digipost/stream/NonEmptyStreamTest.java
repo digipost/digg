@@ -72,6 +72,16 @@ public class NonEmptyStreamTest {
         assertThat(sum, is(10));
     }
 
+    @Test
+    void flatMapToNonEmptyStreams() {
+        int sumOfNumsAndTheirSquares = NonEmptyStream
+                .iterate(1, i -> i + 1)
+                .limitToNonEmpty(4)
+                .flatMap(i -> NonEmptyStream.of(i, i * i))
+                .reduceFromFirst(Math::addExact);
+
+        assertThat(sumOfNumsAndTheirSquares, is(40));
+    }
 
 
 }

@@ -31,6 +31,7 @@ import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collector;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
@@ -79,6 +80,22 @@ public class NonEmptyStream<T> implements Stream<T> {
 
     public static <T> NonEmptyStream<T> of(Supplier<? extends T> firstElement, Stream<T> remainingElements) {
         return new NonEmptyStream<>(firstElement, remainingElements);
+    }
+
+    /**
+     * Create the same stream as produced by {@link Stream#iterate(Object, UnaryOperator)},
+     * but typed as {@link NonEmptyStream}.
+     *
+     * @param <T> the type of stream elements
+     * @param seed the initial element
+     * @param f a function to be applied to to the previous element to produce a new element
+     *
+     * @return the new infinite non-empty stream
+     *
+     * @see Stream#iterate(Object, UnaryOperator)
+     */
+    public static <T> NonEmptyStream<T> iterate(T seed, UnaryOperator<T> f) {
+        return new NonEmptyStream<>(Stream.iterate(seed, f));
     }
 
 
@@ -193,6 +210,23 @@ public class NonEmptyStream<T> implements Stream<T> {
     @Override
     public <R> Stream<R> flatMap(Function<? super T, ? extends Stream<? extends R>> mapper) {
         return completeStream.flatMap(mapper);
+    }
+
+    /**
+     * Returns a stream consisting of the results of replacing each element of this stream with
+     * the contents of a mapped stream produced by applying the provided mapping function to each element.
+     * <p>
+     * This is an extension to the general {@link Stream} API, as flat-mapping to non-empty streams
+     * will preserve the non-empty guarantee of the stream.
+     *
+     * @param <R> The element type of the new stream
+     * @param mapper a non-interfering, stateless function to apply to each element which
+     *               produces a stream of new values
+     *
+     * @return the new non-empty stream
+     */
+    public <R> NonEmptyStream<R> flatMap(ToNonEmptyStreamFunction<? super T, ? extends R> mapper) {
+        return new NonEmptyStream<>(completeStream.flatMap(mapper));
     }
 
     @Override
