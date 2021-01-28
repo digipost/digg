@@ -65,19 +65,57 @@ import static no.digipost.DiggBase.friendlyName;
  */
 public class NonEmptyStream<T> implements Stream<T> {
 
+    /**
+     * Create a non-empty stream containing a single element.
+     *
+     * @param <T> the type of the single element in the stream
+     * @param singleElement the element
+     *
+     * @return the new singleton non-empty stream
+     */
     public static <T> NonEmptyStream<T> of(T singleElement) {
         return of(singleElement, Stream.empty());
     }
 
+    /**
+     * Create a non-empty stream whose elements are the specified values.
+     *
+     * @param <T> the type of stream elements
+     * @param firstElement the first element
+     * @param remainingElements the remaining elements after the first
+     *
+     * @return the new non-empty stream
+     */
     @SafeVarargs
     public static <T> NonEmptyStream<T> of(T firstElement, T ... remainingElements) {
         return of(firstElement, Arrays.stream(remainingElements));
     }
 
+    /**
+     * Create a non-empty stream whose elements are a given first value,
+     * and remaining elements are provided from another stream.
+     *
+     * @param <T> the type of stream elements
+     * @param firstElement the first element
+     * @param remainingElements the remaining elements after the first
+     *
+     * @return the new non-empty stream
+     */
     public static <T> NonEmptyStream<T> of(T firstElement, Stream<T> remainingElements) {
         return of((Supplier<T>) () -> firstElement, remainingElements);
     }
 
+    /**
+     * Create a non-empty stream where the first element is resolved
+     * from a {@link Supplier}, and remaining elements are provided
+     * from another stream.
+     *
+     * @param <T> the type of stream elements
+     * @param firstElement the supplier of the first element
+     * @param remainingElements the remaining elements after the first
+     *
+     * @return the new non-empty stream
+     */
     public static <T> NonEmptyStream<T> of(Supplier<? extends T> firstElement, Stream<T> remainingElements) {
         return new NonEmptyStream<>(firstElement, remainingElements);
     }
