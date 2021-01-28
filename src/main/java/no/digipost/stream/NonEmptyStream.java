@@ -98,6 +98,21 @@ public class NonEmptyStream<T> implements Stream<T> {
         return new NonEmptyStream<>(Stream.iterate(seed, f));
     }
 
+    /**
+     * Create the same stream as produced by {@link Stream#generate(Supplier)},
+     * but typed as {@link NonEmptyStream}.
+     *
+     * @param <T> the type of stream elements
+     * @param s the {@code Supplier} of generated elements
+     *
+     * @return a new infinite non-empty stream
+     *
+     * @see Stream#generate(Supplier)
+     */
+    public static<T> NonEmptyStream<T> generate(Supplier<T> s) {
+        return new NonEmptyStream<>(Stream.generate(s));
+    }
+
 
     private final Stream<T> completeStream;
 
