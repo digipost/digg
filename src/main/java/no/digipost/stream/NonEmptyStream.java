@@ -31,6 +31,7 @@ import java.util.function.Supplier;
 import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
 import java.util.function.ToLongFunction;
+import java.util.function.UnaryOperator;
 import java.util.stream.Collector;
 import java.util.stream.DoubleStream;
 import java.util.stream.IntStream;
@@ -64,21 +65,149 @@ import static no.digipost.DiggBase.friendlyName;
  */
 public class NonEmptyStream<T> implements Stream<T> {
 
+    /**
+     * Create a non-empty stream containing a single element.
+     *
+     * @param <T> the type of the single element in the stream
+     * @param singleElement the element
+     *
+     * @return the new singleton non-empty stream
+     */
     public static <T> NonEmptyStream<T> of(T singleElement) {
         return of(singleElement, Stream.empty());
     }
 
+    /**
+     * Create a non-empty stream whose elements are the specified values.
+     *
+     * @param <T> the type of stream elements
+     * @param firstElement the first element
+     * @param remainingElements the remaining elements after the first
+     *
+     * @return the new non-empty stream
+     */
     @SafeVarargs
     public static <T> NonEmptyStream<T> of(T firstElement, T ... remainingElements) {
         return of(firstElement, Arrays.stream(remainingElements));
     }
 
+    /**
+     * Create a non-empty stream whose elements are a given first value,
+     * and remaining elements are provided from another stream.
+     *
+     * @param <T> the type of stream elements
+     * @param firstElement the first element
+     * @param remainingElements the remaining elements after the first
+     *
+     * @return the new non-empty stream
+     */
     public static <T> NonEmptyStream<T> of(T firstElement, Stream<T> remainingElements) {
         return of((Supplier<T>) () -> firstElement, remainingElements);
     }
 
+    /**
+     * Create a non-empty stream where the first element is resolved
+     * from a {@link Supplier}, and remaining elements are provided
+     * from another stream.
+     *
+     * @param <T> the type of stream elements
+     * @param firstElement the supplier of the first element
+     * @param remainingElements the remaining elements after the first
+     *
+     * @return the new non-empty stream
+     */
     public static <T> NonEmptyStream<T> of(Supplier<? extends T> firstElement, Stream<T> remainingElements) {
         return new NonEmptyStream<>(firstElement, remainingElements);
+    }
+
+    /**
+     * Create a stream by concatenating a {@link NonEmptyStream}
+     * followed by a regular {@link Stream}, in the same manner as
+     * {@link Stream#concat(Stream, Stream)}. The resulting stream
+     * is also non-empty.
+     *
+     * @param <T> The type of stream elements
+     * @param a the first stream, non-empty
+     * @param b the second stream
+     *
+     * @return the concatenation of the two input streams
+     *
+     * @see Stream#concat(Stream, Stream)
+     */
+    public static <T> NonEmptyStream<T> concat(NonEmptyStream<? extends T> a, Stream<? extends T> b) {
+        return new NonEmptyStream<>(Stream.concat(a, b));
+    }
+
+    /**
+     * Create a stream by concatenating a regular {@link Stream}
+     * followed by a {@link NonEmptyStream}, in the same manner as
+     * {@link Stream#concat(Stream, Stream)}. The resulting stream
+     * is also non-empty.
+     *
+     * @param <T> The type of stream elements
+     * @param a the first stream
+     * @param b the second stream, non-empty
+     *
+     * @return the concatenation of the two input streams
+     *
+     * @see Stream#concat(Stream, Stream)
+     */
+    public static <T> NonEmptyStream<T> concat(Stream<? extends T> a, NonEmptyStream<? extends T> b) {
+        return new NonEmptyStream<>(Stream.concat(a, b));
+    }
+
+    /**
+     * Create a stream by concatenating two non-empty streams,
+     * in the same manner as {@link Stream#concat(Stream, Stream)}.
+     * The resulting stream is also non-empty.
+     * <p>
+     * This method overload is needed to avoid ambiguity with
+     * {@link #concat(NonEmptyStream, Stream)} and
+     * {@link #concat(Stream, NonEmptyStream)} when concatenating
+     * two non-empty streams.
+     *
+     * @param <T> The type of stream elements
+     * @param a the first non-empty stream
+     * @param b the second non-empty stream
+     *
+     * @return the concatenation of the two input streams
+     *
+     * @see Stream#concat(Stream, Stream)
+     */
+    public static <T> NonEmptyStream<T> concat(NonEmptyStream<? extends T> a, NonEmptyStream<? extends T> b) {
+        return new NonEmptyStream<>(Stream.concat(a, b));
+    }
+
+
+    /**
+     * Create the same stream as produced by {@link Stream#iterate(Object, UnaryOperator)},
+     * but typed as {@link NonEmptyStream}.
+     *
+     * @param <T> the type of stream elements
+     * @param seed the initial element
+     * @param f a function to be applied to to the previous element to produce a new element
+     *
+     * @return the new infinite non-empty stream
+     *
+     * @see Stream#iterate(Object, UnaryOperator)
+     */
+    public static <T> NonEmptyStream<T> iterate(T seed, UnaryOperator<T> f) {
+        return new NonEmptyStream<>(Stream.iterate(seed, f));
+    }
+
+    /**
+     * Create the same stream as produced by {@link Stream#generate(Supplier)},
+     * but typed as {@link NonEmptyStream}.
+     *
+     * @param <T> the type of stream elements
+     * @param s the {@code Supplier} of generated elements
+     *
+     * @return a new infinite non-empty stream
+     *
+     * @see Stream#generate(Supplier)
+     */
+    public static<T> NonEmptyStream<T> generate(Supplier<T> s) {
+        return new NonEmptyStream<>(Stream.generate(s));
     }
 
 
@@ -193,6 +322,23 @@ public class NonEmptyStream<T> implements Stream<T> {
     @Override
     public <R> Stream<R> flatMap(Function<? super T, ? extends Stream<? extends R>> mapper) {
         return completeStream.flatMap(mapper);
+    }
+
+    /**
+     * Returns a stream consisting of the results of replacing each element of this stream with
+     * the contents of a mapped stream produced by applying the provided mapping function to each element.
+     * <p>
+     * This is an extension to the general {@link Stream} API, as flat-mapping to non-empty streams
+     * will preserve the non-empty guarantee of the stream.
+     *
+     * @param <R> The element type of the new stream
+     * @param mapper a non-interfering, stateless function to apply to each element which
+     *               produces a stream of new values
+     *
+     * @return the new non-empty stream
+     */
+    public <R> NonEmptyStream<R> flatMap(ToNonEmptyStreamFunction<? super T, ? extends R> mapper) {
+        return new NonEmptyStream<>(completeStream.flatMap(mapper));
     }
 
     @Override
