@@ -50,7 +50,7 @@
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
-                <version>5.7.0</version>
+                <version>5.8.0-M1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -72,13 +72,13 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>3.7.7</version>
+            <version>3.9.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>30.1-jre</version>
+            <version>30.1.1-jre</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -90,7 +90,7 @@
         <dependency>
             <groupId>nl.jqno.equalsverifier</groupId>
             <artifactId>equalsverifier</artifactId>
-            <version>3.4.2</version>
+            <version>3.6</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -127,13 +127,9 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>3.0.0-M1</version>
-                </plugin>
-                <plugin>
                     <groupId>com.mycila</groupId>
                     <artifactId>license-maven-plugin</artifactId>
-                    <version>4.0.rc2</version>
+                    <version>4.1</version>
                     <configuration>
                         <header>src/main/license-header.txt</header>
                         <excludes>
@@ -232,7 +228,7 @@
                 <plugin>
                     <groupId>com.github.siom79.japicmp</groupId>
                     <artifactId>japicmp-maven-plugin</artifactId>
-                    <version>0.15.2</version>
+                    <version>0.15.3</version>
                     <configuration>
                         <oldVersion>
                             <dependency>

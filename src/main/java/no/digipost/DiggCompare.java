@@ -19,6 +19,8 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
 
 import static java.util.Arrays.asList;
 import static java.util.Comparator.comparing;
@@ -138,7 +140,7 @@ public final class DiggCompare {
      * Create a comparator which will use a given list of already prioritized elements
      * to determine the order of given elements. Two elements present in the prioritized list
      * are compared according to their position in the list. An element not present in the
-     * elements is always considered lesser than a present element. Two elements not present
+     * elements is always considered as less prioritized than a present element. Two elements not present
      * are considered equal.
      *
      * @param elementsOrderedByPriority The elements which order is used to determine the order
@@ -158,7 +160,7 @@ public final class DiggCompare {
      * Create a comparator which will use a given list of already prioritized elements
      * to determine the order of given elements. Two elements present in the prioritized list
      * are compared according to their position in the list. An element not present in the
-     * elements is always considered lesser than a present element. Two elements not present
+     * elements is always considered as less prioritized than a present element. Two elements not present
      * are considered equal.
      *
      * @param elementsOrderedByPriority The elements which order is used to determine the order
@@ -167,9 +169,73 @@ public final class DiggCompare {
      * @return the comparator
      */
     public static <T> Comparator<T> prioritize(List<T> elementsOrderedByPriority) {
-        return (t1, t2) -> {
-            int firstIndex = elementsOrderedByPriority.indexOf(t1);
-            int secondIndex = elementsOrderedByPriority.indexOf(t2);
+        return elementsOrderedByPriority.isEmpty() ? PrioritizeByIndex.noPrioritization() : new PrioritizeByIndex<>(elementsOrderedByPriority::indexOf);
+    }
+
+
+    /**
+     * Create a comparator which will use a given list of predicates in prioritized order
+     * to determine the order of given elements. The indexes of the first predicates which pass
+     * two compared elements will determine the comparison result. An element not passing any of the predicates
+     * is always considered as less prioritized than a passing element. Two elements not passing any predicate
+     * are considered equal.
+     *
+     * @param predicatesOrderedByPriority The predicates which order is used to determine the order
+     *                                    of elements given to the comparator.
+     *
+     * @return the comparator
+     */
+    public static <T> Comparator<T> prioritizeIf(List<? extends Predicate<? super T>> predicatesOrderedByPriority) {
+        @SuppressWarnings("unchecked")
+        Predicate<T>[] targetArray = new Predicate[predicatesOrderedByPriority.size()];
+        return prioritizeIf(predicatesOrderedByPriority.toArray(targetArray));
+    }
+
+
+    /**
+     * Create a comparator which will use the given predicates in prioritized order
+     * to determine the order of any given elements. The indexes of the first predicates which pass
+     * two compared elements will determine the comparison result. An element not passing any of the predicates
+     * is always considered as less prioritized than a passing element. Two elements not passing any predicate
+     * are considered equal.
+     *
+     * @param predicatesOrderedByPriority The predicates which order is used to determine the order
+     *                                    of elements given to the comparator.
+     *
+     * @return the comparator
+     */
+    @SafeVarargs
+    public static <T> Comparator<T> prioritizeIf(Predicate<? super T> ... predicatesOrderedByPriority) {
+        return predicatesOrderedByPriority.length == 0 ? PrioritizeByIndex.noPrioritization() : new PrioritizeByIndex<>(element -> {
+            for (int index = 0; index < predicatesOrderedByPriority.length; index++) {
+                if (predicatesOrderedByPriority[index].test(element)) {
+                    return index;
+                }
+            }
+            return -1;
+        });
+    }
+
+    private static final class PrioritizeByIndex<T> implements Comparator<T> {
+
+        @SuppressWarnings("unchecked")
+        public static <T> Comparator<T> noPrioritization() {
+            return (Comparator<T>) NO_PRIORITIZATION;
+        }
+
+        private static Comparator<?> NO_PRIORITIZATION = (t1, t2) -> 0;
+
+
+        private final ToIntFunction<T> indexResolver;
+
+        public PrioritizeByIndex(ToIntFunction<T> indexResolver) {
+            this.indexResolver = indexResolver;
+        }
+
+        @Override
+        public int compare(T t1, T t2) {
+            int firstIndex = indexResolver.applyAsInt(t1);
+            int secondIndex = indexResolver.applyAsInt(t2);
             if (firstIndex < 0 && secondIndex >= 0) {
                 return 1;
             } else if (secondIndex < 0 && firstIndex >= 0) {
@@ -177,8 +243,9 @@ public final class DiggCompare {
             } else {
                 return Integer.compare(firstIndex, secondIndex);
             }
-        };
+        }
     }
+
 
     private DiggCompare() {}
 }
