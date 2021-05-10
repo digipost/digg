@@ -127,13 +127,9 @@
         <pluginManagement>
             <plugins>
                 <plugin>
-                    <artifactId>maven-release-plugin</artifactId>
-                    <version>3.0.0-M1</version>
-                </plugin>
-                <plugin>
                     <groupId>com.mycila</groupId>
                     <artifactId>license-maven-plugin</artifactId>
-                    <version>4.0.rc2</version>
+                    <version>4.1</version>
                     <configuration>
                         <header>src/main/license-header.txt</header>
                         <excludes>
@@ -232,7 +228,7 @@
                 <plugin>
                     <groupId>com.github.siom79.japicmp</groupId>
                     <artifactId>japicmp-maven-plugin</artifactId>
-                    <version>0.15.2</version>
+                    <version>0.15.3</version>
                     <configuration>
                         <oldVersion>
                             <dependency>
