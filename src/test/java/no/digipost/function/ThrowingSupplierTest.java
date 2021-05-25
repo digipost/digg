@@ -18,15 +18,18 @@ package no.digipost.function;
 import org.junit.jupiter.api.Test;
 
 import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 import static java.util.Optional.empty;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static uk.co.probablyfine.matchers.Java8Matchers.where;
 
 public class ThrowingSupplierTest {
 
@@ -38,6 +41,12 @@ public class ThrowingSupplierTest {
     public void rethrowOriginalRuntimeException() {
         ThrowingSupplier<?, Exception> fn = () -> {throw ex;};
         assertThat(assertThrows(RuntimeException.class, fn.asUnchecked()::get), sameInstance(ex));
+    }
+
+    @Test
+    void allowsNull() {
+        ThrowingSupplier<?, Exception> yieldsNull = () -> null;
+        assertThat(yieldsNull.asUnchecked(), where(Supplier::get, nullValue()));
     }
 
     @Test
