@@ -31,14 +31,14 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.co.probablyfine.matchers.Java8Matchers.where;
 
-public class ThrowingSupplierTest {
+class ThrowingSupplierTest {
 
     private final RuntimeException ex = new RuntimeException();
 
     private final Error err = new Error();
 
     @Test
-    public void rethrowOriginalRuntimeException() {
+    void rethrowOriginalRuntimeException() {
         ThrowingSupplier<?, Exception> fn = () -> {throw ex;};
         assertThat(assertThrows(RuntimeException.class, fn.asUnchecked()::get), sameInstance(ex));
     }
@@ -49,14 +49,15 @@ public class ThrowingSupplierTest {
         assertThat(yieldsNull.asUnchecked(), where(Supplier::get, nullValue()));
     }
 
+
     @Test
-    public void rethrowOriginalError() {
+    void rethrowOriginalError() {
         ThrowingSupplier<?, Exception> fn = () -> {throw err;};
         assertThat(assertThrows(Error.class, fn.asUnchecked()::get), sameInstance(err));
     }
 
     @Test
-    public void translateToEmptyOptionalAndDelegateExceptionToHandler() {
+    void translateToEmptyOptionalAndDelegateExceptionToHandler() {
         ThrowingSupplier<?, Exception> fn = () -> {throw ex;};
         @SuppressWarnings("unchecked")
         Consumer<Exception> handler = mock(Consumer.class);
@@ -64,4 +65,5 @@ public class ThrowingSupplierTest {
         assertThat(fn.ifException(handler).get(), is(empty()));
         verify(handler, times(1)).accept(ex);
     }
+
 }
