@@ -31,7 +31,7 @@ public interface ThrowingSupplier<T, X extends Throwable> {
     }
 
     default Supplier<T> ifExceptionThrow(Function<? super Exception, ? extends RuntimeException> exceptionMapper) {
-        return () -> ifException(e -> { throw exceptionMapper.apply(e); }).get().get();
+        return () -> ifException(e -> { throw exceptionMapper.apply(e); }).get().orElse(null);
     }
 
     default Supplier<Optional<T>> ifException(Consumer<Exception> exceptionHandler) {
