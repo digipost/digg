@@ -109,24 +109,58 @@ public interface NonEmptyList<E> extends List<E> {
 
 
     /**
-     * <strong>Unsafe</strong> construction of non-empty list from a possibly empty list.
+     * Try to construct a non-empty list from a given array, which may be empty.
+     *
+     * @param <E> the type of elements in the array.
+     * @param array the array, which may be empty
+     *
+     * @return the resulting non-empty list, or {@link Optional#empty()} if the
+     *         given array is empty
+     */
+    static <E> Optional<NonEmptyList<E>> of(E[] array) {
+        return of(asList(array));
+    }
+
+
+    /**
+     * Try to construct a non-empty list from a given list, which is assumed is not empty.
      * <p>
      * This method should only be used when the given list is <em>guarantied</em>
      * to be empty, and thus offers a fail-fast way to introduce the non-empty
-     * quality on a type level. Use {@link #copyOf(List)} if you need
+     * quality on a type level. Use {@link #of(List)} if you need
      * more flexibility in handling of a possible empty list.
      *
      * @param <E> the type of elements in the list.
-     * @param list the list
+     * @param list the list, which may be empty
      *
-     * @return the resulting non-empty list
+     * @return the resulting non-empty list, or {@link Optional#empty()} if the
+     *         given list is empty
      *
      * @throws IllegalArgumentException if the given list is empty
-     *
-     * @see #copyOf(List)
      */
     static <E> NonEmptyList<E> ofUnsafe(List<E> list) {
-        return copyOf(list).orElseThrow(() -> new IllegalArgumentException("empty list"));
+        return of(list).orElseThrow(() -> new IllegalArgumentException("empty list"));
+    }
+
+
+    /**
+     * Try to construct a non-empty list from a given array, which is assumed is not empty.
+     * <p>
+     * This method should only be used when the given list is <em>guarantied</em>
+     * to be empty, and thus offers a fail-fast way to introduce the non-empty
+     * quality on a type level. Use {@link #of(Object[])} if you need
+     * more flexibility in handling of a possible empty list.
+     *
+     * @param <E> the type of elements in the array.
+     * @param array the array, which may be empty
+     *
+     * @return the resulting non-empty list, or {@link Optional#empty()} if the
+     *         given array is empty
+     *
+     * @throws IllegalArgumentException if the given array is empty
+     */
+    static <E> NonEmptyList<E> ofUnsafe(E[] array) {
+        return of(array).orElseThrow(() -> new IllegalArgumentException("empty array"));
     }
 
 
@@ -146,8 +180,23 @@ public interface NonEmptyList<E> extends List<E> {
 
 
     /**
+     * Try to construct a non-empty list from copying the elements
+     * of a given array, which may be empty.
+     *
+     * @param <E> the type of elements in the array.
+     * @param array the array, which may be empty
+     *
+     * @return the resulting non-empty list,
+     *         or {@link Optional#empty()} if the given array is empty
+     */
+    static <E> Optional<NonEmptyList<E>> copyOf(E[] array) {
+        return copyOf(asList(array));
+    }
+
+
+    /**
      * <strong>Unsafe</strong> construction of non-empty list from copying the
-     * elements of a possibly empty list.
+     * elements of a list assumed to be non-empty.
      * <p>
      * This method should only be used when the given list is <em>guarantied</em>
      * to be empty, and thus offers a fail-fast way to introduce the non-empty
@@ -165,6 +214,29 @@ public interface NonEmptyList<E> extends List<E> {
      */
     static <E> NonEmptyList<E> copyOfUnsafe(List<E> nonEmptyList) {
         return copyOf(nonEmptyList).orElseThrow(() -> new IllegalArgumentException("empty list"));
+    }
+
+
+    /**
+     * <strong>Unsafe</strong> construction of non-empty list from copying the
+     * elements of an array assumed to be non-empty.
+     * <p>
+     * This method should only be used when the given array is <em>guarantied</em>
+     * to be empty, and thus offers a fail-fast way to introduce the non-empty
+     * quality on a type level. Use {@link #copyOf(Object[])} if you need
+     * more flexibility in handling of a possible empty array.
+     *
+     * @param <E> the type of elements in the array.
+     * @param array the array
+     *
+     * @return the resulting non-empty list
+     *
+     * @throws IllegalArgumentException if the given array is empty
+     *
+     * @see #copyOf(Object[])
+     */
+    static <E> NonEmptyList<E> copyOfUnsafe(E[] array) {
+        return copyOf(array).orElseThrow(() -> new IllegalArgumentException("empty array"));
     }
 
 
