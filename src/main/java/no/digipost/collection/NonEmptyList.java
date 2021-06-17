@@ -28,6 +28,20 @@ import static java.util.Arrays.asList;
  * take care to ensure that instances will <em>never</em> in any
  * circumstance be allowed to be empty.
  *
+ * @implNote In general, constructing a {@code NonEmptyList} from another
+ * mutable container source (e.g. an existing list or array), and then changing the
+ * contents of the source, results in undefined behavior of the non-empty list. The
+ * only guarantee is that the non-empty list will <em>never</em> be empty, but the
+ * behavior when mutating a list on which the non-empty list is based on should not be
+ * relied on.
+ * <p>
+ * If you need to construct non-empty lists based on another container you
+ * need to further mutate, consider using one of the {@link #copyOf(List) copyOf}
+ * constructors, which will copy the given references so that any subsequent changes to the
+ * to the given source container will not be reflected in the created non-empty list. (As usual,
+ * this is a shallow copy, meaning that the instances themselves can of course be mutated by anything.)
+ *
+ *
  * @param <E> the type of elements in this list
  */
 public interface NonEmptyList<E> extends List<E> {
