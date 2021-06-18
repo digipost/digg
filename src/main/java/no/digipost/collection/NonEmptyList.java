@@ -235,7 +235,7 @@ public interface NonEmptyList<E> extends List<E> {
      * <strong>Unsafe</strong> construction of non-empty list from copying the
      * elements of an array assumed to be non-empty.
      * <p>
-     * This method should only be used when the given array is <em>guarantied</em>
+     * This method should only be used when the given array is <em>guaranteed</em>
      * to be empty, and thus offers a fail-fast way to introduce the non-empty
      * quality on a type level. Use {@link #copyOf(Object[])} if you need
      * more flexibility in handling of a possible empty array.
