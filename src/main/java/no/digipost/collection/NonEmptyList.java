@@ -145,15 +145,15 @@ public interface NonEmptyList<E> extends List<E> {
      * more flexibility in handling of a possible empty list.
      *
      * @param <E> the type of elements in the list.
-     * @param list the list, which may be empty
+     * @param nonEmptyList the list, which is assumed not to be empty
      *
      * @return the resulting non-empty list, or {@link Optional#empty()} if the
      *         given list is empty
      *
      * @throws IllegalArgumentException if the given list is empty
      */
-    static <E> NonEmptyList<E> ofUnsafe(List<E> list) {
-        return of(list).orElseThrow(() -> new IllegalArgumentException("empty list"));
+    static <E> NonEmptyList<E> ofUnsafe(List<E> nonEmptyList) {
+        return of(nonEmptyList).orElseThrow(() -> new IllegalArgumentException("empty list"));
     }
 
 
@@ -166,15 +166,15 @@ public interface NonEmptyList<E> extends List<E> {
      * more flexibility in handling of a possible empty list.
      *
      * @param <E> the type of elements in the array.
-     * @param array the array, which may be empty
+     * @param nonEmptyArray the array, which is assumed not to be empty
      *
      * @return the resulting non-empty list, or {@link Optional#empty()} if the
      *         given array is empty
      *
      * @throws IllegalArgumentException if the given array is empty
      */
-    static <E> NonEmptyList<E> ofUnsafe(E[] array) {
-        return of(array).orElseThrow(() -> new IllegalArgumentException("empty array"));
+    static <E> NonEmptyList<E> ofUnsafe(E[] nonEmptyArray) {
+        return of(nonEmptyArray).orElseThrow(() -> new IllegalArgumentException("empty array"));
     }
 
 
@@ -218,7 +218,7 @@ public interface NonEmptyList<E> extends List<E> {
      * more flexibility in handling of a possible empty list.
      *
      * @param <E> the type of elements in the list.
-     * @param nonEmptyList the list
+     * @param nonEmptyList the list, which is assumed not to be empty
      *
      * @return the resulting non-empty list
      *
@@ -241,7 +241,7 @@ public interface NonEmptyList<E> extends List<E> {
      * more flexibility in handling of a possible empty array.
      *
      * @param <E> the type of elements in the array.
-     * @param array the array
+     * @param nonEmptyArray the array, which is assumed not to be empty
      *
      * @return the resulting non-empty list
      *
@@ -249,8 +249,8 @@ public interface NonEmptyList<E> extends List<E> {
      *
      * @see #copyOf(Object[])
      */
-    static <E> NonEmptyList<E> copyOfUnsafe(E[] array) {
-        return copyOf(array).orElseThrow(() -> new IllegalArgumentException("empty array"));
+    static <E> NonEmptyList<E> copyOfUnsafe(E[] nonEmptyArray) {
+        return copyOf(nonEmptyArray).orElseThrow(() -> new IllegalArgumentException("empty array"));
     }
 
 
