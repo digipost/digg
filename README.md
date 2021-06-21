@@ -23,7 +23,7 @@ _Digg_ is available in [![Maven Central Repository](https://maven-badges.herokua
 <dependency>
     <groupId>no.digipost</groupId>
     <artifactId>digg</artifactId>
-    <version>0.28</version>
+    <version>0.30</version>
 </dependency>
 ```
 
@@ -44,7 +44,7 @@ Javadocs are available at [javadoc.io/doc/no.digipost/digg](https://www.javadoc.
 
 ## Non-empty lists and streams
 
-Many actual domains deal with one to many elements. While using the general case of e.g. a `List` to model this works all fine, it would be even better to have the type system to eliminate the illegal state of zero elements as early as possible, and in many cases also to offer some operations which are guarantied to be safe having one or more elements.
+Many actual domains deal with cardinalities of one to many instead of zero to many. That is, having zero elements of something has no meaning in the domain; it would be an illegal state. While using the general case of e.g. a `List` to model this may work fine, it would be even better to have the type system to eliminate the illegal state of zero elements as early as possible, and in many cases also to offer some operations which are guarantied to be safe having one or more elements.
 
 _Digg_ contains some extensions of the Java Collections and Streams API to provide first-class support for multitudes of elements which are _not_ empty: `NonEmptyList` and `NonEmptyStream`. Both these types are fully compatible with code already processing JDK lists and/or streams.
 
@@ -62,7 +62,7 @@ List<String> list = NonEmptyList.of(1, 2, 3).stream()
 It is possible to preserve the non-emptyness going from list to stream, and back to list, on a type level, using a particular collector for `NonEmptyList`, found in the `DiggCollectors` class:
 
 ```java
-NonEmptyList list = NonEmptyList.of(1, 2, 3).stream()
+NonEmptyList<String> list = NonEmptyList.of(1, 2, 3).stream()
         .map(String::valueOf)
         .collect(toNonEmptyList()); //static imported from DiggCollectors
 ```
