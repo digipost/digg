@@ -25,6 +25,18 @@ import java.util.function.Function;
 
 @FunctionalInterface
 public interface ThrowingFunction<T, R, X extends Throwable> {
+
+    /**
+     * Returns a function that always returns its input argument.
+     *
+     * @param <T> the type of the input and output objects to the function
+     * @return a function that always returns its input argument
+     */
+    static <T> ThrowingFunction<T, T, RuntimeException> identity() {
+        return t -> t;
+    }
+
+
     R apply(T t) throws X;
 
 
