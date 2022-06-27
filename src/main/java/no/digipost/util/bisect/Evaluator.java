@@ -16,6 +16,7 @@
 package no.digipost.util.bisect;
 
 import no.digipost.function.ThrowingFunction;
+import no.digipost.io.DataSize;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -35,6 +36,20 @@ public interface Evaluator<T> {
     static <T, U extends Comparable<? super U>, X extends Exception> Evaluator<T> having(ThrowingFunction<? super T, ? extends U, X> propertyExtractor, U comparableTarget) {
         return suggestion -> Result.fromComparatorResult(propertyExtractor.apply(suggestion).compareTo(comparableTarget));
     }
+
+    /**
+     * Evaluate suggestions based on how many bytes is written from a suggestion.
+     *
+     * @param targetSize the ideal target {@link DataSize size}
+     * @param serializer the consumer function which defines how a suggestion is written
+     *                   as a series of bytes to a {@link ByteCounter} (an {@link OutputStream}).
+     *
+     * @return the evaluator
+     */
+    static <T> Evaluator<T> size(DataSize targetSize, OutputStreamObjectWriter<? super T, ? super ByteCounter> serializer) {
+        return byteCount(targetSize.toBytes(), serializer);
+    }
+
 
     /**
      * Evaluate suggestions based on how many bytes is written from a suggestion.

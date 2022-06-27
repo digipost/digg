@@ -26,8 +26,8 @@ import java.util.stream.Stream;
 import static java.lang.Math.toIntExact;
 import static java.util.stream.Collectors.toList;
 import static no.digipost.function.ThrowingFunction.identity;
-import static no.digipost.util.bisect.Evaluator.byteCount;
 import static no.digipost.util.bisect.Evaluator.having;
+import static no.digipost.util.bisect.Evaluator.size;
 import static no.digipost.util.bisect.Evaluator.Result.fromComparatorResult;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.hasSize;
@@ -73,7 +73,7 @@ class BisectSearchTest {
         List<byte[]> result = BisectSearch
             .from(chunks -> Suggestion.of(Stream.generate(() -> new byte[toIntExact(chunkSize.toBytes())]).limit(chunks).collect(toList())))
             .inRange(1, 1_000_000).maximumAttempts(20)
-            .searchFor(byteCount(targetSize.toBytes(), (chunks, output) -> chunks.forEach(output::write)));
+            .searchFor(size(targetSize, (chunks, output) -> chunks.forEach(output::write)));
 
         assertThat(result, hasSize(toIntExact(targetSize.toBytes() / chunkSize.toBytes())));
     }
