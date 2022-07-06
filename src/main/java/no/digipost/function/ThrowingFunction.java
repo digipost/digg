@@ -23,8 +23,46 @@ import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
+/**
+ * Represents a function that accepts one argument and produces a result,
+ * and it may throw an exception.
+ *
+ * @param <T> the type of the input to the function
+ * @param <R> the type of the result of the function
+ * @param <X> the exception type which may be thrown when applying the function
+ */
 @FunctionalInterface
 public interface ThrowingFunction<T, R, X extends Throwable> {
+
+    /**
+     * Unification of {@link ThrowingFunction} and {@link java.util.function.Function}.
+     * This type is applicable as a <em>return type</em> from methods producing functions,
+     * and never as an input parameter type. This enables such returned functions to be used
+     * both where a {@code ThrowingFunction} is expected, as well as the JDK's {@code Function} type.
+     *
+     * @param <T> the type of the input to the function
+     * @param <R> the type of the result of the function
+     * @param <X> unchecked exception type
+     *
+     * @see ThrowingFunction#identity()
+     */
+    @FunctionalInterface
+    interface OfUncheckedException<T, R, X extends RuntimeException> extends ThrowingFunction<T, R, X>, Function<T, R> {
+    }
+
+
+    /**
+     * Returns a function that always returns its input argument.
+     *
+     * @param <T> the type of the input and output objects to the function
+     *
+     * @return a function that always returns its input argument
+     */
+    static <T> ThrowingFunction.OfUncheckedException<T, T, RuntimeException> identity() {
+        return t -> t;
+    }
+
+
     R apply(T t) throws X;
 
 
