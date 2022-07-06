@@ -18,8 +18,29 @@ package no.digipost.util.bisect;
 import static no.digipost.util.bisect.Evaluator.Result.FOUND;
 import static no.digipost.util.bisect.Evaluator.Result.TOO_HIGH;
 
+/**
+ * Implementation of bisection search algorithm, which can be used
+ * to find objects having any quantifiable properties one would evaluate
+ * as approaching a certain ideal target value. This can e.g. be the binary/serialized
+ * {@link Evaluator#size(no.digipost.io.DataSize, no.digipost.util.bisect.Evaluator.OutputStreamObjectWriter) size}
+ * of an image generated from different dimensions, or a document with differenct amount of pages.
+ * <p>
+ * To specify a search, one starts by defining the "source" of the search space,
+ * using the {@link BisectSearch#from(Suggester)} method.
+ *
+ * @param <T> the type of the values/objects which are searched for
+ */
 public final class BisectSearch<T> {
 
+    /**
+     * Define the "source" of the search, how to generate suggested values
+     * which will be evaluated.
+     *
+     * @param suggester the {@link Suggestion} generator function
+     *
+     * @return a new builder which is used for further specification
+     *         of the search
+     */
     public static <T> BisectSearch.Builder<T> from(Suggester<T> suggester) {
         return new BisectSearch.Builder<>(suggester);
     }
@@ -57,15 +78,6 @@ public final class BisectSearch<T> {
     }
 
 
-    @FunctionalInterface
-    public interface Disposer<T> {
-        static final Disposer<Object> NO_DISPOSING = suggestion -> {};
-        static final Disposer<AutoCloseable> DISPOSE_BY_CLOSING = AutoCloseable::close;
-
-        void dispose(T suggestion) throws Exception;
-    }
-
-
 
     private final int min;
     private final int max;
@@ -79,10 +91,29 @@ public final class BisectSearch<T> {
         this.suggester = suggester;
     }
 
+    /**
+     * Specify how many suggestions the search should attempt before
+     * yielding a result.
+     *
+     * @param maxAttempts the amount of suggestions to attempt
+     *
+     * @return the new {@link BisectSearch} instance
+     */
     public BisectSearch<T> maximumAttempts(int maxAttempts) {
         return new BisectSearch<>(min, max, maxAttempts, suggester);
     }
 
+
+    /**
+     * Perform a search for a value using a given {@link Evaluator}
+     *
+     * @param evaluator evaluates if a suggested value is {@link Evaluator.Result#TOO_LOW too low},
+     *                  {@link Evaluator.Result#TOO_HIGH too high}, or {@link Evaluator.Result#FOUND found}.
+     *
+     * @return the resulting value from the search, which has not necessarily been evaluated as
+     *         {@link Evaluator.Result#FOUND found}, but was the last suggested value before reaching
+     *         the {@link #maximumAttempts(int) maximum allowed attempts}.
+     */
     public T searchFor(Evaluator<? super T> evaluator) {
         return bisect(min, max, suggester, evaluator, maxAttempts);
     }

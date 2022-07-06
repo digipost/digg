@@ -25,5 +25,13 @@ package no.digipost.util.bisect;
  */
 @FunctionalInterface
 public interface Suggester<T> {
+
+    /**
+     * Generate a {@link Suggestion}.
+     *
+     * @param point the "point" which the geenrated suggestion must be based on
+     *
+     * @return the suggestion
+     */
     Suggestion<? extends T> suggest(int point) throws Exception;
 }

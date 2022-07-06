@@ -22,6 +22,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UncheckedIOException;
 
+/**
+ * An evaluator is used to quantify a suggested value as one of the
+ * values of {@link Evaluator.Result}, and sort defines what an ideal
+ * target value is like.
+ *
+ * @param <T> the type of values which are evaluated
+ */
 @FunctionalInterface
 public interface Evaluator<T> {
 
