@@ -20,6 +20,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -124,6 +125,12 @@ public class DiggExceptionsTest {
                     () -> assertThat(uncheckedException, where(Exception::getMessage, containsString("DiggExceptionsTest.AsUnchecked.MyCheckedException"))),
                     () -> assertThat(uncheckedException, where(Exception::getMessage, containsString("Who in their right mind"))));
         }
+
+        @Test
+        void ioExceptionAsUncheckedIOException() {
+            assertThat(new IOException("error"), where(DiggExceptions::asUnchecked, instanceOf(UncheckedIOException.class)));
+        }
+
     }
 
 }

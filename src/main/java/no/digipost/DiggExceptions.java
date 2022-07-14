@@ -22,6 +22,8 @@ import no.digipost.function.ThrowingFunction;
 import no.digipost.function.ThrowingRunnable;
 import no.digipost.function.ThrowingSupplier;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -102,7 +104,11 @@ public final class DiggExceptions {
      *         and the given exception as its {@link Throwable#getCause() cause}
      */
     public static RuntimeException asUnchecked(Throwable t, String message) {
-        return new RuntimeException(message, t);
+        if (t instanceof IOException) {
+            return new UncheckedIOException(message, (IOException) t);
+        } else {
+            return new RuntimeException(message, t);
+        }
     }
 
     /**
