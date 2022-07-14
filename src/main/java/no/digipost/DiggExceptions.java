@@ -15,11 +15,20 @@
  */
 package no.digipost;
 
-import no.digipost.function.*;
+import no.digipost.function.ThrowingBiConsumer;
+import no.digipost.function.ThrowingBiFunction;
+import no.digipost.function.ThrowingConsumer;
+import no.digipost.function.ThrowingFunction;
+import no.digipost.function.ThrowingRunnable;
+import no.digipost.function.ThrowingSupplier;
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
+
+import static no.digipost.DiggBase.friendlyName;
 
 public final class DiggExceptions {
 
@@ -35,16 +44,71 @@ public final class DiggExceptions {
         return causes.build();
     }
 
+    /**
+     * Generate a concise description of an exception/throwable
+     * containing the {@link DiggBase#friendlyName(Class) "friendly name"}
+     * of the exception's type, and its {@link Throwable#getMessage() message}.
+     *
+     * @param t the exception/throwable
+     *
+     * @return the description
+     */
     public static String exceptionNameAndMessage(Throwable t) {
-        return t.getClass().getSimpleName() + ": '" + t.getMessage() + "'";
+        return friendlyName(t.getClass()) + ": '" + t.getMessage() + "'";
     }
 
+
+    /**
+     * Utility for acquiring a {@link RuntimeException} from any {@link Throwable}.
+     * This method is appropriate to use when you have caught an exception which you have no
+     * ability to handle, and you need to just throw it from a context where you are
+     * not allowed to.
+     * <p>
+     * If you want to add more context to the thrown exception (which you probably should), consider
+     * using {@link #asUnchecked(Throwable, String)} or {@link #asUnchecked(Throwable, Function)}.
+     *
+     * @param t the exception (Throwable)
+     *
+     * @return a new {@link RuntimeException} which has the given exception as its {@link Throwable#getCause() cause},
+     *         or {@code t} itself casted to {@code RuntimeException} if possible
+     */
     public static RuntimeException asUnchecked(Throwable t) {
-        return asUnchecked(t, DiggExceptions::exceptionNameAndMessage);
+        return t instanceof RuntimeException ? (RuntimeException) t : asUnchecked(t, DiggExceptions::exceptionNameAndMessage);
     }
 
-    public static <X extends Throwable> RuntimeException asUnchecked(X t, Function<? super X, String> message) {
-        return t instanceof RuntimeException ? (RuntimeException) t : new RuntimeException(message.apply(t), t);
+
+    /**
+     * Utility for acquiring a {@link RuntimeException} with a custom message from any {@link Throwable}.
+     * The result from this method will <em>always</em> be a new exception instance.
+     *
+     * @param <X> the type of the given exception
+     * @param t the exception (Throwable)
+     * @param messageCreator a function which returns the message for the new exception
+     *
+     * @return a new {@link RuntimeException} which has the result from the {@code messageCreator} function as its
+     *         {@link Throwable#getMessage() message}, and the given exception as its {@link Throwable#getCause() cause}
+     */
+    public static <X extends Throwable> RuntimeException asUnchecked(X t, Function<? super X, String> messageCreator) {
+        return asUnchecked(t, messageCreator.apply(t));
+    }
+
+
+    /**
+     * Utility for acquiring a {@link RuntimeException} with a custom message from any {@link Throwable}.
+     * The result from this method will <em>always</em> be a new exception instance.
+     *
+     * @param t the exception (Throwable)
+     * @param message the message for the new exception
+     *
+     * @return a new {@link RuntimeException} which has the given {@code message},
+     *         and the given exception as its {@link Throwable#getCause() cause}
+     */
+    public static RuntimeException asUnchecked(Throwable t, String message) {
+        if (t instanceof IOException) {
+            return new UncheckedIOException(message, (IOException) t);
+        } else {
+            return new RuntimeException(message, t);
+        }
     }
 
     /**
