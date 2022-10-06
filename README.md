@@ -4,6 +4,7 @@
 [![License](https://img.shields.io/badge/license-Apache%202-blue)](https://github.com/digipost/digg/blob/main/LICENCE)
 
 
+
 Digipost Digg 🍬
 ===============================
 
@@ -23,7 +24,7 @@ _Digg_ is available in [![Maven Central Repository](https://maven-badges.herokua
 <dependency>
     <groupId>no.digipost</groupId>
     <artifactId>digg</artifactId>
-    <version>0.30</version>
+    <version>0.32</version>
 </dependency>
 ```
 
