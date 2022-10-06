@@ -3,6 +3,8 @@
 [![Build and deploy](https://github.com/digipost/digg/workflows/Build%20and%20deploy/badge.svg)](https://github.com/digipost/digg/actions)
 [![License](https://img.shields.io/badge/license-Apache%202-blue)](https://github.com/digipost/digg/blob/main/LICENCE)
 
+
+
 Digipost Digg 🍬
 ===============================
 
@@ -11,6 +13,8 @@ is not meant as an replacement for other common and very useful general purpose 
 or [Commons Lang](https://commons.apache.org/proper/commons-lang/), but to complement those. _Digg_ has grown from various encountered repetitive programming problems, which has been generalized and put into the library. The functionality found in _Digg_ is not specific to or coupled with the Digipost domain, and should be applicable for any project.
 
 The term _"digg"_ is Norwegian jargon for tasty stuff, like candy.
+
+
 
 ## Getting Digg
 
@@ -26,6 +30,10 @@ _Digg_ is available in [![Maven Central Repository](https://maven-badges.herokua
 
 _Digg_ requires Java 8, and has no other dependencies.
 
+
+
+
+
 ## Getting to know Digg in 45 seconds
 
 _Digg_ contains a lot of useful utilities implemented as static methods. The "entry point" for these methods are all classes with the prefix `Digg*`. An easy way to explore the API is to type `Digg` in your IDE, and let auto-completion show you what is available.
@@ -33,6 +41,7 @@ _Digg_ contains a lot of useful utilities implemented as static methods. The "en
 ![Auto-complete in an IDE](https://digipost.github.io/digg/img/digg-autocomplete.png?nocache=1)
 
 Javadocs are available at [javadoc.io/doc/no.digipost/digg](https://www.javadoc.io/doc/no.digipost/digg)
+
 
 ## Non-empty lists and streams
 
@@ -81,6 +90,8 @@ PersonType = persons.stream()
 Using `.collect(allowAtMostOne())` on a regular stream which may be empty would result in an `Optional<PersonType>`, but because the stream originated from a non-empty list and the map and distinct operations does not create a possibly empty stream, there is no need to produce an `Optional` from the collect operation.
 
 Using `.collect(allowAtMostOne())` has the benefit of actually failing if you intend to filter down multiple elements into exactly one element, and failing to do so would be a bug. This is safer than using e.g. `Stream.findFirst()` or `Strean.findAny()` which should not be used if you rely on correct prior processing to narrow down to exactly one element. However, if for your use case it does not matter if the stream contains multiple elements, and you just want a single element, the methods `NonEmptyStream.first()` and `NonEmptyStream.any()` exist, and they return values appropriately typed without `Optional`.
+
+
 
 ## License
 
