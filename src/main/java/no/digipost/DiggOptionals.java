@@ -39,7 +39,7 @@ public final class DiggOptionals {
      * optional values will be attempted resolved. E.g. calling {@link Stream#findFirst() .findFirst()} will only resolve
      * as many {@code Optional}s needed until the first present one is encountered.
      *
-     * <h4>Note on parallel streams</h4>
+     * <p><strong>Note on parallel streams:</strong></p>
      * The returned stream will be sequential and appropriate for use to resolve several {@link Optional}s in a deterministic
      * order, or for instance to find the first present value of a prioritized set of possible ways to resolve it. One should
      * be <em>very</em> (as always with streams) careful with {@link Stream#parallel() parallelizing} the stream, as you generally

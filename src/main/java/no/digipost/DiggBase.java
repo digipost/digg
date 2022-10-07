@@ -36,7 +36,7 @@ import static java.util.stream.StreamSupport.stream;
 /**
  * Party people, turn up tha...
  *
- * <h2>&ndash;&ndash; {@link DiggBase} &ndash;&ndash;</h2>
+ * <p><strong>&ndash;&ndash; {@link DiggBase} &ndash;&ndash;</strong></p>
  *
  * <p>This class contains basic utilities. Basically.</p>
  */
