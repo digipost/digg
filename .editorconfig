@@ -25,9 +25,8 @@ charset = utf-8
 continuation_indent_size = 8
 
 [*.yml]
-indent_style = space
 indent_size = 2
 
 [*.md]
-indent_style = tabs
+indent_style = tab
 indent_size = 2
