@@ -21,6 +21,7 @@ import java.util.stream.IntStream;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.co.probablyfine.matchers.Java8Matchers.where;
 import static uk.co.probablyfine.matchers.Java8Matchers.whereNot;
 
@@ -32,6 +33,17 @@ class CountDownTest {
         assertThat(countDown, whereNot(TargetState::yet));
         assertThat(countDown, whereNot(TargetState::yet));
         assertThat(countDown, where(TargetState::yet));
+    }
+
+    @Test
+    void aZeroCountDownIsImmediatelyDone() {
+        CountDown countDown = new CountDown(0);
+        assertThat(countDown, where(TargetState::yet));
+    }
+
+    @Test
+    void doesNotAllowNegativeCount() {
+        assertThrows(IllegalArgumentException.class, () -> new CountDown(-1));
     }
 
     @Test

@@ -44,6 +44,9 @@ public final class CountDown implements TargetState {
      *              and switches to only return {@code true}.
      */
     public CountDown(long count) {
+        if (count < 0) {
+            throw new IllegalArgumentException("negative count: " + count);
+        }
         this.count = new AtomicLong(count);
     }
 
