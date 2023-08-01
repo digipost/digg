@@ -73,6 +73,8 @@ public final class AttributesMap implements Serializable {
     }
 
     private static final Serializable NON_EXISTING_VALUE = new Serializable() {
+        private static final long serialVersionUID = 1L;
+
         private Object readResolve() {
             return NON_EXISTING_VALUE;
         }
