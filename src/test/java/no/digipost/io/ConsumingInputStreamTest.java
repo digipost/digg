@@ -15,8 +15,8 @@
  */
 package no.digipost.io;
 
-import com.google.common.io.ByteStreams;
 import no.digipost.io.ConsumingInputStream.ProducerFailed;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
@@ -95,7 +95,7 @@ public class ConsumingInputStreamTest {
             for (ZipEntry entry : Zip.entriesIn(zip)) {
                 assertThat(entry.getName(), is("file" + entriesAmount));
                 assertThat(entry.getExtra(), is("Extra bytes".getBytes()));
-                assertThat(ByteStreams.toByteArray(zip), is((entry.getName() + " content").getBytes()));
+                assertThat(IOUtils.toByteArray(zip), is((entry.getName() + " content").getBytes()));
                 entriesAmount.increment();
             }
         }

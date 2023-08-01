@@ -15,6 +15,7 @@
  */
 package no.digipost.io;
 
+import static org.apache.commons.io.IOUtils.toByteArray;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -26,7 +27,6 @@ import java.security.GeneralSecurityException;
 import java.util.function.Supplier;
 
 import static uk.co.probablyfine.matchers.Java8Matchers.where;
-import static com.google.common.io.ByteStreams.toByteArray;
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static no.digipost.DiggIO.limit;
 import static no.digipost.io.DataSize.bytes;

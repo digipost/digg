@@ -32,7 +32,6 @@ public class SerializableClassesTest {
 
     @Test
     public void serializableClassesMustDefineSerialVersionUID() throws IOException {
-
         List<Class<?>> serializableClassesWithoutSerialVersionUID = ClassPath
             .from(SerializableClassesTest.class.getClassLoader())
             .getTopLevelClassesRecursive("no.digipost")
