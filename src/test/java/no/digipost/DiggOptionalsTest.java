@@ -15,6 +15,7 @@
  */
 package no.digipost;
 
+import java.util.Locale;
 import uk.co.probablyfine.matchers.OptionalMatchers;
 import uk.co.probablyfine.matchers.StreamMatchers;
 import org.junit.jupiter.api.Test;
@@ -72,13 +73,13 @@ public class DiggOptionalsTest {
     @Test
     public void convertPresentOptionalsToStreamOfMostCommonBaseType() {
         Stream<Number> nums = toStream(Optional.of(3.14), Optional.empty(), Optional.of(42));
-        assertThat(nums.map(n -> String.format("%.2f", n.doubleValue())), StreamMatchers.contains("3.14", "42.00"));
+        assertThat(nums.map(n -> String.format(Locale.US, "%.2f", n.doubleValue())), StreamMatchers.contains("3.14", "42.00"));
     }
 
     @Test
     public void getPresentOptionalsInStreamOfMostCommonBaseType() {
         Stream<Number> nums = toStream(() -> Optional.of(3.14), Optional::empty, () -> Optional.of(42));
-        assertThat(nums.map(n -> String.format("%.2f", n.doubleValue())), StreamMatchers.contains("3.14", "42.00"));
+        assertThat(nums.map(n -> String.format(Locale.US, "%.2f", n.doubleValue())), StreamMatchers.contains("3.14", "42.00"));
     }
 
     @Test
