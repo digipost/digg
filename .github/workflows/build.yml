@@ -11,7 +11,7 @@ jobs:
 
     name: build java ${{ matrix.java }}
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - name: Set up java
         uses: actions/setup-java@v1
         with:
@@ -35,7 +35,7 @@ jobs:
           else
             TAG=${GITHUB_REF#refs/heads/}-SNAPSHOT
           fi
-          echo ::set-output name=version::${TAG//\//-}
+          echo "version=${TAG//\//-}" >> $GITHUB_OUTPUT
 
   deploy_snapshot:
     if: startsWith(github.ref, 'refs/heads/')
@@ -44,7 +44,7 @@ jobs:
 
     name: Deploy snapshot
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v4
       - uses: digipost/action-maven-publish@1.1.0
         with:
           sonatype_secrets: ${{ secrets.sonatype_secrets }}
@@ -58,7 +58,7 @@ jobs:
     name: Release to Sonatype
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
       - name: Release to Central Repository
         uses: digipost/action-maven-publish@1.1.0
         with:
