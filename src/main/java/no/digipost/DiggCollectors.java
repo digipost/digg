@@ -22,6 +22,7 @@ import no.digipost.collection.NonEmptyList;
 import no.digipost.concurrent.OneTimeAssignment;
 import no.digipost.stream.EmptyResultIfEmptySourceCollector;
 import no.digipost.stream.NonEmptyStream;
+import no.digipost.stream.SubjectFilter;
 import no.digipost.tuple.Tuple;
 import no.digipost.tuple.ViewableAsTuple;
 import no.digipost.util.ViewableAsOptional;
@@ -34,6 +35,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -47,6 +49,37 @@ import static java.util.stream.Collectors.toList;
  * Various {@link java.util.stream.Collector} implementations.
  */
 public final class DiggCollectors {
+
+
+    /**
+     * Create a collector used for finding and accumulating a specific result,
+     * where applying a filter is not adequate. The returned
+     * {@link SubjectFilter subject filter} is used for
+     * further specifying the final (compound) condition for the result to find.
+     * <p>
+     * When searching for a result <em>in context</em> of other elements, you must carefully
+     * ensure the source to have appropriate ordering and parallelity (or probably rather lack thereof)
+     * for the correct and expected operation of the collector.
+     * <p>
+     * Note: because {@link Collector collectors} are applied to <em>all</em> elements
+     * in a Stream, care should be taken to exclude non-applicable elements e.g. using
+     * a {@link Stream#filter(Predicate) filter}, and {@link Stream#limit(long) limit}
+     * especially for infinite Streams, before collecting.
+     *
+     *
+     * @param <T> The element type which is inspected by the subject filter. This type is
+     *            typically the same as the element type of the Stream the final collector
+     *            is applied to.
+     *
+     * @param subjectElement the predicate for selecting a subject element for further use
+     *                       in accumulating a result from applying the final collector.
+     *
+     * @return the subject filter for the collector, which must be further specified
+     *         to build the final collector
+     */
+    public static <T> SubjectFilter<T> find(Predicate<T> subjectElement) {
+        return new SubjectFilter<>(subjectElement);
+    }
 
 
     /**

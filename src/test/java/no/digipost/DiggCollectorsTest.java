@@ -19,7 +19,10 @@ import no.digipost.collection.ConflictingElementEncountered;
 import no.digipost.tuple.Tuple;
 import no.digipost.tuple.ViewableAsTuple;
 import no.digipost.util.ViewableAsOptional;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.RepeatedTest;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Timeout;
 import org.quicktheories.core.Gen;
 import uk.co.probablyfine.matchers.OptionalMatchers;
 
@@ -31,6 +34,8 @@ import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -39,6 +44,7 @@ import static no.digipost.DiggBase.close;
 import static no.digipost.DiggCollectors.allowAtMostOne;
 import static no.digipost.DiggCollectors.allowAtMostOneOrElseThrow;
 import static no.digipost.DiggCollectors.asSuppressedExceptionsOf;
+import static no.digipost.DiggCollectors.find;
 import static no.digipost.DiggCollectors.toMultimap;
 import static no.digipost.DiggCollectors.toMultituple;
 import static no.digipost.DiggCollectors.toSingleExceptionWithSuppressed;
@@ -50,6 +56,7 @@ import static org.hamcrest.Matchers.empty;
 import static org.hamcrest.Matchers.emptyArray;
 import static org.hamcrest.Matchers.everyItem;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.lessThan;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
@@ -206,5 +213,46 @@ public class DiggCollectorsTest {
                         })));
                 assertThat(thrown, sameInstance(customException));
             });
+    }
+
+    @Nested
+    class FindTest {
+
+        @Test
+        void emptyStream() {
+            assertThat(Stream.empty().collect(find(e -> true).keepLastNotFollowedBy(null)), whereNot(Optional::isPresent));
+        }
+
+        @Test
+        void findsLastItemInStreamNothingIsVoided() {
+            assertThat(Stream.of(1, 2, 3, 4).collect(find((Integer n) -> n > 2).keepLastNotFollowedBy(0)), contains(4));
+        }
+
+        @Test
+        void findsLastMatchingItemAndNotCancelledByAnyFollowingElement() {
+            assertThat(Stream.of(1, 2, 3, 4, 5, 6).collect(find((Integer n) -> n > 2 && n < 6).keepLastNotFollowedBy(0)), contains(5));
+        }
+
+        @Test
+        void findsLastMatchingItemNotFollowedByCertainValue() {
+            assertThat(Stream.of(1, 2, 3, 4, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7).collect(find((Integer n) -> n > 3 && n < 6).keepLastNotFollowedBy(8)), contains(5));
+        }
+
+        @Test
+        void findsFirstMatchingItemNotFollowedByCertainValue() {
+            assertThat(Stream.of(1, 2, 3, 5, 6, 7, 8, 1, 2, 3, 4, 5, 6, 7).collect(find((Integer n) -> n > 3 && n < 6).keepFirstNotFollowedBy(8)), contains(4));
+        }
+
+        @RepeatedTest(20) @Timeout(10)
+        void parallelStreamsWorksButBehaviorIsNotReallyDefined() {
+            Random random = new Random();
+            Optional<Integer> result = Optional.empty();
+            while(!result.isPresent()) {
+                result = IntStream.generate(() -> random.nextInt(1000)).limit(500_000).boxed()
+                        .parallel()
+                        .collect(find((Integer n) -> n < 100).keepLastNotFollowedBy(n -> n > 990));
+            }
+            assertThat(result, contains(lessThan(100)));
+        }
     }
 }
