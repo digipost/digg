@@ -101,6 +101,7 @@ public final class DiggEnums {
      * @return the comma separated {@code enum} names.
      */
     @SafeVarargs
+    @SuppressWarnings({"varargs"})
     public static <E extends Enum<E>> String toCommaSeparatedNames(E ... enums) {
         return toCommaSeparatedNames(asList(enums));
     }
@@ -126,6 +127,7 @@ public final class DiggEnums {
      * @return the {@code enum} names, separated by the {@code delim}iter.
      */
     @SafeVarargs
+    @SuppressWarnings({"varargs"})
     public static <E extends Enum<E>> String toNames(String delim, E ... enums) {
         return toNames(delim, asList(enums));
     }
@@ -154,6 +156,7 @@ public final class DiggEnums {
      * @return the joined string
      */
     @SafeVarargs
+    @SuppressWarnings({"varargs"})
     public static <E extends Enum<E>> String toStringOf(Function<? super E, String> enumAsString, String delim, E ... enums) {
         return toStringOf(enumAsString, delim, asList(enums));
     }
@@ -183,6 +186,7 @@ public final class DiggEnums {
      * @return the joined string.
      */
     @SafeVarargs
+    @SuppressWarnings({"varargs"})
     public static <E extends Enum<E>> String toStringOf(Function<? super E, String> enumAsString, Collector<? super String, ?, String> joiner, E ... enums) {
         return toStringOf(enumAsString, joiner, asList(enums));
     }

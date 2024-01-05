@@ -87,6 +87,7 @@ public class NonEmptyStream<T> implements Stream<T> {
      * @return the new non-empty stream
      */
     @SafeVarargs
+    @SuppressWarnings("varargs")
     public static <T> NonEmptyStream<T> of(T firstElement, T ... remainingElements) {
         return of(firstElement, Arrays.stream(remainingElements));
     }

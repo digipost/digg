@@ -87,6 +87,7 @@ public interface NonEmptyList<E> extends List<E> {
      * @return the non-empty list
      */
     @SafeVarargs
+    @SuppressWarnings("varargs")
     public static <E> NonEmptyList<E> of(E firstElement, E ... remainingElements) {
         return of(firstElement, asList(remainingElements));
     }

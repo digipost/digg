@@ -159,6 +159,7 @@ public final class DiggBase {
      *            should yield the same type.
      */
     @SafeVarargs
+    @SuppressWarnings({"varargs"})
     public static final <T, R> Stream<R> extract(T object, Function<? super T, ? extends R> ... extractors) {
         return Stream.of(extractors).map(e -> e.apply(object));
     }
@@ -182,6 +183,7 @@ public final class DiggBase {
      *            should yield the same type.
      */
     @SafeVarargs
+    @SuppressWarnings({"varargs"})
     public static final <T, R> Stream<R> extractIfPresent(T object, Function<? super T, ? extends Optional<R>> ... extractors) {
         return extract(object, extractors).filter(Optional::isPresent).map(Optional::get);
     }
@@ -227,6 +229,7 @@ public final class DiggBase {
      * @return the Stream with exceptions, if any
      */
     @SafeVarargs
+    @SuppressWarnings({"varargs"})
     public static <T> Stream<Exception> forceOnAll(ThrowingConsumer<? super T, ? extends Exception> action, T ... instances) {
         return forceOnAll(action, Stream.of(instances));
     }

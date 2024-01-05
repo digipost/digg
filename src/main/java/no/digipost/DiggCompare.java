@@ -151,6 +151,7 @@ public final class DiggCompare {
      * @see #prioritize(List)
      */
     @SafeVarargs
+    @SuppressWarnings({"varargs"})
     public static <T> Comparator<T> prioritize(T ... elementsOrderedByPriority) {
         return prioritize(asList(elementsOrderedByPriority));
     }
@@ -186,7 +187,7 @@ public final class DiggCompare {
      * @return the comparator
      */
     public static <T> Comparator<T> prioritizeIf(List<? extends Predicate<? super T>> predicatesOrderedByPriority) {
-        @SuppressWarnings("unchecked")
+        @SuppressWarnings("all")
         Predicate<T>[] targetArray = new Predicate[predicatesOrderedByPriority.size()];
         return prioritizeIf(predicatesOrderedByPriority.toArray(targetArray));
     }
