@@ -15,14 +15,13 @@
  */
 package no.digipost;
 
-import uk.co.probablyfine.matchers.OptionalMatchers;
 import no.digipost.collection.ConflictingElementEncountered;
 import no.digipost.tuple.Tuple;
 import no.digipost.tuple.ViewableAsTuple;
 import no.digipost.util.ViewableAsOptional;
 import org.junit.jupiter.api.Test;
-import org.quicktheories.WithQuickTheories;
 import org.quicktheories.core.Gen;
+import uk.co.probablyfine.matchers.OptionalMatchers;
 
 import java.io.IOException;
 import java.sql.BatchUpdateException;
@@ -34,9 +33,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static uk.co.probablyfine.matchers.Java8Matchers.where;
-import static uk.co.probablyfine.matchers.Java8Matchers.whereNot;
-import static uk.co.probablyfine.matchers.OptionalMatchers.contains;
 import static java.util.Arrays.asList;
 import static java.util.stream.IntStream.range;
 import static no.digipost.DiggBase.close;
@@ -58,8 +54,14 @@ import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.quicktheories.QuickTheory.qt;
+import static org.quicktheories.generators.SourceDSL.lists;
+import static org.quicktheories.generators.SourceDSL.strings;
+import static uk.co.probablyfine.matchers.Java8Matchers.where;
+import static uk.co.probablyfine.matchers.Java8Matchers.whereNot;
+import static uk.co.probablyfine.matchers.OptionalMatchers.contains;
 
-public class DiggCollectorsTest implements WithQuickTheories {
+public class DiggCollectorsTest {
 
     interface NumTranslation extends ViewableAsTuple<Integer, Optional<String>> {}
 

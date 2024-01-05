@@ -66,7 +66,7 @@ public class JustAStringTest {
     }
 
     static final class JustAName extends JustA<String> implements WithName {
-
+        private static final long serialVersionUID = 42L;
         private JustAName(String name) {
             super(name);
         }

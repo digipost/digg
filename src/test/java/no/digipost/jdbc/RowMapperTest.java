@@ -31,13 +31,13 @@ import org.junit.jupiter.api.Test;
 
 import java.io.File;
 import java.math.BigDecimal;
+import java.net.URI;
 import java.net.URL;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.Optional;
 
-import static uk.co.probablyfine.matchers.OptionalMatchers.contains;
 import static java.time.Instant.EPOCH;
 import static no.digipost.jdbc.Mappers.getBigDecimal;
 import static no.digipost.jdbc.Mappers.getBoolean;
@@ -52,6 +52,7 @@ import static no.digipost.jdbc.ResultSetMock.mockSingleRowResult;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.is;
+import static uk.co.probablyfine.matchers.OptionalMatchers.contains;
 
 public class RowMapperTest {
 
@@ -251,7 +252,7 @@ public class RowMapperTest {
         assertThat(row.fifth(), both(is(user.active)).and(is(true)));
         assertThat(row.sixth(), both(is(user.avatar)).and(contains(new File("johndoe.png"))));
         assertThat(row.seventh(), both(is(user.credit)).and(is(new BigDecimal("100.00"))));
-        assertThat(row.eighth(), both(is(user.homepage)).and(contains(new URL("http://example.com"))));
+        assertThat(row.eighth(), both(is(user.homepage)).and(contains(URI.create("http://example.com").toURL())));
     }
 
     @Test
@@ -266,7 +267,7 @@ public class RowMapperTest {
         assertThat(row.fifth(), both(is(user.active)).and(is(true)));
         assertThat(row.sixth(), both(is(user.avatar)).and(contains(new File("johndoe.png"))));
         assertThat(row.seventh(), both(is(user.credit)).and(is(new BigDecimal("100.00"))));
-        assertThat(row.eighth(), both(is(user.homepage)).and(contains(new URL("http://example.com"))));
+        assertThat(row.eighth(), both(is(user.homepage)).and(contains(URI.create("http://example.com").toURL())));
         assertThat(row.ninth(), both(is(user.petName)).and(contains("Snowball")));
     }
 
@@ -282,7 +283,7 @@ public class RowMapperTest {
         assertThat(row.fifth(), both(is(user.active)).and(is(true)));
         assertThat(row.sixth(), both(is(user.avatar)).and(contains(new File("johndoe.png"))));
         assertThat(row.seventh(), both(is(user.credit)).and(is(new BigDecimal("100.00"))));
-        assertThat(row.eighth(), both(is(user.homepage)).and(contains(new URL("http://example.com"))));
+        assertThat(row.eighth(), both(is(user.homepage)).and(contains(URI.create("http://example.com").toURL())));
         assertThat(row.ninth(), both(is(user.petName)).and(contains("Snowball")));
         assertThat(row.tenth(), both(is(user.levelOfAwesome)).and(is(1.0f)));
     }

@@ -22,7 +22,7 @@
     <parent>
         <groupId>no.digipost</groupId>
         <artifactId>digipost-open-super-pom</artifactId>
-        <version>7</version>
+        <version>13</version>
     </parent>
 
     <artifactId>digg</artifactId>
@@ -42,7 +42,6 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <project.previousVersion>set_with_-Dproject.previousVersion=X.Y</project.previousVersion>
     </properties>
 
     <dependencyManagement>
@@ -50,7 +49,7 @@
             <dependency>
                 <groupId>org.junit</groupId>
                 <artifactId>junit-bom</artifactId>
-                <version>5.9.1</version>
+                <version>5.10.1</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -63,13 +62,10 @@
             </dependency>
             <dependency>
                 <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>2.0.7</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-simple</artifactId>
-                <version>2.0.7</version>
+                <artifactId>slf4j-bom</artifactId>
+                <version>2.0.10</version>
+                <type>pom</type>
+                <scope>import</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -87,6 +83,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>nl.jqno.equalsverifier</groupId>
+            <artifactId>equalsverifier</artifactId>
+            <version>3.15.5</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
             <scope>test</scope>
@@ -94,7 +96,7 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.7</version>
+            <version>2.15.1</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -121,12 +123,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>nl.jqno.equalsverifier</groupId>
-            <artifactId>equalsverifier</artifactId>
-            <version>3.12.3</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>uk.co.probablyfine</groupId>
             <artifactId>java-8-matchers</artifactId>
             <version>1.9</version>
@@ -141,7 +137,7 @@
         <dependency>
             <groupId>com.mockrunner</groupId>
             <artifactId>mockrunner-jdbc</artifactId>
-            <version>2.0.6</version>
+            <version>2.0.7</version>
             <scope>test</scope>
             <exclusions>
                 <exclusion>
@@ -162,28 +158,15 @@
                 <plugin>
                     <groupId>com.mycila</groupId>
                     <artifactId>license-maven-plugin</artifactId>
-                    <version>4.1</version>
-                    <configuration>
-                        <header>src/main/license-header.txt</header>
-                        <excludes>
-                            <exclude>LICENSE*</exclude>
-                            <exclude>NOTICE</exclude>
-                            <exclude>src/main/notice/NOTICE.template</exclude>
-                            <exclude>.mvn/maven.config</exclude>
-                            <exclude>.java-version</exclude>
-                            <exclude>.github/**/*.yml</exclude>
-                        </excludes>
-                    </configuration>
+                    <version>4.3</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>3.4.1</version>
                     <configuration>
                         <rules>
                             <requireMavenVersion>
-                                <!-- Maven 3.3.1 is needed for .mvn/maven.config to work
-                                     https://maven.apache.org/docs/3.3.1/release-notes.html -->
-                                <version>3.3.1</version>
+                                <version>3.6.3</version>
                             </requireMavenVersion>
                             <bannedDependencies>
                                 <excludes>
@@ -202,7 +185,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.10.1</version>
+                    <version>3.12.1</version>
                     <configuration>
                         <compilerArgs>
                             <arg>-Xlint</arg>
@@ -211,31 +194,31 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.0.0-M7</version>
+                    <version>3.2.3</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>3.1.1</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.2.0</version>
+                    <version>3.3.2</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.6.0</version>
+                    <version>3.6.1</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>3.1.1</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.3.0</version>
+                    <version>3.3.1</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.4.1</version>
+                    <version>3.6.3</version>
                     <configuration>
                         <tags>
                             <tag>
@@ -253,7 +236,7 @@
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>versions-maven-plugin</artifactId>
-                    <version>2.14.2</version>
+                    <version>2.16.2</version>
                     <configuration>
                         <generateBackupPoms>false</generateBackupPoms>
                     </configuration>
@@ -261,21 +244,9 @@
                 <plugin>
                     <groupId>com.github.siom79.japicmp</groupId>
                     <artifactId>japicmp-maven-plugin</artifactId>
-                    <version>0.15.7</version>
+                    <version>0.18.3</version>
                     <configuration>
-                        <oldVersion>
-                            <dependency>
-                                <groupId>${project.groupId}</groupId>
-                                <artifactId>${project.artifactId}</artifactId>
-                                <version>${project.previousVersion}</version>
-                            </dependency>
-                        </oldVersion>
-                        <newVersion>
-                            <file><path>${project.build.directory}/${project.build.finalName}.${project.packaging}</path></file>
-                        </newVersion>
                         <parameter>
-                            <onlyModified>true</onlyModified>
-                            <onlyBinaryIncompatible>true</onlyBinaryIncompatible>
                             <includes>
                                 <include>no.digipost</include>
                             </includes>
@@ -285,33 +256,6 @@
             </plugins>
         </pluginManagement>
         <plugins>
-            <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>check-license-header</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>analyze-only</goal>
-                        </goals>
-                        <configuration>
-                            <failOnWarning>true</failOnWarning>
-                            <ignoreNonCompile>true</ignoreNonCompile>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <executions>

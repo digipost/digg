@@ -15,7 +15,12 @@
  */
 package no.digipost;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
+import java.util.Spliterator;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
@@ -52,6 +57,7 @@ public final class DiggOptionals {
      * @return a {@code Stream} containing the present {@code Optional}s
      */
     @SafeVarargs
+    @SuppressWarnings("varargs")
     public static <T> Stream<T> toStream(Supplier<Optional<T>> ... optionalResolvers) {
         Supplier<Optional<T>>[] copiedResolvers = Arrays.copyOf(optionalResolvers, optionalResolvers.length);
         Spliterator<Supplier<Optional<T>>> spliterator = spliterator(copiedResolvers, IMMUTABLE | ORDERED);
@@ -69,6 +75,7 @@ public final class DiggOptionals {
      * @return a {@code Stream} containing the present {@code Optional}s
      */
     @SafeVarargs
+    @SuppressWarnings("varargs")
     public static <T> Stream<T> toStream(Optional<? extends T> ... optionals) {
         return Stream.of(optionals).filter(Optional::isPresent).map(Optional::get);
     }

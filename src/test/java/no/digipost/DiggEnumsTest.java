@@ -16,14 +16,11 @@
 package no.digipost;
 
 import org.junit.jupiter.api.Test;
-import org.quicktheories.WithQuickTheories;
 import org.quicktheories.core.Gen;
 
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static uk.co.probablyfine.matchers.StreamMatchers.contains;
-import static uk.co.probablyfine.matchers.StreamMatchers.empty;
 import static java.util.stream.Collectors.joining;
 import static no.digipost.DiggEnums.fromCommaSeparatedNames;
 import static no.digipost.DiggEnums.toCommaSeparatedNames;
@@ -34,8 +31,13 @@ import static no.digipost.DiggEnumsTest.MyEnum.AA;
 import static no.digipost.DiggEnumsTest.MyEnum.ABA;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.quicktheories.QuickTheory.qt;
+import static org.quicktheories.generators.SourceDSL.arbitrary;
+import static org.quicktheories.generators.SourceDSL.arrays;
+import static uk.co.probablyfine.matchers.StreamMatchers.contains;
+import static uk.co.probablyfine.matchers.StreamMatchers.empty;
 
-public class DiggEnumsTest implements WithQuickTheories {
+public class DiggEnumsTest {
 
     enum MyEnum {
         A, AA, ABA, ABC

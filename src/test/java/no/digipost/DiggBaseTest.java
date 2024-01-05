@@ -30,9 +30,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static uk.co.probablyfine.matchers.Java8Matchers.where;
-import static uk.co.probablyfine.matchers.StreamMatchers.contains;
-import static uk.co.probablyfine.matchers.StreamMatchers.empty;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Stream.generate;
@@ -54,6 +51,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static uk.co.probablyfine.matchers.Java8Matchers.where;
+import static uk.co.probablyfine.matchers.StreamMatchers.contains;
+import static uk.co.probablyfine.matchers.StreamMatchers.empty;
 
 public class DiggBaseTest implements WithQuickTheories {
 
@@ -132,6 +132,7 @@ public class DiggBaseTest implements WithQuickTheories {
         MyResource resource = mock(MyResource.class);
         try (ThrowingAutoClosed<MyResource, RuntimeException> managedResource = throwingAutoClose(resource, MyResource::done)) {
             verifyNoInteractions(resource);
+            managedResource.object(); //just to avoid javac lint warning
         }
         verify(resource, times(1)).done();
         verifyNoMoreInteractions(resource);
@@ -141,10 +142,12 @@ public class DiggBaseTest implements WithQuickTheories {
     public void wrappingAnAlreadyAutoCloseableWithAutoCloseWillAlsoInvokeClose() throws Exception {
         abstract class MyResource implements AutoCloseable {
             abstract void done() throws IOException;
+            @Override public abstract void close() throws IOException;
         }
         MyResource resource = mock(MyResource.class);
         try (ThrowingAutoClosed<MyResource, IOException> managedResource = throwingAutoClose(resource, MyResource::done)) {
             verifyNoInteractions(resource);
+            managedResource.object(); //just to avoid javac lint warning
         }
         InOrder inOrder = inOrder(resource);
         inOrder.verify(resource, times(1)).done();
@@ -160,6 +163,7 @@ public class DiggBaseTest implements WithQuickTheories {
         MyResource resource = mock(MyResource.class);
         try (AutoClosed<MyResource> managedResource = autoClose(resource, MyResource::done)) {
             verifyNoInteractions(resource);
+            managedResource.object(); //just to avoid javac lint warning
         }
         verify(resource, times(1)).done();
         verifyNoMoreInteractions(resource);

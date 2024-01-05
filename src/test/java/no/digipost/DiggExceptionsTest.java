@@ -115,6 +115,7 @@ public class DiggExceptionsTest {
         @Test
         void UnknownCheckedExceptionBecomesRuntimeException() {
             class MyCheckedException extends Exception {
+                private static final long serialVersionUID = 42L;
                 public MyCheckedException() {
                     super("Who in their right mind would define their own checked exception");
                 }

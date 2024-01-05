@@ -52,7 +52,7 @@ class CountDownTest {
         CountDown countDown = new CountDown(count);
         long invocationsBeforeZero = IntStream.generate(() -> countDown.yet() ? 0 : 1)
             .parallel()
-            .limit(count * 5)
+            .limit(count * 20)
             .filter(i -> i == 1)
             .count();
         assertThat(invocationsBeforeZero, is(count));

@@ -18,12 +18,10 @@ package no.digipost.util;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import no.digipost.tuple.Tuple;
 import org.junit.jupiter.api.Test;
-import org.quicktheories.WithQuickTheories;
 import org.quicktheories.core.Gen;
 
 import java.util.Map;
 
-import static uk.co.probablyfine.matchers.Java8Matchers.where;
 import static no.digipost.util.AttributesMap.Config.ALLOW_NULL_VALUES;
 import static no.digipost.util.DiggMatchers.isEffectivelySerializable;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -32,9 +30,14 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.quicktheories.QuickTheory.qt;
+import static org.quicktheories.generators.SourceDSL.integers;
+import static org.quicktheories.generators.SourceDSL.maps;
+import static org.quicktheories.generators.SourceDSL.strings;
+import static uk.co.probablyfine.matchers.Java8Matchers.where;
 
 
-public class AttributesMapTest implements WithQuickTheories {
+public class AttributesMapTest {
 
     private final Gen<Attribute<Integer>> attributes() {
         return strings().ascii().ofLengthBetween(0, 40).map(Attribute::new);

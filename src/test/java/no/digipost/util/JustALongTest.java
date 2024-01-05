@@ -66,7 +66,7 @@ public class JustALongTest {
     }
 
     static final class JustAnId extends JustALong implements WithId {
-
+        private static final long serialVersionUID = 42L;
         private JustAnId(long name) {
             super(name);
         }

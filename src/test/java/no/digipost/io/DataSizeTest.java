@@ -18,7 +18,6 @@ package no.digipost.io;
 import nl.jqno.equalsverifier.EqualsVerifier;
 import no.digipost.tuple.Tuple;
 import org.junit.jupiter.api.Test;
-import org.quicktheories.WithQuickTheories;
 import org.quicktheories.core.Gen;
 
 import java.util.HashSet;
@@ -49,8 +48,12 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.quicktheories.QuickTheory.qt;
+import static org.quicktheories.generators.SourceDSL.arbitrary;
+import static org.quicktheories.generators.SourceDSL.integers;
+import static org.quicktheories.generators.SourceDSL.lists;
 
-public class DataSizeTest implements WithQuickTheories {
+public class DataSizeTest {
 
     @Test
     public void correctEqualsAndHashCode() {
