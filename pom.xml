@@ -22,7 +22,7 @@
     <parent>
         <groupId>no.digipost</groupId>
         <artifactId>digipost-open-super-pom</artifactId>
-        <version>7</version>
+        <version>13</version>
     </parent>
 
     <artifactId>digg</artifactId>
@@ -42,7 +42,6 @@
     <properties>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <project.previousVersion>set_with_-Dproject.previousVersion=X.Y</project.previousVersion>
     </properties>
 
     <dependencyManagement>
@@ -159,18 +158,7 @@
                 <plugin>
                     <groupId>com.mycila</groupId>
                     <artifactId>license-maven-plugin</artifactId>
-                    <version>4.1</version>
-                    <configuration>
-                        <header>src/main/license-header.txt</header>
-                        <excludes>
-                            <exclude>LICENSE*</exclude>
-                            <exclude>NOTICE</exclude>
-                            <exclude>src/main/notice/NOTICE.template</exclude>
-                            <exclude>.mvn/maven.config</exclude>
-                            <exclude>.java-version</exclude>
-                            <exclude>.github/**/*.yml</exclude>
-                        </excludes>
-                    </configuration>
+                    <version>4.3</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-enforcer-plugin</artifactId>
@@ -258,19 +246,7 @@
                     <artifactId>japicmp-maven-plugin</artifactId>
                     <version>0.18.3</version>
                     <configuration>
-                        <oldVersion>
-                            <dependency>
-                                <groupId>${project.groupId}</groupId>
-                                <artifactId>${project.artifactId}</artifactId>
-                                <version>${project.previousVersion}</version>
-                            </dependency>
-                        </oldVersion>
-                        <newVersion>
-                            <file><path>${project.build.directory}/${project.build.finalName}.${project.packaging}</path></file>
-                        </newVersion>
                         <parameter>
-                            <onlyModified>true</onlyModified>
-                            <onlyBinaryIncompatible>true</onlyBinaryIncompatible>
                             <includes>
                                 <include>no.digipost</include>
                             </includes>
@@ -280,33 +256,6 @@
             </plugins>
         </pluginManagement>
         <plugins>
-            <plugin>
-                <groupId>com.mycila</groupId>
-                <artifactId>license-maven-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>check-license-header</id>
-                        <phase>test</phase>
-                        <goals>
-                            <goal>check</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <artifactId>maven-dependency-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>analyze-only</goal>
-                        </goals>
-                        <configuration>
-                            <failOnWarning>true</failOnWarning>
-                            <ignoreNonCompile>true</ignoreNonCompile>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
             <plugin>
                 <artifactId>maven-enforcer-plugin</artifactId>
                 <executions>
