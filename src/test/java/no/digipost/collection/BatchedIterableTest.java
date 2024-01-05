@@ -32,11 +32,10 @@ import static org.hamcrest.Matchers.emptyIterable;
 import static org.hamcrest.Matchers.is;
 
 
-public class BatchedIterableTest {
-
+class BatchedIterableTest {
 
     @Test
-    public void emptyBatch() {
+    void emptyBatch() {
         Batches<Object> empty1 = new Batches<>();
         assertThat(batched(empty1, b -> false), is(emptyIterable()));
         assertThat(empty1.fetches(), is(1));
@@ -47,19 +46,18 @@ public class BatchedIterableTest {
     }
 
     @Test
-    public void singleBatch() {
+    void singleBatch() {
         Batches<String> singleBatch = new Batches<String>(asList("a", "b"));
         assertThat(batched(singleBatch, b -> false), contains("a", "b"));
         assertThat(singleBatch.fetches(), is(1));
     }
 
     @Test
-    public void twoBatches() {
+    void twoBatches() {
         Batches<String> twoBatches = new Batches<String>(asList("a", "b", "c"), asList("d", "e"));
         assertThat(batched(twoBatches, batch -> batch.size() >= 3), contains("a", "b", "c", "d", "e"));
         assertThat(twoBatches.fetches(), is(2));
     }
-
 
 
     static class Batches<T> implements Supplier<List<T>> {
@@ -67,10 +65,6 @@ public class BatchedIterableTest {
         private final Queue<List<T>> batches;
         private int fetches;
 
-        @SuppressWarnings("unchecked")
-        Batches() {
-            this(new List[0]);
-        }
         @SafeVarargs
         Batches(List<T> ... batches) {
             this.batches = new LinkedList<>();

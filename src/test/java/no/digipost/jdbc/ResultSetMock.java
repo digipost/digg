@@ -34,11 +34,13 @@ final class ResultSetMock extends MockResultSet {
     }
 
     @SafeVarargs
+    @SuppressWarnings("varargs")
     public static final ResultSetMock mockSingleRowResult(Tuple<String, Object> ... columns) {
         return mockResultSet(Stream.of(columns).map(c -> c.mapSecond(Arrays::asList)));
     }
 
     @SafeVarargs
+    @SuppressWarnings("varargs")
     public static final ResultSetMock mockResult(Tuple<String, List<Object>> ... columns) {
         return mockResultSet(Stream.of(columns));
     }

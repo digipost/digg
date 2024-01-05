@@ -16,7 +16,6 @@
 package no.digipost.tuple;
 
 import org.junit.jupiter.api.Test;
-import org.quicktheories.WithQuickTheories;
 import org.quicktheories.core.Gen;
 
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -24,8 +23,12 @@ import static org.hamcrest.Matchers.both;
 import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.quicktheories.QuickTheory.qt;
+import static org.quicktheories.generators.SourceDSL.arbitrary;
+import static org.quicktheories.generators.SourceDSL.integers;
+import static org.quicktheories.generators.SourceDSL.strings;
 
-public class TupleTest implements WithQuickTheories {
+public class TupleTest {
 
     private final Gen<Object> anything = arbitrary()
             .pick(new Object())
