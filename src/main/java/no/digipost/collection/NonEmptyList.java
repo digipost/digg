@@ -18,6 +18,7 @@ package no.digipost.collection;
 import no.digipost.stream.NonEmptyStream;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,7 +37,7 @@ import static java.util.Arrays.asList;
  * relied on.
  * <p>
  * If you need to construct non-empty lists based on another container you
- * need to further mutate, consider using one of the {@link #copyOf(List) copyOf}
+ * need to further mutate, consider using one of the {@link #copyOf(Collection) copyOf}
  * constructors, which will copy the given references so that any subsequent changes to the
  * to the given source container will not be reflected in the created non-empty list. (As usual,
  * this is a shallow copy, meaning that the instances themselves can of course be mutated by anything.)
@@ -190,7 +191,22 @@ public interface NonEmptyList<E> extends List<E> {
      *         or {@link Optional#empty()} if the given list is empty
      */
     static <E> Optional<NonEmptyList<E>> copyOf(List<E> list) {
-        return firstOf(list).map(first -> NonEmptyList.of(first, new ArrayList<>(list.subList(1, list.size()))));
+        return copyOf((Collection<E>) list);
+    }
+
+
+    /**
+     * Try to construct a non-empty list from copying the elements
+     * of a given collection, which may be empty.
+     *
+     * @param <E> the type of elements in the collection.
+     * @param collection the collection, which may be empty
+     *
+     * @return the resulting non-empty list,
+     *         or {@link Optional#empty()} if the given collection is empty
+     */
+    static <E> Optional<NonEmptyList<E>> copyOf(Collection<E> collection) {
+        return of(new ArrayList<>(collection));
     }
 
 
@@ -228,7 +244,30 @@ public interface NonEmptyList<E> extends List<E> {
      * @see #copyOf(List)
      */
     static <E> NonEmptyList<E> copyOfUnsafe(List<E> nonEmptyList) {
-        return copyOf(nonEmptyList).orElseThrow(() -> new IllegalArgumentException("empty list"));
+        return copyOfUnsafe((Collection<E>) nonEmptyList);
+    }
+
+
+    /**
+     * <strong>Unsafe</strong> construction of non-empty list from copying the
+     * elements of a collection assumed to be non-empty.
+     * <p>
+     * This method should only be used when the given collection is <em>guarantied</em>
+     * to be empty, and thus offers a fail-fast way to introduce the non-empty
+     * quality on a type level. Use {@link #copyOf(Collection)} if you need
+     * more flexibility in handling of a possible empty list.
+     *
+     * @param <E> the type of elements in the list.
+     * @param nonEmptyCollection the collection, which is assumed not to be empty
+     *
+     * @return the resulting non-empty list
+     *
+     * @throws IllegalArgumentException if the given list is empty
+     *
+     * @see #copyOf(Collection)
+     */
+    static <E> NonEmptyList<E> copyOfUnsafe(Collection<E> nonEmptyCollection) {
+        return copyOf(nonEmptyCollection).orElseThrow(() -> new IllegalArgumentException("empty list"));
     }
 
 
