@@ -15,12 +15,15 @@
  */
 package no.digipost.io;
 
-import no.digipost.DiggBase;
-
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
+
+import static java.lang.Math.toIntExact;
+import static no.digipost.DiggBase.friendlyName;
+import static no.digipost.DiggExceptions.exceptionNameAndMessage;
 
 /**
  * InputStreamIterator is an {@link Iterator} reading from an {@link InputStream} in chunks
@@ -29,41 +32,39 @@ import java.util.NoSuchElementException;
  */
 public class InputStreamIterator implements Iterator<byte[]> {
     private final InputStream inputStream;
-    private final int chunkSize;
+    private final int chunkSizeBytes;
     private byte[] next;
     private Boolean hasNext;
-    private boolean endOfStreamReached = false;
 
     /**
      * @param inputStream The input stream to iterate over
      * @param chunkSize   DataSize should not be too big since that defeats the purpose of this iterator.
      */
     public InputStreamIterator(InputStream inputStream, DataSize chunkSize) {
-        this.inputStream = inputStream;
-        this.chunkSize   = (int) chunkSize.toBytes();
+        this(inputStream, toIntExact(chunkSize.toBytes()));
     }
 
     public InputStreamIterator(InputStream inputStream, int chunkSizeBytes) {
         this.inputStream = inputStream;
-        this.chunkSize   = chunkSizeBytes;
+        this.chunkSizeBytes   = chunkSizeBytes;
     }
 
     private byte[] loadNextChunk() {
-        if (endOfStreamReached) return null;
-
-        byte[] chunk = new byte[chunkSize];
+        byte[] chunk = new byte[chunkSizeBytes];
         int bytesRead = 0;
         try {
             bytesRead = inputStream.read(chunk);
             if (bytesRead == -1) {
-                endOfStreamReached = true;
                 return null;
             }
         } catch (IOException e) {
-            throw new WrappedInputStreamFailed(e, inputStream);
+            throw new UncheckedIOException(
+                    "Failed reading next chunk of up to " + chunkSizeBytes +
+                    " bytes from " + friendlyName(inputStream.getClass()) +
+                    " because " + exceptionNameAndMessage(e), e);
         }
 
-        if (bytesRead < chunkSize) {
+        if (bytesRead < chunkSizeBytes) {
             // resize the buffer if less data was read
             byte[] smallerBuffer = new byte[bytesRead];
             System.arraycopy(chunk, 0, smallerBuffer, 0, bytesRead);
@@ -74,10 +75,10 @@ public class InputStreamIterator implements Iterator<byte[]> {
     }
 
     /**
-     * If the iterator fails reading from the wrapped InputStream an
-     * {@link  InputStreamIterator.WrappedInputStreamFailed} runtime exception is thrown.
      *
      * @return true if the iteration has more elements
+     *
+     * @throws UncheckedIOException if the wrapped InputStream throws an IOException
      */
     @Override
     public boolean hasNext() {
@@ -101,12 +102,4 @@ public class InputStreamIterator implements Iterator<byte[]> {
         return result;
     }
 
-    public static final class WrappedInputStreamFailed extends RuntimeException {
-        private static final long serialVersionUID = 1L;
-
-        private WrappedInputStreamFailed(Throwable cause, InputStream inputStream) {
-            super("The InputStream " + DiggBase.friendlyName(inputStream.getClass()) +
-                    " read failed. Cause: " + cause.getClass() + ": " + cause.getMessage(), cause);
-        }
-    }
 }

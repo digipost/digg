@@ -15,8 +15,8 @@
  */
 package no.digipost.io;
 
-import no.digipost.io.InputStreamIterator.WrappedInputStreamFailed;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BrokenInputStream;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
@@ -24,8 +24,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.nio.charset.StandardCharsets;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
@@ -34,87 +35,55 @@ import java.util.zip.ZipInputStream;
 import java.util.zip.ZipOutputStream;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
+import static no.digipost.DiggExceptions.runUnchecked;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
+import static org.hamcrest.Matchers.is;
 import static org.hamcrest.core.StringContains.containsString;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static uk.co.probablyfine.matchers.Java8Matchers.where;
+import static uk.co.probablyfine.matchers.Java8Matchers.whereNot;
 
 class InputStreamIteratorTest {
 
     @Test
-    void should_read_the_input_stream_fully() throws Exception {
-        StringBuilder sb = new StringBuilder();
+    void fully_reads_the_input_stream() throws Exception {
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream("Some data".getBytes(UTF_8));) {
+            String consumedFromIterator = consumeToString(new InputStreamIterator(inputStream, DataSize.bytes(2)), UTF_8);
 
-        try (final ByteArrayInputStream inputStream = new ByteArrayInputStream("Some data".getBytes(StandardCharsets.UTF_8));) {
+            assertThat(consumedFromIterator, is("Some data"));
+        }
+    }
+
+    @Test
+    void cannot_instantiate_with_too_big_chunk_size() throws Exception {
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream("Some data".getBytes(UTF_8))) {
+            Exception thrown = assertThrows(ArithmeticException.class, () -> new InputStreamIterator(inputStream, DataSize.MAX));
+
+            assertThat(thrown, where(Exception::getMessage, containsStringIgnoringCase("integer overflow")));
+        }
+    }
+
+    @Test
+    void throws_if_next_is_called_with_no_more_elements() throws Exception {
+        try (ByteArrayInputStream inputStream = new ByteArrayInputStream("Some data".getBytes(UTF_8));) {
             InputStreamIterator iterator = new InputStreamIterator(inputStream, 2);
 
-            while (iterator.hasNext()) {
-                sb.append(new String(iterator.next()));
-            }
-        }
-
-        assertEquals("Some data", sb.toString());
-    }
-
-    @Test
-    void should_read_the_input_stream_fully_with_datasize() throws Exception {
-        StringBuilder sb = new StringBuilder();
-
-        try (final ByteArrayInputStream inputStream = new ByteArrayInputStream("Some data".getBytes(StandardCharsets.UTF_8));) {
-
-            InputStreamIterator iterator = new InputStreamIterator(inputStream, DataSize.bytes(2));
-            while (iterator.hasNext()) {
-                sb.append(new String(iterator.next()));
-            }
-        }
-
-        assertEquals("Some data", sb.toString());
-    }
-
-    @Test
-    void too_big_data_size_will_throw_NegativeArraySizeException() throws Exception {
-        try (final ByteArrayInputStream inputStream = new ByteArrayInputStream("Some data".getBytes(StandardCharsets.UTF_8))) {
-            InputStreamIterator iterator = new InputStreamIterator(inputStream, DataSize.MAX);
-
-            assertThrows(NegativeArraySizeException.class, iterator::hasNext);
-        }
-    }
-
-    @Test
-    void should_throw_if_next_is_called_with_no_more_elements() throws Exception {
-        StringBuilder sb = new StringBuilder();
-
-        try (final ByteArrayInputStream inputStream = new ByteArrayInputStream("Some data".getBytes(StandardCharsets.UTF_8));) {
-
-            InputStreamIterator iterator = new InputStreamIterator(inputStream, 2);
-
-            while (iterator.hasNext()) {
-                sb.append(new String(iterator.next()));
-            }
+            assertThat(consumeToString(iterator, UTF_8), is("Some data"));
+            assertThat(iterator, whereNot(Iterator::hasNext));
 
             assertThrows(NoSuchElementException.class, iterator::next);
         }
-
-        assertEquals("Some data", sb.toString());
     }
 
     @Test
-    void should_throw_exception_if_input_stream_fails() throws Exception {
-        try (final InputStream failingInputStream = new InputStream() {
+    void throws_exception_if_input_stream_fails() throws Exception {
+        InputStreamIterator iterator = new InputStreamIterator(new BrokenInputStream(), 3);
 
-            @Override
-            public int read() throws IOException {
-                throw new IOException("This input stream is broken");
-            }
-        }) {
-            InputStreamIterator iterator = new InputStreamIterator(failingInputStream, 1);
+        Exception ex = assertThrows(UncheckedIOException.class, iterator::next);
 
-            final WrappedInputStreamFailed ex = assertThrows(WrappedInputStreamFailed.class, iterator::next);
-            assertThat(ex, where(Exception::getMessage, containsString("InputStreamIteratorTest.")));
-        }
-
+        assertThat(ex, where(Exception::getMessage, containsString("BrokenInputStream")));
     }
 
     @Test
@@ -137,22 +106,29 @@ class InputStreamIteratorTest {
         List<ZipEntryContent> entriesReadInChunks = new ArrayList<>();
         try (ZipInputStream zipReader = new ZipInputStream(new ByteArrayInputStream(zipFile))) {
             for (ZipEntry nextEntry = zipReader.getNextEntry(); nextEntry != null; nextEntry = zipReader.getNextEntry()) {
-                ByteArrayOutputStream entryConsumer = new ByteArrayOutputStream();
-                for (byte[] chunk : (Iterable<byte[]>) () -> new InputStreamIterator(zipReader, DataSize.bytes(2))) {
-                    entryConsumer.write(chunk);
-                }
-                entriesReadInChunks.add(ZipEntryContent.read(nextEntry, entryConsumer.toByteArray()));
+                String content = consumeToString(new InputStreamIterator(zipReader, DataSize.bytes(2)), UTF_8);
+                entriesReadInChunks.add(new ZipEntryContent(nextEntry, content));
             }
         }
 
         assertThat(entriesReadInChunks, containsInAnyOrder(file1, file2));
     }
 
+    private static String consumeToString(InputStreamIterator iterator, Charset charset) {
+        byte[] bytes = consumeAndFlatten(iterator);
+        return new String(bytes, charset);
+    }
+
+    private static byte[] consumeAndFlatten(InputStreamIterator iterator) {
+        ByteArrayOutputStream chunkConsumer = new ByteArrayOutputStream();
+        for (byte[] chunk : (Iterable<byte[]>) () -> iterator) {
+            runUnchecked(() -> chunkConsumer.write(chunk));
+        }
+        return chunkConsumer.toByteArray();
+    }
+
 
     private static final class ZipEntryContent {
-        static ZipEntryContent read(ZipEntry entry, byte[] content) throws IOException {
-            return read(entry, new ByteArrayInputStream(content));
-        }
 
         static ZipEntryContent read(ZipEntry entry, InputStream contentStream) throws IOException {
             return new ZipEntryContent(entry.getName(), IOUtils.toString(contentStream, UTF_8));
@@ -160,6 +136,10 @@ class InputStreamIteratorTest {
 
         final String name;
         final String content;
+
+        ZipEntryContent(ZipEntry entry, String content) {
+            this(entry.getName(), content);
+        }
 
         ZipEntryContent(String name, String content) {
             this.name = name;
