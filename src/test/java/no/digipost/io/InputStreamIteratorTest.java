@@ -16,15 +16,26 @@
 package no.digipost.io;
 
 import no.digipost.io.InputStreamIterator.WrappedInputStreamFailed;
+import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.core.StringContains.containsString;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -99,10 +110,98 @@ class InputStreamIteratorTest {
             }
         }) {
             InputStreamIterator iterator = new InputStreamIterator(failingInputStream, 1);
-            
+
             final WrappedInputStreamFailed ex = assertThrows(WrappedInputStreamFailed.class, iterator::next);
             assertThat(ex, where(Exception::getMessage, containsString("InputStreamIteratorTest.")));
         }
 
     }
+
+    @Test
+    void worksWithInputStreamHavingMultipleEntries() throws IOException {
+        ZipEntryContent file1 = new ZipEntryContent("file1.txt", "This is file1");
+        ZipEntryContent file2 = new ZipEntryContent("file2.txt", "This is file2");
+        byte[] zipFile = zip(file1, file2);
+
+
+        List<ZipEntryContent> entriesReadConventionally = new ArrayList<>();
+        try (ZipInputStream zipReader = new ZipInputStream(new ByteArrayInputStream(zipFile))) {
+            for (ZipEntry nextEntry = zipReader.getNextEntry(); nextEntry != null; nextEntry = zipReader.getNextEntry()) {
+                entriesReadConventionally.add(ZipEntryContent.read(nextEntry, zipReader));
+            }
+        }
+
+        assertThat(entriesReadConventionally, containsInAnyOrder(file1, file2));
+
+
+        List<ZipEntryContent> entriesReadInChunks = new ArrayList<>();
+        try (ZipInputStream zipReader = new ZipInputStream(new ByteArrayInputStream(zipFile))) {
+            for (ZipEntry nextEntry = zipReader.getNextEntry(); nextEntry != null; nextEntry = zipReader.getNextEntry()) {
+                ByteArrayOutputStream entryConsumer = new ByteArrayOutputStream();
+                for (byte[] chunk : (Iterable<byte[]>) () -> new InputStreamIterator(zipReader, DataSize.bytes(2))) {
+                    entryConsumer.write(chunk);
+                }
+                entriesReadInChunks.add(ZipEntryContent.read(nextEntry, entryConsumer.toByteArray()));
+            }
+        }
+
+        assertThat(entriesReadInChunks, containsInAnyOrder(file1, file2));
+    }
+
+
+    private static final class ZipEntryContent {
+        static ZipEntryContent read(ZipEntry entry, byte[] content) throws IOException {
+            return read(entry, new ByteArrayInputStream(content));
+        }
+
+        static ZipEntryContent read(ZipEntry entry, InputStream contentStream) throws IOException {
+            return new ZipEntryContent(entry.getName(), IOUtils.toString(contentStream, UTF_8));
+        }
+
+        final String name;
+        final String content;
+
+        ZipEntryContent(String name, String content) {
+            this.name = name;
+            this.content = content;
+        }
+
+        public void writeTo(ZipOutputStream zip) throws IOException {
+            zip.putNextEntry(new ZipEntry(name));
+            zip.write(content.getBytes(UTF_8));
+        }
+
+        @Override
+        public String toString() {
+            return "zip entry '" + name + "': " + content;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (o instanceof ZipEntryContent) {
+                ZipEntryContent that = (ZipEntryContent) o;
+                return Objects.equals(this.name, that.name) && Objects.equals(this.content, that.content);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, content);
+        }
+
+    }
+
+    private static byte[] zip(ZipEntryContent ... entries) {
+        ByteArrayOutputStream zipOutput = new ByteArrayOutputStream();
+        try (ZipOutputStream zipWriter = new ZipOutputStream(zipOutput)) {
+            for (ZipEntryContent entry : entries) {
+                entry.writeTo(zipWriter);
+            }
+        } catch (IOException e) {
+            throw new UncheckedIOException(e);
+        }
+        return zipOutput.toByteArray();
+    }
+
 }
