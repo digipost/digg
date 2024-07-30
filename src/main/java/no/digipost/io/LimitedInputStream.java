@@ -53,17 +53,28 @@ public final class LimitedInputStream extends FilterInputStream implements Close
     public static final Supplier<Exception> SILENTLY_EOF_ON_REACHING_LIMIT = new SilentlyEofWhenReachingLimit();
 
 
-    private final DataSize limit;
+    private final long maxBytesCount;
     private final Supplier<? extends Exception> throwIfTooManyBytes;
     private long count;
 
 
     /**
      * @see no.digipost.DiggIO#limit(InputStream, DataSize, Supplier)
+     *
+     * @deprecated Pending removal to avoid depending on {@link DataSize}. The constructor methods provided in
+     *             {@link no.digipost.DiggIO} will allow using {@code DataSize}.
      */
+    @Deprecated
     public LimitedInputStream(InputStream inputStream, DataSize maxDataToRead, Supplier<? extends Exception> throwIfTooManyBytes) {
+        this(inputStream, maxDataToRead.toBytes(), throwIfTooManyBytes);
+    }
+
+    /**
+     * @see no.digipost.DiggIO#limit(InputStream, DataSize, Supplier)
+     */
+    public LimitedInputStream(InputStream inputStream, long maxBytesCount, Supplier<? extends Exception> throwIfTooManyBytes) {
         super(inputStream);
-        this.limit = maxDataToRead;
+        this.maxBytesCount = maxBytesCount;
         this.throwIfTooManyBytes = throwIfTooManyBytes;
     }
 
@@ -134,7 +145,7 @@ public final class LimitedInputStream extends FilterInputStream implements Close
 
 
     private boolean hasReachedLimit() throws IOException {
-        if (count > limit.toBytes()) {
+        if (count > maxBytesCount) {
             if (throwIfTooManyBytes == SILENTLY_EOF_ON_REACHING_LIMIT) {
                 return true;
             }
