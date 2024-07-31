@@ -19,6 +19,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.quicktheories.core.Gen;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -38,7 +39,9 @@ import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.quicktheories.QuickTheory.qt;
 import static org.quicktheories.generators.SourceDSL.integers;
@@ -169,6 +172,69 @@ class LimitedInputStreamTest {
         }
         byte[] readBytes = byteBuffer.array();
         return readBytes;
+    }
+
+    @Test
+    void doesNotConsumeMoreFromUnderlyingInputStreamThanGivenLimit() throws IOException {
+        byte[] readBytes = new byte[3];
+        try (
+                InputStream threeBytes = new ByteArrayInputStream(new byte[] {65, 66, 67});
+                InputStream maxTwoBytes = limit(threeBytes, bytes(2))) {
+
+            assertThat(maxTwoBytes.read(readBytes), is(2));
+        }
+        assertArrayEquals(new byte[] {65, 66, 0}, readBytes);
+    }
+
+    @Test
+    void ableToResetBufferedStreamWhenLimitedStreamIsExhausted() throws IOException {
+        byte[] oneKiloByte = new byte[1024];
+        Arrays.fill(oneKiloByte, (byte) 65);
+
+        byte[] readFromLimitedStream = new byte[800];
+        byte[] readFromBufferedStream = new byte[oneKiloByte.length];
+        int limit = 600;
+        try (
+                InputStream source = new ByteArrayInputStream(oneKiloByte);
+                InputStream bufferedSource = new BufferedInputStream(source, 400)) {
+
+            bufferedSource.mark(limit);
+            try (InputStream limitedStream = limit(bufferedSource, DataSize.bytes(limit), () -> new IllegalStateException("Reached limit!"))) {
+                assertThat(limitedStream.read(readFromLimitedStream), is(limit));
+                bufferedSource.reset();
+                bufferedSource.read(readFromBufferedStream);
+            }
+        }
+        assertArrayEquals(readFromBufferedStream, oneKiloByte);
+        assertAll(
+                () -> assertEquals(readFromLimitedStream[0], (byte)65),
+                () -> assertEquals(readFromLimitedStream[limit - 1], (byte)65),
+                () -> assertEquals(readFromLimitedStream[limit], (byte)0),
+                () -> assertEquals(readFromLimitedStream[readFromLimitedStream.length - 1], (byte)0)
+                );
+    }
+
+    @Test
+    void rewindWhenReachingLimit() throws IOException {
+        byte[] twoKiloByte = new byte[2048];
+        Arrays.fill(twoKiloByte, (byte) 65);
+
+        int limit = 1024;
+        try (
+                InputStream source = new ByteArrayInputStream(twoKiloByte);
+                InputStream bufferedSource = new BufferedInputStream(source, 512)) {
+
+            bufferedSource.mark(limit + 1); //  <-- :(
+            try (InputStream limitedStream = limit(bufferedSource, DataSize.bytes(limit))) {
+                byte[] readFromLimitedStream = toByteArray(limitedStream);
+                assertThat(readFromLimitedStream.length, is(limit));
+
+                bufferedSource.reset();
+                byte[] readFromBufferedStream = toByteArray(bufferedSource);
+                assertArrayEquals(readFromBufferedStream, twoKiloByte);
+            }
+        }
+
     }
 
 }
