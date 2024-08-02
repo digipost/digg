@@ -87,6 +87,41 @@ class LimitedInputStreamTest {
                     }
                 });
         }
+
+        @Test
+        void discardsBytesAfterLimit() throws IOException {
+            byte[] sixBytes = new byte[] {65, 66, 67, 68, 69, 70};
+            try (
+                    InputStream source = new ByteArrayInputStream(sixBytes);
+                    InputStream limitedToTwoBytes = limit(source, bytes(4))) {
+
+
+                byte[] readBytes = new byte[6];
+                byte[] expectedEmpty = new byte[2];
+                assertAll(
+                        () -> assertThat("first read yields 4 bytes", limitedToTwoBytes.read(readBytes), is(4)),
+                        () -> assertArrayEquals(new byte[] {65, 66, 67, 68, 0, 0}, readBytes),
+                        () -> assertThat("reading single read yields EOF", limitedToTwoBytes.read(), is(-1)),
+                        () -> assertThat("reading chunk yields EOF", limitedToTwoBytes.read(expectedEmpty), is(-1)),
+                        () -> assertArrayEquals(new byte[] {0, 0}, expectedEmpty));
+            }
+        }
+
+        @Test
+        void readingZeroBytesYieldsZeroUntilEofHasBeenDetectedByANonZeroReadOperation() throws IOException {
+            byte[] twoBytes = new byte[] {65, 66};
+            try (
+                    InputStream source = new ByteArrayInputStream(twoBytes);
+                    InputStream limitedToOneByte = limit(source, bytes(1))) {
+                assertThat(limitedToOneByte.read(new byte[0]), is(0));
+                limitedToOneByte.read();
+                assertThat(limitedToOneByte.read(new byte[0]), is(0));
+
+                assertThat(limitedToOneByte.read(), is(-1));
+                assertThat(limitedToOneByte.read(new byte[0]), is(-1));
+            }
+        }
+
     }
 
 
@@ -115,6 +150,53 @@ class LimitedInputStreamTest {
         public void wrapsOtherCheckedExceptionsThanIOExceptionAsRuntimeException() throws Exception {
             GeneralSecurityException tooManyBytes = new DigestException();
             assertThat(assertThrows(RuntimeException.class, () -> testLimitedStream("xyz", () -> tooManyBytes)), where(Exception::getCause, sameInstance(tooManyBytes)));
+        }
+
+        @Test
+        void cutsOffLastChunkIfReachingLimit() throws IOException {
+            byte[] sixBytes = new byte[] {65, 66, 67, 68, 69, 70};
+            try (
+                    InputStream source = new ByteArrayInputStream(sixBytes);
+                    InputStream limitedToTwoBytes = limit(source, bytes(4), () -> new IllegalStateException("reached limit!"))) {
+
+                byte[] consumed = new byte[6];
+                assertAll(
+                        () -> assertThat(limitedToTwoBytes.read(consumed), is(4)),
+                        () -> assertArrayEquals(new byte[] {65, 66, 67, 68, 0, 0}, consumed),
+                        () -> assertThrows(IllegalStateException.class, () -> limitedToTwoBytes.read(consumed)),
+                        () -> assertArrayEquals(new byte[] {65, 66, 67, 68, 0, 0}, consumed)
+                        );
+            }
+        }
+
+        @Test
+        void doesNotThrowWhenAttemptingToReadChunkExactlyEndingAtTheLimit() throws IOException {
+            byte[] sixBytes = new byte[] {65, 66, 67, 68, 69, 70};
+            try (
+                    InputStream source = new ByteArrayInputStream(sixBytes);
+                    InputStream limitedToTwoBytes = limit(source, bytes(6), () -> new IllegalStateException("reached limit!"))) {
+
+                limitedToTwoBytes.read(new byte[3]);
+                byte[] lastThreeBytes = new byte[3];
+                limitedToTwoBytes.read(lastThreeBytes);
+                assertArrayEquals(new byte[]{68, 69, 70}, lastThreeBytes);
+            }
+        }
+
+        @Test
+        void readingZeroBytesNeverThrowsUntilTryingToActuallyReadNonZeroBytes() throws IOException {
+            byte[] twoBytes = new byte[] {65, 66};
+            try (
+                    InputStream source = new ByteArrayInputStream(twoBytes);
+                    InputStream limitedToOneByte = limit(source, bytes(1), () -> new IOException("Should not be thrown"))) {
+                assertThat(limitedToOneByte.read(new byte[0]), is(0));
+                limitedToOneByte.read();
+                assertThat(limitedToOneByte.read(new byte[0]), is(0));
+                assertAll(
+                    () -> assertThrows(IOException.class, () -> limitedToOneByte.read()),
+                    () -> assertThrows(IOException.class, () -> limitedToOneByte.read(new byte[0])),
+                    () -> assertThrows(IOException.class, () -> limitedToOneByte.read(new byte[1])));
+            }
         }
 
     }
@@ -181,9 +263,10 @@ class LimitedInputStreamTest {
                 InputStream threeBytes = new ByteArrayInputStream(new byte[] {65, 66, 67});
                 InputStream maxTwoBytes = limit(threeBytes, bytes(2))) {
 
-            assertThat(maxTwoBytes.read(readBytes), is(2));
+            assertAll(
+                    () -> assertThat(maxTwoBytes.read(readBytes), is(2)),
+                    () -> assertArrayEquals(new byte[] {65, 66, 0}, readBytes));
         }
-        assertArrayEquals(new byte[] {65, 66, 0}, readBytes);
     }
 
     @Test
@@ -199,7 +282,7 @@ class LimitedInputStreamTest {
                 InputStream bufferedSource = new BufferedInputStream(source, 400)) {
 
             bufferedSource.mark(limit);
-            try (InputStream limitedStream = limit(bufferedSource, DataSize.bytes(limit), () -> new IllegalStateException("Reached limit!"))) {
+            try (InputStream limitedStream = limit(bufferedSource, DataSize.bytes(limit))) {
                 assertThat(limitedStream.read(readFromLimitedStream), is(limit));
                 bufferedSource.reset();
                 bufferedSource.read(readFromBufferedStream);
@@ -224,6 +307,11 @@ class LimitedInputStreamTest {
                 InputStream source = new ByteArrayInputStream(twoKiloByte);
                 InputStream bufferedSource = new BufferedInputStream(source, 512)) {
 
+            // consuming a LimitedInputStream until EOF requires consuming one "extra" byte
+            // to determine if the underlying stream is also at EOF or has more data available
+            // in order to distinguish if it should EOF or throw an exception. It would in theory
+            // be possible to avoid reading this extra byte if the LimitedInputStream is not
+            // set to throw an exception on reaching the limit, but currently it does not support this.
             bufferedSource.mark(limit + 1); //  <-- :(
             try (InputStream limitedStream = limit(bufferedSource, DataSize.bytes(limit))) {
                 byte[] readFromLimitedStream = toByteArray(limitedStream);
@@ -234,7 +322,6 @@ class LimitedInputStreamTest {
                 assertArrayEquals(readFromBufferedStream, twoKiloByte);
             }
         }
-
     }
 
 }

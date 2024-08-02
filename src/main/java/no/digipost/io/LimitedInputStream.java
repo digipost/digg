@@ -137,12 +137,21 @@ public final class LimitedInputStream extends FilterInputStream implements Close
      */
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        int allowedRemaing = (int)(maxBytesCount - count);
+        int allowedRemaining = (int)(maxBytesCount - count);
+        if (len == 0) {
+            return allowedRemaining < 0 ? reachedLimit() : 0;
+        }
         int res;
-        if (allowedRemaing > 0) {
-            res = super.read(b, off, min(len, allowedRemaing));
+        if (allowedRemaining > 0) {
+            // reads at most what is allowed according to the limit
+            res = super.read(b, off, min(len, allowedRemaining));
             count += max(res, 1);
         } else {
+            // The stream is not allowed to read any more bytes.
+            // Delegating to the single byte read method which handles
+            // if the stream is already beyond its set limit, and in
+            // any case at most reads one byte to determine if it has
+            // reached the EOF or contains more data.
             res = read();
         }
         return res;
