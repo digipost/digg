@@ -80,7 +80,7 @@ public final class DiggIO {
      * @see #limit(InputStream, DataSize, Supplier)
      */
      public static InputStream limit(InputStream inputStream, DataSize maxDataToRead) {
-         return new LimitedInputStream(inputStream, maxDataToRead, LimitedInputStream.SILENTLY_EOF_ON_REACHING_LIMIT);
+         return new LimitedInputStream(inputStream, maxDataToRead.toBytes(), LimitedInputStream.SILENTLY_EOF_ON_REACHING_LIMIT);
      }
 
 
@@ -94,7 +94,7 @@ public final class DiggIO {
     *                            a non-{@link RuntimeException} which is <em>not</em> an {@link IOException}, it will be wrapped in a {@code RuntimeException}.
     */
     public static InputStream limit(InputStream inputStream, DataSize maxDataToRead, Supplier<? extends Exception> throwIfTooManyBytes) {
-        return new LimitedInputStream(inputStream, maxDataToRead, throwIfTooManyBytes);
+        return new LimitedInputStream(inputStream, maxDataToRead.toBytes(), throwIfTooManyBytes);
     }
 
 

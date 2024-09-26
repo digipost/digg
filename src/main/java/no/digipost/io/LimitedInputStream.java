@@ -21,6 +21,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.function.Supplier;
 
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static no.digipost.DiggExceptions.asUnchecked;
 
 /**
@@ -53,17 +55,28 @@ public final class LimitedInputStream extends FilterInputStream implements Close
     public static final Supplier<Exception> SILENTLY_EOF_ON_REACHING_LIMIT = new SilentlyEofWhenReachingLimit();
 
 
-    private final DataSize limit;
+    private final long maxBytesCount;
     private final Supplier<? extends Exception> throwIfTooManyBytes;
     private long count;
 
 
     /**
      * @see no.digipost.DiggIO#limit(InputStream, DataSize, Supplier)
+     *
+     * @deprecated Pending removal to avoid depending on {@link DataSize}. The constructor methods provided in
+     *             {@link no.digipost.DiggIO} will allow using {@code DataSize}.
      */
+    @Deprecated
     public LimitedInputStream(InputStream inputStream, DataSize maxDataToRead, Supplier<? extends Exception> throwIfTooManyBytes) {
+        this(inputStream, maxDataToRead.toBytes(), throwIfTooManyBytes);
+    }
+
+    /**
+     * @see no.digipost.DiggIO#limit(InputStream, DataSize, Supplier)
+     */
+    public LimitedInputStream(InputStream inputStream, long maxBytesCount, Supplier<? extends Exception> throwIfTooManyBytes) {
         super(inputStream);
-        this.limit = maxDataToRead;
+        this.maxBytesCount = maxBytesCount;
         this.throwIfTooManyBytes = throwIfTooManyBytes;
     }
 
@@ -87,14 +100,16 @@ public final class LimitedInputStream extends FilterInputStream implements Close
      */
     @Override
     public int read() throws IOException {
-        int res = super.read();
-        if (res != -1) {
-            count++;
-            if (hasReachedLimit()) {
-                return -1;
-            }
+        if (count > maxBytesCount) {
+            return reachedLimit();
         }
-        return res;
+        int res = super.read();
+        count++;
+        if (res == -1 || count <= maxBytesCount) {
+            return res;
+        } else {
+            return reachedLimit();
+        }
     }
 
     /**
@@ -122,30 +137,35 @@ public final class LimitedInputStream extends FilterInputStream implements Close
      */
     @Override
     public int read(byte[] b, int off, int len) throws IOException {
-        int res = super.read(b, off, len);
-        if (res > 0) {
-            count += res;
-            if (hasReachedLimit()) {
-                return -1;
-            }
+        int allowedRemaining = (int)(maxBytesCount - count);
+        if (len == 0) {
+            return allowedRemaining < 0 ? reachedLimit() : 0;
+        }
+        int res;
+        if (allowedRemaining > 0) {
+            // reads at most what is allowed according to the limit
+            res = super.read(b, off, min(len, allowedRemaining));
+            count += max(res, 1);
+        } else {
+            // The stream is not allowed to read any more bytes.
+            // Delegating to the single byte read method which handles
+            // if the stream is already beyond its set limit, and in
+            // any case at most reads one byte to determine if it has
+            // reached the EOF or contains more data.
+            res = read();
         }
         return res;
     }
 
-
-    private boolean hasReachedLimit() throws IOException {
-        if (count > limit.toBytes()) {
-            if (throwIfTooManyBytes == SILENTLY_EOF_ON_REACHING_LIMIT) {
-                return true;
-            }
-            Exception tooManyBytes = throwIfTooManyBytes.get();
-            if (tooManyBytes instanceof IOException) {
-                throw (IOException) tooManyBytes;
-            } else {
-                throw asUnchecked(tooManyBytes);
-            }
+    private int reachedLimit() throws IOException {
+        if (throwIfTooManyBytes == SILENTLY_EOF_ON_REACHING_LIMIT) {
+            return -1;
+        }
+        Exception tooManyBytes = throwIfTooManyBytes.get();
+        if (tooManyBytes instanceof IOException) {
+            throw (IOException) tooManyBytes;
         } else {
-            return false;
+            throw asUnchecked(tooManyBytes);
         }
     }
 
