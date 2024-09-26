@@ -16,6 +16,9 @@
 package no.digipost.function;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
@@ -26,10 +29,10 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 public class ThrowingFunctionTest {
 
     private final RuntimeException ex = new RuntimeException("fail");
@@ -55,16 +58,15 @@ public class ThrowingFunctionTest {
     }
 
     @Test
-    public void translateToEmptyOptionalAndDelegateExceptionToHandler() {
+    public void translateToEmptyOptionalAndDelegateExceptionToHandler(
+            @Mock Consumer<Exception> getException,
+            @Mock BiConsumer<Integer, Exception> getValueAndException) {
+
         ThrowingFunction<Integer, ?, Exception> fn = i -> {throw ex;};
 
-        @SuppressWarnings("unchecked")
-        Consumer<Exception> getException = mock(Consumer.class);
         assertThat(fn.ifException(getException).apply(42), is(empty()));
         verify(getException, times(1)).accept(ex);
 
-        @SuppressWarnings("unchecked")
-        BiConsumer<Integer, Exception> getValueAndException = mock(BiConsumer.class);
         assertThat(fn.ifException(getValueAndException).apply(42), is(empty()));
         verify(getValueAndException, times(1)).accept(42, ex);
     }

@@ -19,6 +19,7 @@ import no.digipost.function.ObjIntFunction;
 import no.digipost.function.ObjLongFunction;
 
 import java.util.Collection;
+import java.util.Objects;
 import java.util.Spliterator;
 import java.util.Spliterators;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -30,6 +31,18 @@ import java.util.stream.IntStream;
 import java.util.stream.LongStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
+
+import static java.lang.Integer.toBinaryString;
+import static java.util.Spliterator.CONCURRENT;
+import static java.util.Spliterator.DISTINCT;
+import static java.util.Spliterator.IMMUTABLE;
+import static java.util.Spliterator.NONNULL;
+import static java.util.Spliterator.ORDERED;
+import static java.util.Spliterator.SIZED;
+import static java.util.Spliterator.SORTED;
+import static java.util.Spliterator.SUBSIZED;
+import static java.util.stream.Collectors.joining;
+import static no.digipost.DiggBase.friendlyName;
 
 /**
  * Utilities for working with {@link Stream}s.
@@ -194,6 +207,35 @@ public final class DiggStreams {
             }
         };
         return StreamSupport.stream(spliterator, false);
+    }
+
+
+    /**
+     * Get a description of {@link Spliterator#characteristics() characteristics} of a
+     * {@code Spliterator}. The returned text is is solely intended for debugging and
+     * logging purposes, and contents and format may change at any time.
+     *
+     * @param spliterator the Spliterator
+     * @return the description
+     */
+    public static String describeCharacteristics(Spliterator<?> spliterator) {
+        int value = spliterator.characteristics();
+        if (value == 0) {
+            return friendlyName(spliterator.getClass()) + " with no enabled characteristics";
+        } else {
+            String enabledCharacteristics = Stream.of(
+                        spliterator.hasCharacteristics(SIZED) ? "sized" : null,
+                        spliterator.hasCharacteristics(SUBSIZED) ? "subsized" : null,
+                        spliterator.hasCharacteristics(DISTINCT) ? "distinct" : null,
+                        spliterator.hasCharacteristics(NONNULL) ? "non-null" : null,
+                        spliterator.hasCharacteristics(IMMUTABLE) ? "immutable" : null,
+                        spliterator.hasCharacteristics(ORDERED) ? "ordered" : null,
+                        spliterator.hasCharacteristics(CONCURRENT) ? "concurrent" : null,
+                        spliterator.hasCharacteristics(SORTED) ? "sorted" : null)
+                    .filter(Objects::nonNull)
+                    .collect(joining(", ", "", ""));
+            return enabledCharacteristics + " " + friendlyName(spliterator.getClass()) + " (" + toBinaryString(value) + ")";
+        }
     }
 
 

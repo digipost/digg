@@ -23,10 +23,12 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static java.util.Spliterator.ORDERED;
 import static java.util.Spliterators.spliterator;
@@ -220,8 +222,8 @@ public final class DiggBase {
 
     /**
      * Create a stream which will yield the exceptions (if any) from invoking an {@link ThrowingConsumer action} on
-     * several {@code instances}. Consuming the stream will ensure that <strong>all</strong> instances will have
-     * the action invoked on them, and any exceptions happening will be available through the returned stream.
+     * several {@code instances}. Consuming the returned stream will ensure that <strong>all</strong> instances will have
+     * the action attempted on them, and any exceptions happening will be available through the returned stream.
      *
      * @param action the action to execute for each provided instance
      * @param instances the instances to act on with the provided {@code action}.
@@ -237,8 +239,12 @@ public final class DiggBase {
 
     /**
      * Create a stream which will yield the exceptions (if any) from invoking an {@link ThrowingConsumer action} on
-     * several {@code instances}. Consuming the stream will ensure that <strong>all</strong> instances will have
-     * the action invoked on them, and any exceptions happening will be available through the returned stream.
+     * several {@code instances}. This also includes exceptions thrown from <em>traversing</em> the given {@link Stream}
+     * of instances, i.e. should resolving an element from the {@code Stream} cause an exception, it will be caught and
+     * included in the returned {@code Stream}.
+     * <p>
+     * Consuming the returned stream will ensure that <strong>all</strong> traversed instances will have
+     * the action attempted on them, and any exceptions happening will be available through the returned stream.
      *
      * @param action the action to execute for each provided instance
      * @param instances the instances to act on with the provided {@code action}.
@@ -246,15 +252,49 @@ public final class DiggBase {
      * @return the Stream with exceptions, if any
      */
     public static <T> Stream<Exception> forceOnAll(ThrowingConsumer<? super T, ? extends Exception> action, Stream<T> instances) {
-        return instances.filter(Objects::nonNull).flatMap(instance -> {
-            try {
-                action.accept(instance);
-            } catch (Exception exception) {
-                return Stream.of(exception);
-            }
-            return Stream.empty();
-        });
+        return StreamSupport.stream(
+                new FlatMapToExceptionSpliterator<>(action, instances.filter(Objects::nonNull).spliterator()),
+                instances.isParallel());
     }
+
+    private static final class FlatMapToExceptionSpliterator<W> implements Spliterator<Exception> {
+
+        private final ThrowingConsumer<? super W, ? extends Exception> action;
+        private final Spliterator<W> wrappedSpliterator;
+        private final int characteristics;
+
+        FlatMapToExceptionSpliterator(ThrowingConsumer<? super W, ? extends Exception> action, Spliterator<W> wrappedSpliterator) {
+            this.action = action;
+            this.wrappedSpliterator = wrappedSpliterator;
+            this.characteristics = wrappedSpliterator.characteristics() & ~(SIZED | SUBSIZED | SORTED);
+        }
+
+        @Override
+        public boolean tryAdvance(Consumer<? super Exception> exceptionConsumer) {
+            try {
+                return wrappedSpliterator.tryAdvance(action.ifException(exceptionConsumer::accept));
+            } catch (Exception e) {
+                exceptionConsumer.accept(e);
+                return true;
+            }
+        }
+
+        @Override
+        public Spliterator<Exception> trySplit() {
+            Spliterator<W> triedSplit = wrappedSpliterator.trySplit();
+            return triedSplit != null ? new FlatMapToExceptionSpliterator<>(action, triedSplit) : null;
+        }
+
+        @Override
+        public long estimateSize() {
+            return Long.MAX_VALUE;
+        }
+
+        @Override
+        public int characteristics() {
+            return characteristics;
+        }
+    };
 
 
     /**

@@ -20,6 +20,9 @@ import no.digipost.tuple.Tuple;
 import no.digipost.tuple.ViewableAsTuple;
 import no.digipost.util.ViewableAsOptional;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.quicktheories.core.Gen;
 import uk.co.probablyfine.matchers.OptionalMatchers;
 
@@ -53,7 +56,6 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.mock;
 import static org.quicktheories.QuickTheory.qt;
 import static org.quicktheories.generators.SourceDSL.lists;
 import static org.quicktheories.generators.SourceDSL.strings;
@@ -61,12 +63,13 @@ import static uk.co.probablyfine.matchers.Java8Matchers.where;
 import static uk.co.probablyfine.matchers.Java8Matchers.whereNot;
 import static uk.co.probablyfine.matchers.OptionalMatchers.contains;
 
-public class DiggCollectorsTest {
+@ExtendWith(MockitoExtension.class)
+class DiggCollectorsTest {
 
     interface NumTranslation extends ViewableAsTuple<Integer, Optional<String>> {}
 
     @Test
-    public void collectTuplesIntoMap() {
+    void collectTuplesIntoMap() {
         NumTranslation oneInEnglish = () -> Tuple.of(1, Optional.of("one"));
         NumTranslation twoInEnglish = () -> Tuple.of(2, Optional.of("two"));
         NumTranslation twoInSpanish = () -> Tuple.of(2, Optional.of("dos"));
@@ -83,7 +86,7 @@ public class DiggCollectorsTest {
     }
 
     @Test
-    public void collectMultitupleFromTuplesWithEqualFirstElement() {
+    void collectMultitupleFromTuplesWithEqualFirstElement() {
         NumTranslation oneInEnglish = () -> Tuple.of(1, Optional.of("one"));
         NumTranslation oneInSpanish = () -> Tuple.of(1, Optional.of("uno"));
         NumTranslation oneInEsperanto = () -> Tuple.of(1, Optional.of("unu"));
@@ -96,13 +99,13 @@ public class DiggCollectorsTest {
     }
 
     @Test
-    public void collectNoTuplesYieldsEmptyOptional() {
+    void collectNoTuplesYieldsEmptyOptional() {
         Optional<Tuple<Integer, List<String>>> noTuple = Stream.<Tuple<Integer, Optional<String>>>empty().collect(toMultituple());
         assertThat(noTuple, OptionalMatchers.empty());
     }
 
     @Test
-    public void collectMultitupleFromTuplesWithNonDistinctFirstElementIsErroneous() {
+    void collectMultitupleFromTuplesWithNonDistinctFirstElementIsErroneous() {
         NumTranslation oneInEnglish = () -> Tuple.of(1, Optional.of("one"));
         NumTranslation missingOne = () -> Tuple.of(1, Optional.empty());
         NumTranslation oneInEsperanto = () -> Tuple.of(1, Optional.of("unu"));
@@ -113,20 +116,20 @@ public class DiggCollectorsTest {
     }
 
     @Test
-    public void collectTheValueOfSingleElementStream() {
+    void collectTheValueOfSingleElementStream() {
         assertThat(Stream.of(42).collect(allowAtMostOne()), contains(is(42)));
         assertThat(Stream.empty().collect(allowAtMostOne()), OptionalMatchers.empty());
         assertThat(Stream.of((String) null).collect(allowAtMostOne()), OptionalMatchers.empty());
     }
 
     @Test
-    public void allowAtMostOneFailsEvenIfExcessiveElementsAreNull() {
+    void allowAtMostOneFailsEvenIfExcessiveElementsAreNull() {
         Stream<String> xAndNull = Stream.of("x", null);
         assertThrows(ViewableAsOptional.TooManyElements.class, () -> xAndNull.collect(allowAtMostOne()));
     }
 
     @Test
-    public void convertTwoExceptionsToSingleWithSuppressed() {
+    void convertTwoExceptionsToSingleWithSuppressed() {
         Exception mainException = new Exception("main");
         Exception suppressedException = new Exception("suppressed");
         Exception collatedException = Stream.of(mainException, suppressedException).collect(toSingleExceptionWithSuppressed()).get();
@@ -135,7 +138,7 @@ public class DiggCollectorsTest {
     }
 
     @Test
-    public void convertLotsOfExceptionsToSingleWithTheRestSuppressed() {
+    void convertLotsOfExceptionsToSingleWithTheRestSuppressed() {
         Stream<Exception> exceptions = range(0, 300).mapToObj(n -> new Exception("exception-" + n));
         Exception collatedException = exceptions.parallel().collect(toSingleExceptionWithSuppressed()).get();
         assertThat(collatedException, where(Throwable::getSuppressed, arrayWithSize(299)));
@@ -143,7 +146,7 @@ public class DiggCollectorsTest {
     }
 
     @Test
-    public void addLotsOfSuppressedToGivenException() {
+    void addLotsOfSuppressedToGivenException() {
         Stream<Exception> exceptions = range(0, 300).mapToObj(n -> new Exception("exception-" + n));
         IOException collatedException = exceptions.parallel().collect(asSuppressedExceptionsOf(new IOException()));
         assertThat(collatedException, where(Throwable::getSuppressed, arrayWithSize(300)));
@@ -151,9 +154,7 @@ public class DiggCollectorsTest {
     }
 
     @Test
-    public void suppressesExceptionsCorrectlyWithTryCatchBlocks() throws SQLException {
-        Connection connection = mock(Connection.class);
-        PreparedStatement pstmt = mock(PreparedStatement.class);
+    void suppressesExceptionsCorrectlyWithTryCatchBlocks(@Mock Connection connection, @Mock PreparedStatement pstmt) throws SQLException {
         SQLException connectionCloseException = new SQLException();
         BatchUpdateException statementCloseException = new BatchUpdateException();
         doThrow(connectionCloseException).when(connection).close();
@@ -170,7 +171,7 @@ public class DiggCollectorsTest {
     }
 
     @Test
-    public void convertNoExceptionsToEmptyOptional() {
+    void convertNoExceptionsToEmptyOptional() {
         Optional<Exception> noException = range(0, 300).parallel().mapToObj(n -> new Exception("exception-" + n)).filter(e -> false).collect(toSingleExceptionWithSuppressed());
         assertThat(noException, whereNot(Optional::isPresent));
     }
@@ -179,7 +180,7 @@ public class DiggCollectorsTest {
     private final Gen<List<String>> listsWithAtLeastTwoElements = lists().of(strings().allPossible().ofLengthBetween(0, 10)).ofSizeBetween(2, 40);
 
     @Test
-    public void allowAtMostOneFails() {
+    void allowAtMostOneFails() {
         qt()
             .forAll(listsWithAtLeastTwoElements)
             .check(list -> {
@@ -193,7 +194,7 @@ public class DiggCollectorsTest {
     }
 
     @Test
-    public void allowAtMostOneFailsWithCustomException() {
+    void allowAtMostOneFailsWithCustomException() {
         IllegalStateException customException = new IllegalStateException();
         qt()
             .forAll(listsWithAtLeastTwoElements)

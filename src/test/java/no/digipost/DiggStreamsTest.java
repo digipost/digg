@@ -15,6 +15,7 @@
  */
 package no.digipost;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.quicktheories.WithQuickTheories;
 import org.quicktheories.core.Gen;
@@ -22,26 +23,36 @@ import org.quicktheories.core.Gen;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Spliterators.AbstractSpliterator;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
-import static uk.co.probablyfine.matchers.StreamMatchers.contains;
-import static uk.co.probablyfine.matchers.StreamMatchers.equalTo;
+import static java.lang.Integer.toBinaryString;
 import static java.util.Arrays.asList;
+import static java.util.Spliterator.DISTINCT;
+import static java.util.Spliterator.NONNULL;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toMap;
 import static java.util.stream.IntStream.iterate;
+import static no.digipost.DiggBase.friendlyName;
 import static no.digipost.DiggStreams.streamByIntIndex;
 import static no.digipost.DiggStreams.streamByKey;
 import static no.digipost.DiggStreams.streamByLongIndex;
 import static no.digipost.DiggStreams.streamWhileNonEmpty;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.allOf;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.containsStringIgnoringCase;
 import static org.hamcrest.Matchers.is;
+import static uk.co.probablyfine.matchers.Java8Matchers.where;
+import static uk.co.probablyfine.matchers.StreamMatchers.contains;
+import static uk.co.probablyfine.matchers.StreamMatchers.equalTo;
 
-public class DiggStreamsTest implements WithQuickTheories {
+class DiggStreamsTest implements WithQuickTheories {
 
     @Test
-    public void streamAllElementsByIntIndex() {
+    void streamAllElementsByIntIndex() {
         Gen<List<String>> listsOfStrings = lists().of(strings().allPossible().ofLengthBetween(0, 100)).ofSizeBetween(0, 20);
         qt()
             .forAll(listsOfStrings)
@@ -49,14 +60,14 @@ public class DiggStreamsTest implements WithQuickTheories {
     }
 
     @Test
-    public void streamValuesOfMap() {
+    void streamValuesOfMap() {
         List<Character> chars = asList('A', 'B', 'C', 'D');
         Map<Character, String> charAndString = chars.stream().collect(toMap(Function.identity(), String::valueOf));
         assertThat(streamByKey(charAndString, chars.stream(), Map::get), contains("A", "B", "C", "D"));
     }
 
     @Test
-    public void streamValuesByLongIndex() {
+    void streamValuesByLongIndex() {
         assertThat(streamByLongIndex(new LongConverter(), 4, LongConverter::asString), contains("0", "1", "2", "3"));
     }
 
@@ -67,7 +78,7 @@ public class DiggStreamsTest implements WithQuickTheories {
     }
 
     @Test
-    public void streamPagesWhilePageHasContent() {
+    void streamPagesWhilePageHasContent() {
         Gen<Integer> alphabetLengths = integers().between(10, 200);
         Gen<Integer> pageSizes = integers().between(1, 13);
 
@@ -75,6 +86,41 @@ public class DiggStreamsTest implements WithQuickTheories {
             .forAll(alphabetLengths, pageSizes)
             .as(PagedAlphabet::new)
             .checkAssert(pagedAlphabet -> assertThat(streamWhileNonEmpty(pagedAlphabet::getPage), equalTo(pagedAlphabet.getEntireAlphabet())));
+    }
+
+    @Nested
+    class Spliterators {
+        final class CharacteristicsTester extends AbstractSpliterator<Void> {
+            public CharacteristicsTester(int characteristics) {
+                super(Long.MAX_VALUE, characteristics);
+            }
+            @Override
+            public boolean tryAdvance(Consumer<? super Void> action) {
+                return false;
+            }
+        }
+        @Test
+        void describeNoCharacteristics() {
+            assertThat(new CharacteristicsTester(0), where(DiggStreams::describeCharacteristics, allOf(
+                    containsString(friendlyName(CharacteristicsTester.class)),
+                    containsStringIgnoringCase("no enabled characteristics"))));
+        }
+
+        @Test
+        void describeOneEnabledCharacteristic() {
+            assertThat(new CharacteristicsTester(NONNULL), where(DiggStreams::describeCharacteristics, allOf(
+                    containsString(friendlyName(CharacteristicsTester.class)),
+                    containsStringIgnoringCase("non-null"),
+                    containsString(toBinaryString(NONNULL)))));
+        }
+
+        @Test
+        void describeMultipleEnabledCharacteristics() {
+            assertThat(new CharacteristicsTester(NONNULL | DISTINCT), where(DiggStreams::describeCharacteristics, allOf(
+                    containsString(friendlyName(CharacteristicsTester.class)),
+                    containsStringIgnoringCase("non-null"), containsStringIgnoringCase("distinct"),
+                    containsString(toBinaryString(DISTINCT | NONNULL)))));
+        }
     }
 
     private static final class PagedAlphabet {
