@@ -21,12 +21,13 @@ import no.digipost.util.ThrowingAutoClosed;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.Spliterator;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 import static java.util.Spliterator.ORDERED;
 import static java.util.Spliterators.spliterator;
@@ -246,15 +247,47 @@ public final class DiggBase {
      * @return the Stream with exceptions, if any
      */
     public static <T> Stream<Exception> forceOnAll(ThrowingConsumer<? super T, ? extends Exception> action, Stream<T> instances) {
-        return instances.filter(Objects::nonNull).flatMap(instance -> {
-            try {
-                action.accept(instance);
-            } catch (Exception exception) {
-                return Stream.of(exception);
-            }
-            return Stream.empty();
-        });
+        return StreamSupport.stream(new FlatMapToExceptionSpliterator<>(action, instances.spliterator()), instances.isParallel());
     }
+
+    private static final class FlatMapToExceptionSpliterator<W> implements Spliterator<Exception> {
+
+        private final ThrowingConsumer<? super W, ? extends Exception> action;
+        private final Spliterator<W> wrappedSpliterator;
+        private final int characteristics;
+
+        FlatMapToExceptionSpliterator(ThrowingConsumer<? super W, ? extends Exception> action, Spliterator<W> wrappedSpliterator) {
+            this.action = action;
+            this.wrappedSpliterator = wrappedSpliterator;
+            this.characteristics = wrappedSpliterator.characteristics() & ~(SIZED | SUBSIZED | SORTED);
+        }
+
+        @Override
+        public boolean tryAdvance(Consumer<? super Exception> exceptionConsumer) {
+            try {
+                return wrappedSpliterator.tryAdvance(action.ifException(exceptionConsumer::accept));
+            } catch (Exception e) {
+                exceptionConsumer.accept(e);
+                return true;
+            }
+        }
+
+        @Override
+        public Spliterator<Exception> trySplit() {
+            Spliterator<W> triedSplit = wrappedSpliterator.trySplit();
+            return triedSplit != null ? new FlatMapToExceptionSpliterator<>(action, triedSplit) : null;
+        }
+
+        @Override
+        public long estimateSize() {
+            return Long.MAX_VALUE;
+        }
+
+        @Override
+        public int characteristics() {
+            return characteristics;
+        }
+    };
 
 
     /**
