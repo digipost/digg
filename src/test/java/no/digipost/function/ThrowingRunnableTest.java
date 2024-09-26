@@ -16,16 +16,19 @@
 package no.digipost.function;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.function.Consumer;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+@ExtendWith(MockitoExtension.class)
 public class ThrowingRunnableTest {
 
     private final RuntimeException ex = new RuntimeException();
@@ -45,10 +48,8 @@ public class ThrowingRunnableTest {
     }
 
     @Test
-    public void translateToEmptyOptionalAndDelegateExceptionToHandler() {
+    public void translateToEmptyOptionalAndDelegateExceptionToHandler(@Mock Consumer<Exception> handler) {
         ThrowingRunnable<Exception> fn = () -> {throw ex;};
-        @SuppressWarnings("unchecked")
-        Consumer<Exception> handler = mock(Consumer.class);
 
         fn.ifException(handler).run();
         verify(handler, times(1)).accept(ex);

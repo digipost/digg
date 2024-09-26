@@ -18,6 +18,9 @@ package no.digipost;
 import no.digipost.concurrent.OneTimeToggle;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -42,25 +45,25 @@ import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static uk.co.probablyfine.matchers.Java8Matchers.where;
 
-public class DiggExceptionsTest {
+@ExtendWith(MockitoExtension.class)
+class DiggExceptionsTest {
 
     @Test
-    public void causalChainOfNullIsEmptyStream() {
+    void causalChainOfNullIsEmptyStream() {
         assertThat(causalChainOf(null).collect(toList()), empty());
     }
 
     @Test
-    public void returnsTheCausalChainOfExceptions() {
+    void returnsTheCausalChainOfExceptions() {
         List<Throwable> exception = causalChainOf(new Exception(new IllegalStateException(new IOException()))).collect(toList());
         assertThat(exception, contains(instanceOf(Exception.class), instanceOf(IllegalStateException.class), instanceOf(IOException.class)));
     }
 
     @Test
-    public void runAThrowingRunnableUnchecked() {
+    void runAThrowingRunnableUnchecked() {
         OneTimeToggle toggled = new OneTimeToggle();
         DiggExceptions.runUnchecked(() -> toggled.nowOrIfAlreadyThenThrow(() -> new AssertionError("should not be run twice!")));
         assertThat(toggled, where(OneTimeToggle::yet));
@@ -70,7 +73,7 @@ public class DiggExceptionsTest {
     }
 
     @Test
-    public void getAThrowingSupplierUnchecked() {
+    void getAThrowingSupplierUnchecked() {
         assertThat(getUnchecked(() -> 42), is(42));
 
         Exception e = new Exception();
@@ -78,7 +81,7 @@ public class DiggExceptionsTest {
     }
 
     @Test
-    public void applyAThrowingFunctionUnchecked() {
+    void applyAThrowingFunctionUnchecked() {
         assertThat(applyUnchecked(Math::round, 4.6f), is(5));
         assertThat(applyUnchecked(n -> n, null), nullValue());
         assertThat(applyUnchecked(n -> n, Optional.empty()), is(Optional.empty()));
@@ -88,14 +91,12 @@ public class DiggExceptionsTest {
     }
 
     @Test
-    public void factoryMethodsForThrowingFunctionalInterfaces() throws Throwable {
+    void factoryMethodsForThrowingFunctionalInterfaces(@Mock Consumer<Exception> exceptionHandler) throws Throwable {
         assertThat(mayThrow((t) -> t).apply("a"), is("a"));
         assertThat(mayThrow((t, u) -> t).apply("a", "b"), is("a"));
         assertThat(mayThrow(() -> "a").get(), is("a"));
 
         Exception ex = new Exception();
-        @SuppressWarnings("unchecked")
-        Consumer<Exception> exceptionHandler = mock(Consumer.class);
         mayThrow(t -> { if (t == null) throw ex; }).ifException(exceptionHandler).accept(null);
         verify(exceptionHandler).accept(ex);
 

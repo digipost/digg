@@ -64,7 +64,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -148,12 +147,12 @@ public class DiggBaseTest implements WithQuickTheories {
     }
 
 
+    interface MyResource {
+        void done();
+    }
+
     @Test
-    public void useArbitraryObjectWithTryWithResources() {
-        abstract class MyResource {
-            abstract void done();
-        }
-        MyResource resource = mock(MyResource.class);
+    public void useArbitraryObjectWithTryWithResources(@Mock MyResource resource) {
         try (ThrowingAutoClosed<MyResource, RuntimeException> managedResource = throwingAutoClose(resource, MyResource::done)) {
             verifyNoInteractions(resource);
             managedResource.object(); //just to avoid javac lint warning
@@ -162,14 +161,14 @@ public class DiggBaseTest implements WithQuickTheories {
         verifyNoMoreInteractions(resource);
     }
 
+
+    interface MyAutoCloseableResource extends AutoCloseable {
+        void done() throws IOException;
+    }
+
     @Test
-    public void wrappingAnAlreadyAutoCloseableWithAutoCloseWillAlsoInvokeClose() throws Exception {
-        abstract class MyResource implements AutoCloseable {
-            abstract void done() throws IOException;
-            @Override public abstract void close() throws IOException;
-        }
-        MyResource resource = mock(MyResource.class);
-        try (ThrowingAutoClosed<MyResource, IOException> managedResource = throwingAutoClose(resource, MyResource::done)) {
+    public void wrappingAnAlreadyAutoCloseableWithAutoCloseWillAlsoInvokeClose(@Mock MyAutoCloseableResource resource) throws Exception {
+        try (ThrowingAutoClosed<MyAutoCloseableResource, IOException> managedResource = throwingAutoClose(resource, MyAutoCloseableResource::done)) {
             verifyNoInteractions(resource);
             managedResource.object(); //just to avoid javac lint warning
         }
@@ -180,11 +179,7 @@ public class DiggBaseTest implements WithQuickTheories {
     }
 
     @Test
-    public void autoCloseWithoutCheckedException() {
-        abstract class MyResource {
-            abstract void done();
-        }
-        MyResource resource = mock(MyResource.class);
+    public void autoCloseWithoutCheckedException(@Mock MyResource resource) {
         try (AutoClosed<MyResource> managedResource = autoClose(resource, MyResource::done)) {
             verifyNoInteractions(resource);
             managedResource.object(); //just to avoid javac lint warning
@@ -194,8 +189,7 @@ public class DiggBaseTest implements WithQuickTheories {
     }
 
     @Test
-    public void getAllExceptionsFromClosingSeveralAutoCloseables() throws Exception {
-        AutoCloseable closeable = mock(AutoCloseable.class);
+    public void getAllExceptionsFromClosingSeveralAutoCloseables(@Mock AutoCloseable closeable) throws Exception {
         doNothing()
             .doThrow(new IOException())
             .doNothing()

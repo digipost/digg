@@ -16,6 +16,9 @@
 package no.digipost.function;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -26,11 +29,11 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static uk.co.probablyfine.matchers.Java8Matchers.where;
 
+@ExtendWith(MockitoExtension.class)
 class ThrowingSupplierTest {
 
     private final RuntimeException ex = new RuntimeException();
@@ -57,10 +60,8 @@ class ThrowingSupplierTest {
     }
 
     @Test
-    void translateToEmptyOptionalAndDelegateExceptionToHandler() {
+    void translateToEmptyOptionalAndDelegateExceptionToHandler(@Mock Consumer<Exception> handler) {
         ThrowingSupplier<?, Exception> fn = () -> {throw ex;};
-        @SuppressWarnings("unchecked")
-        Consumer<Exception> handler = mock(Consumer.class);
 
         assertThat(fn.ifException(handler).get(), is(empty()));
         verify(handler, times(1)).accept(ex);
