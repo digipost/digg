@@ -222,8 +222,8 @@ public final class DiggBase {
 
     /**
      * Create a stream which will yield the exceptions (if any) from invoking an {@link ThrowingConsumer action} on
-     * several {@code instances}. Consuming the stream will ensure that <strong>all</strong> instances will have
-     * the action invoked on them, and any exceptions happening will be available through the returned stream.
+     * several {@code instances}. Consuming the returned stream will ensure that <strong>all</strong> instances will have
+     * the action attempted on them, and any exceptions happening will be available through the returned stream.
      *
      * @param action the action to execute for each provided instance
      * @param instances the instances to act on with the provided {@code action}.
@@ -239,8 +239,12 @@ public final class DiggBase {
 
     /**
      * Create a stream which will yield the exceptions (if any) from invoking an {@link ThrowingConsumer action} on
-     * several {@code instances}. Consuming the stream will ensure that <strong>all</strong> instances will have
-     * the action invoked on them, and any exceptions happening will be available through the returned stream.
+     * several {@code instances}. This also includes exceptions thrown from <em>traversing</em> the given {@link Stream}
+     * of instances, i.e. should resolving an element from the {@code Stream} cause an exception, it will be caught and
+     * included in the returned {@code Stream}.
+     * <p>
+     * Consuming the returned stream will ensure that <strong>all</strong> traversed instances will have
+     * the action attempted on them, and any exceptions happening will be available through the returned stream.
      *
      * @param action the action to execute for each provided instance
      * @param instances the instances to act on with the provided {@code action}.
