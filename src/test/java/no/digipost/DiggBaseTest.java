@@ -20,7 +20,10 @@ import no.digipost.util.ThrowingAutoClosed;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.Timeout;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InOrder;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.quicktheories.WithQuickTheories;
 import org.quicktheories.core.Gen;
 import org.quicktheories.dsl.TheoryBuilder;
@@ -45,6 +48,7 @@ import static no.digipost.DiggBase.forceOnAll;
 import static no.digipost.DiggBase.friendlyName;
 import static no.digipost.DiggBase.nonNull;
 import static no.digipost.DiggBase.throwingAutoClose;
+import static no.digipost.DiggCollectors.toSingleExceptionWithSuppressed;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsString;
@@ -55,6 +59,7 @@ import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.isA;
 import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.Mockito.doNothing;
@@ -66,6 +71,7 @@ import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static uk.co.probablyfine.matchers.Java8Matchers.where;
 
+@ExtendWith(MockitoExtension.class)
 public class DiggBaseTest implements WithQuickTheories {
 
     @Test
@@ -275,6 +281,16 @@ public class DiggBaseTest implements WithQuickTheories {
 
             assertThat("3 times as much successes as failures: " + successes + " / " + failures,
                     failures * 3, is(successes.get()));
+        }
+
+        @Test
+        void doesNotInvokeOperationOnNulls(@Mock AutoCloseable resource) throws Exception {
+            Optional<RuntimeException> exception = forceOnAll(AutoCloseable::close, resource, null, resource, null, resource)
+                    .collect(toSingleExceptionWithSuppressed())
+                    .map(DiggExceptions::asUnchecked);
+            assertAll(
+                    () -> verify(resource, times(3)).close(),
+                    () -> assertDoesNotThrow(() -> exception.ifPresent(e -> { throw e; })));
         }
 
     }

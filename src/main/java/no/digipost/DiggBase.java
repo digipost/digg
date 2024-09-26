@@ -21,6 +21,7 @@ import no.digipost.util.ThrowingAutoClosed;
 
 import java.util.ArrayDeque;
 import java.util.Deque;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Spliterator;
 import java.util.function.Consumer;
@@ -247,7 +248,9 @@ public final class DiggBase {
      * @return the Stream with exceptions, if any
      */
     public static <T> Stream<Exception> forceOnAll(ThrowingConsumer<? super T, ? extends Exception> action, Stream<T> instances) {
-        return StreamSupport.stream(new FlatMapToExceptionSpliterator<>(action, instances.spliterator()), instances.isParallel());
+        return StreamSupport.stream(
+                new FlatMapToExceptionSpliterator<>(action, instances.filter(Objects::nonNull).spliterator()),
+                instances.isParallel());
     }
 
     private static final class FlatMapToExceptionSpliterator<W> implements Spliterator<Exception> {
