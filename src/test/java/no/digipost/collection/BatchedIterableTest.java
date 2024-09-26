@@ -36,11 +36,13 @@ class BatchedIterableTest {
 
     @Test
     void emptyBatch() {
-        Batches<Object> empty1 = new Batches<>();
+        @SuppressWarnings("unchecked")
+        Batches<?> empty1 = new Batches<>();
         assertThat(batched(empty1, b -> false), is(emptyIterable()));
         assertThat(empty1.fetches(), is(1));
 
-        Batches<Object> empty2 = new Batches<>();
+        @SuppressWarnings("unchecked")
+        Batches<?> empty2 = new Batches<>();
         assertThat(batched(empty2, b -> true), is(emptyIterable()));
         assertThat(empty2.fetches(), is(2));
     }

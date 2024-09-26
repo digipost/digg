@@ -54,7 +54,7 @@ public class DiggEnumsTest {
 
         qt()
             .forAll(multipleEnums)
-            .asWithPrecursor(enums -> Stream.of(enums).map(Enum::name).collect(joining(" , ", "  ", "   ")))
+            .asWithPrecursor(enums -> Stream.of(enums).map(MyEnum::name).collect(joining(" , ", "  ", "   ")))
             .checkAssert((enums, commaSeparatedNames) -> assertThat(fromCommaSeparatedNames(commaSeparatedNames, MyEnum.class), contains(enums)));
 
     }
@@ -74,11 +74,11 @@ public class DiggEnumsTest {
     public void toStringConversionsAreSpecialCasesOfTheGenericBaseCase() {
         qt()
             .forAll(multipleEnums)
-            .check(enums -> toCommaSeparatedNames(enums).equals(toStringOf(Enum::name, joining(","), enums)));
+            .check(enums -> toCommaSeparatedNames(enums).equals(toStringOf(MyEnum::name, joining(","), enums)));
 
         qt()
             .forAll(multipleEnums)
-            .check(enums -> toNames(": ", enums).equals(toStringOf(Enum::name, joining(": "), enums)));
+            .check(enums -> toNames(": ", enums).equals(toStringOf(MyEnum::name, joining(": "), enums)));
 
         qt()
             .forAll(multipleEnums)

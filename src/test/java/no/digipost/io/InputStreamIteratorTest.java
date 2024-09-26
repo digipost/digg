@@ -71,7 +71,7 @@ class InputStreamIteratorTest {
             InputStreamIterator iterator = new InputStreamIterator(inputStream, 2);
 
             assertThat(consumeToString(iterator, UTF_8), is("Some data"));
-            assertThat(iterator, whereNot(Iterator::hasNext));
+            assertThat(iterator, whereNot(Iterator<byte[]>::hasNext));
 
             assertThrows(NoSuchElementException.class, iterator::next);
         }

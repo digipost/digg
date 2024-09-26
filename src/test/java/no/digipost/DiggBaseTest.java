@@ -164,6 +164,8 @@ public class DiggBaseTest implements WithQuickTheories {
 
     interface MyAutoCloseableResource extends AutoCloseable {
         void done() throws IOException;
+        @Override
+        void close() throws RuntimeException;
     }
 
     @Test
