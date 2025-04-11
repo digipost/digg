@@ -46,7 +46,9 @@ final class SqlArray {
         try {
             return sqlArrayConsumer.apply(array);
         } finally {
-            array.free();
+            if (array != null) {
+                array.free();
+            }
         }
     }
 

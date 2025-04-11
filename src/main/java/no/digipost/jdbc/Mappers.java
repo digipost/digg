@@ -197,7 +197,7 @@ public final class Mappers {
     /**
      * Combination of {@link #getTimestamp} and a conversion to an {@link Instant} using {@link Timestamp#toInstant()}.
      */
-    public static final BasicColumnMapper<Instant> getInstant = getTimestamp.andThen(Timestamp::toInstant);
+    public static final BasicColumnMapper<Instant> getInstant = getTimestamp.nullFallthrough().andThen(Timestamp::toInstant);
     /**
      * Combination of {@link #getNullableTimestamp} and a conversion to an {@link Instant}
      * using {@link Timestamp#toInstant()}.
@@ -231,7 +231,7 @@ public final class Mappers {
      * @see #getIntArray
      * @see #getLongArray
      */
-    public static final BasicColumnMapper<Object> getArray = (name, rs) -> getSqlArray.andThen(SqlArray::of).map(name, rs).consume(Array::getArray);
+    public static final BasicColumnMapper<Object> getArray = (name, rs) -> getSqlArray.andThen(SqlArray::of).map(name, rs).consume(a -> a != null ? a.getArray() : null);
 
     /**
      * Gets the value of a given SQL {@code ARRAY} column as an {@code String[]} array.
