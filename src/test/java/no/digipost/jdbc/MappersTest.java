@@ -16,13 +16,17 @@
 package no.digipost.jdbc;
 
 import com.mockrunner.mock.jdbc.MockResultSet;
+import no.digipost.collection.NonEmptyList;
 import org.junit.jupiter.api.Test;
 
 import java.sql.SQLException;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import static uk.co.probablyfine.matchers.StreamMatchers.allMatch;
+import static java.lang.reflect.Modifier.isPublic;
+import static java.lang.reflect.Modifier.isStatic;
+import static no.digipost.DiggCollectors.toNonEmptyList;
 import static no.digipost.DiggExceptions.applyUnchecked;
 import static no.digipost.jdbc.Mappers.getBoolean;
 import static no.digipost.jdbc.Mappers.getByte;
@@ -40,28 +44,44 @@ import static no.digipost.jdbc.Mappers.getNullableShort;
 import static no.digipost.jdbc.Mappers.getShort;
 import static no.digipost.jdbc.ResultSetMock.mockSingleColumnResult;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.nullValue;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static uk.co.probablyfine.matchers.Java8Matchers.whereNot;
 
-public class MappersTest {
+class MappersTest {
 
     @Test
-    public void recognizesSQL_NULLsInPrimitiveMappers() throws SQLException {
+    void recognizesSQL_NULLsInPrimitiveMappers() throws SQLException {
         try (MockResultSet rs = mockSingleColumnResult("value", new Object[] { null })) {
-            Stream<Optional<?>> results =
-                    Stream.of(getNullableInt, getNullableBoolean, getNullableByte, getNullableDouble, getNullableFloat, getNullableLong, getNullableShort)
-                        .map((NullableColumnMapper<?> nullableMapper) -> applyUnchecked(mapper -> mapper.map("value", rs), nullableMapper));
-            assertThat(results, allMatch(is(Optional.empty())));
+            assertAll(Stream.of(getNullableInt, getNullableBoolean, getNullableByte, getNullableDouble, getNullableFloat, getNullableLong, getNullableShort)
+                    .map(nullableMapper -> applyUnchecked(mapper -> mapper.map("value", rs), nullableMapper))
+                    .map(mappedValue -> () -> assertThat(mappedValue, whereNot(Optional::isPresent))));
         }
     }
 
     @Test
-    public void correctlyHandlesResultSetIckySQL_NULLHandling() throws SQLException {
+    void correctlyHandlesResultSetIckySQL_NULLHandling() throws SQLException {
         try (MockResultSet rs = mockSingleColumnResult("value", new Object[] { null })) {
-            Stream<Object> results =
-                    Stream.of(getInt, getBoolean, getByte, getDouble, getFloat, getLong, getShort)
-                        .map((BasicColumnMapper<?> basicMapper) -> applyUnchecked(mapper -> mapper.map("value", rs), basicMapper));
-            assertThat(results, allMatch(nullValue()));
+            assertAll(Stream.of(getInt, getBoolean, getByte, getDouble, getFloat, getLong, getShort)
+                    .map(primitiveMapper -> applyUnchecked(mapper -> mapper.map("value", rs), primitiveMapper))
+                    .map(mappedValue -> () -> assertThat(mappedValue, nullValue())));
+        }
+    }
+
+    @Test
+    void allBasicColumnMappersAreNullSafe() throws SQLException {
+        NonEmptyList<? extends BasicColumnMapper<?>> publicBasicMappers = Stream.of(Mappers.class.getFields())
+            .filter(field -> isStatic(field.getModifiers()) && isPublic(field.getModifiers()) && BasicColumnMapper.class.isAssignableFrom(field.getType()))
+            .map(publicBasicMapperField -> (BasicColumnMapper<?>) applyUnchecked(publicBasicMapperField::get, Mappers.class))
+            .collect(toNonEmptyList())
+            .orElseThrow(() -> new NoSuchElementException("found no public " + BasicColumnMapper.class.getSimpleName() + " fields in " + Mappers.class.getName()));
+
+        try (MockResultSet rs = mockSingleColumnResult("value", new Object[] { null })) {
+            assertAll(publicBasicMappers.stream()
+                .map(basicMapper -> () -> {
+                    Object mappedValue = applyUnchecked(mapper -> mapper.map("value", rs), basicMapper);
+                    assertThat(mappedValue, nullValue());
+                }));
         }
     }
 }
