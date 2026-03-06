@@ -15,6 +15,7 @@
  */
 package no.digipost;
 
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.quicktheories.core.Gen;
 
@@ -37,53 +38,61 @@ import static org.quicktheories.generators.SourceDSL.arrays;
 import static uk.co.probablyfine.matchers.StreamMatchers.contains;
 import static uk.co.probablyfine.matchers.StreamMatchers.empty;
 
-public class DiggEnumsTest {
+class DiggEnumsTest {
 
     enum MyEnum {
         A, AA, ABA, ABC
     }
 
-    private final Gen<MyEnum[]> multipleEnums = arrays().ofClass(arbitrary().enumValues(MyEnum.class), MyEnum.class).withLengthBetween(0, 30);
+    private static final Gen<MyEnum[]> multipleEnums = arrays().ofClass(arbitrary().enumValues(MyEnum.class), MyEnum.class).withLengthBetween(0, 30);
 
-    @Test
-    public void convertFromCommaSeparatedListOfEnumNames() {
-        qt()
-            .forAll(multipleEnums)
-            .asWithPrecursor(DiggEnums::toCommaSeparatedNames)
-            .checkAssert((enums, commaSeparatedNames) -> assertThat(fromCommaSeparatedNames(commaSeparatedNames, MyEnum.class), contains(enums)));
+    @Nested
+    static class FromString {
 
-        qt()
-            .forAll(multipleEnums)
-            .asWithPrecursor(enums -> Stream.of(enums).map(MyEnum::name).collect(joining(" , ", "  ", "   ")))
-            .checkAssert((enums, commaSeparatedNames) -> assertThat(fromCommaSeparatedNames(commaSeparatedNames, MyEnum.class), contains(enums)));
+        @Test
+        void convertFromCommaSeparatedListOfEnumNames() {
+            qt()
+                .forAll(multipleEnums)
+                .asWithPrecursor(DiggEnums::toCommaSeparatedNames)
+                .checkAssert((enums, commaSeparatedNames) -> assertThat(fromCommaSeparatedNames(commaSeparatedNames, MyEnum.class), contains(enums)));
 
+            qt()
+                .forAll(multipleEnums)
+                .asWithPrecursor(enums -> Stream.of(enums).map(MyEnum::name).collect(joining(" , ", "  ", "   ")))
+                .checkAssert((enums, commaSeparatedNames) -> assertThat(fromCommaSeparatedNames(commaSeparatedNames, MyEnum.class), contains(enums)));
+
+        }
+
+        @Test
+        void noEnumsAreFoundInNullString() {
+            assertThat(fromCommaSeparatedNames(null, MyEnum.class), empty());
+        }
     }
 
-    @Test
-    public void noEnumsAreFoundInNullString() {
-        assertThat(fromCommaSeparatedNames(null, MyEnum.class), empty());
-    }
 
-    @Test
-    public void convertToStringOfDelimiterSeparatedStrings() {
-        Function<? super MyEnum, String> lowerCasedEnumName = e -> e.name().toLowerCase();
-        assertThat(toStringOf(lowerCasedEnumName, joining(": ", "[", "]"), A, ABA, AA), is("[a: aba: aa]"));
-    }
+    @Nested
+    static class ToString {
 
-    @Test
-    public void toStringConversionsAreSpecialCasesOfTheGenericBaseCase() {
-        qt()
-            .forAll(multipleEnums)
-            .check(enums -> toCommaSeparatedNames(enums).equals(toStringOf(MyEnum::name, joining(","), enums)));
+        @Test
+        void convertToStringOfDelimiterSeparatedStrings() {
+            Function<? super MyEnum, String> lowerCasedEnumName = e -> e.name().toLowerCase();
+            assertThat(toStringOf(lowerCasedEnumName, joining(": ", "[", "]"), A, ABA, AA), is("[a: aba: aa]"));
+        }
 
-        qt()
-            .forAll(multipleEnums)
-            .check(enums -> toNames(": ", enums).equals(toStringOf(MyEnum::name, joining(": "), enums)));
+        @Test
+        void toStringConversionsAreSpecialCasesOfTheGenericBaseCase() {
+            qt()
+                .forAll(multipleEnums)
+                .check(enums -> toCommaSeparatedNames(enums).equals(toStringOf(MyEnum::name, joining(","), enums)));
 
-        qt()
-            .forAll(multipleEnums)
-            .check(enums -> toStringOf(e -> e.name().toLowerCase(), "#", enums).equals(toStringOf(e -> e.name().toLowerCase(), joining("#"), enums)));
+            qt()
+                .forAll(multipleEnums)
+                .check(enums -> toNames(": ", enums).equals(toStringOf(MyEnum::name, joining(": "), enums)));
 
+            qt()
+                .forAll(multipleEnums)
+                .check(enums -> toStringOf(e -> e.name().toLowerCase(), "#", enums).equals(toStringOf(e -> e.name().toLowerCase(), joining("#"), enums)));
+        }
     }
 
 }
