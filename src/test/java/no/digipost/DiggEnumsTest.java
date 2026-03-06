@@ -19,11 +19,13 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.quicktheories.core.Gen;
 
+import java.util.BitSet;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 import static no.digipost.DiggEnums.fromCommaSeparatedNames;
+import static no.digipost.DiggEnums.selectByBitmask;
 import static no.digipost.DiggEnums.selectByIndexAsOrdinals;
 import static no.digipost.DiggEnums.toCommaSeparatedNames;
 import static no.digipost.DiggEnums.toNames;
@@ -123,6 +125,18 @@ class DiggEnumsTest {
             assertThat(selectByIndexAsOrdinals(new boolean[] {true, false, false, true, true}, MyEnum.class), contains(A, ABC));
             assertThat(selectByIndexAsOrdinals(new boolean[] {true, false, false}, MyEnum.class), contains(A));
             assertThat(selectByIndexAsOrdinals(new boolean[] {true, true, false}, MyEnum.class), contains(A, AA));
+        }
+    }
+
+    @Nested
+    static class ResolveFromBitmask {
+
+        @Test
+        void bitsetsConstructedFromMasksAreTraversedFromLeastSignificantBit() {
+            assertThat(selectByBitmask(BitSet.valueOf(new long[] {0b0001}), MyEnum.class), contains(A));
+            assertThat(selectByBitmask(BitSet.valueOf(new long[] {0b0010}), MyEnum.class), contains(AA));
+            assertThat(selectByBitmask(BitSet.valueOf(new long[] {0b1001}), MyEnum.class), contains(A, ABC));
+            assertThat(selectByBitmask(BitSet.valueOf(new long[] {0b1010}), MyEnum.class), contains(AA, ABC));
         }
     }
 
