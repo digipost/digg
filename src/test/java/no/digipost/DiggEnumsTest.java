@@ -24,12 +24,14 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 import static no.digipost.DiggEnums.fromCommaSeparatedNames;
+import static no.digipost.DiggEnums.selectByIndexAsOrdinals;
 import static no.digipost.DiggEnums.toCommaSeparatedNames;
 import static no.digipost.DiggEnums.toNames;
 import static no.digipost.DiggEnums.toStringOf;
 import static no.digipost.DiggEnumsTest.MyEnum.A;
 import static no.digipost.DiggEnumsTest.MyEnum.AA;
 import static no.digipost.DiggEnumsTest.MyEnum.ABA;
+import static no.digipost.DiggEnumsTest.MyEnum.ABC;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.quicktheories.QuickTheory.qt;
@@ -42,6 +44,8 @@ class DiggEnumsTest {
 
     enum MyEnum {
         A, AA, ABA, ABC
+    }
+    enum Empty {
     }
 
     private static final Gen<MyEnum[]> multipleEnums = arrays().ofClass(arbitrary().enumValues(MyEnum.class), MyEnum.class).withLengthBetween(0, 30);
@@ -92,6 +96,33 @@ class DiggEnumsTest {
             qt()
                 .forAll(multipleEnums)
                 .check(enums -> toStringOf(e -> e.name().toLowerCase(), "#", enums).equals(toStringOf(e -> e.name().toLowerCase(), joining("#"), enums)));
+        }
+    }
+
+
+    @Nested
+    static class ResolveFromBooleanArray {
+
+        @Test
+        void noBooleansYieldsNoEmums() {
+            assertThat(selectByIndexAsOrdinals(new boolean[0], MyEnum.class), empty());
+        }
+
+        @Test
+        void emptyEnumYieldsYieldsNoEmums() {
+            assertThat(selectByIndexAsOrdinals(new boolean[0], Empty.class), empty());
+            assertThat(selectByIndexAsOrdinals(new boolean[] {true}, Empty.class), empty());
+            assertThat(selectByIndexAsOrdinals(new boolean[] {false}, Empty.class), empty());
+            assertThat(selectByIndexAsOrdinals(new boolean[] {false, true}, Empty.class), empty());
+            assertThat(selectByIndexAsOrdinals(new boolean[] {true, true, false}, Empty.class), empty());
+        }
+
+        @Test
+        void resolveSelectionBasedOnBooleanArray() {
+            assertThat(selectByIndexAsOrdinals(new boolean[] {true, false, false, true}, MyEnum.class), contains(A, ABC));
+            assertThat(selectByIndexAsOrdinals(new boolean[] {true, false, false, true, true}, MyEnum.class), contains(A, ABC));
+            assertThat(selectByIndexAsOrdinals(new boolean[] {true, false, false}, MyEnum.class), contains(A));
+            assertThat(selectByIndexAsOrdinals(new boolean[] {true, true, false}, MyEnum.class), contains(A, AA));
         }
     }
 
