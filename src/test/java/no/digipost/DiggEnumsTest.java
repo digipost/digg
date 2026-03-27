@@ -25,8 +25,8 @@ import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.joining;
 import static no.digipost.DiggEnums.fromCommaSeparatedNames;
-import static no.digipost.DiggEnums.selectByBitmask;
-import static no.digipost.DiggEnums.selectByIndexAsOrdinals;
+import static no.digipost.DiggEnums.selectOrdinalsByBitmask;
+import static no.digipost.DiggEnums.selectOrdinalsByIndex;
 import static no.digipost.DiggEnums.toCommaSeparatedNames;
 import static no.digipost.DiggEnums.toNames;
 import static no.digipost.DiggEnums.toStringOf;
@@ -107,24 +107,24 @@ class DiggEnumsTest {
 
         @Test
         void noBooleansYieldsNoEmums() {
-            assertThat(selectByIndexAsOrdinals(new boolean[0], MyEnum.class), empty());
+            assertThat(selectOrdinalsByIndex(MyEnum.class, new boolean[0]), empty());
         }
 
         @Test
         void emptyEnumYieldsYieldsNoEmums() {
-            assertThat(selectByIndexAsOrdinals(new boolean[0], Empty.class), empty());
-            assertThat(selectByIndexAsOrdinals(new boolean[] {true}, Empty.class), empty());
-            assertThat(selectByIndexAsOrdinals(new boolean[] {false}, Empty.class), empty());
-            assertThat(selectByIndexAsOrdinals(new boolean[] {false, true}, Empty.class), empty());
-            assertThat(selectByIndexAsOrdinals(new boolean[] {true, true, false}, Empty.class), empty());
+            assertThat(selectOrdinalsByIndex(Empty.class, new boolean[0]), empty());
+            assertThat(selectOrdinalsByIndex(Empty.class, new boolean[] {true}), empty());
+            assertThat(selectOrdinalsByIndex(Empty.class, new boolean[] {false}), empty());
+            assertThat(selectOrdinalsByIndex(Empty.class, new boolean[] {false, true}), empty());
+            assertThat(selectOrdinalsByIndex(Empty.class, new boolean[] {true, true, false}), empty());
         }
 
         @Test
         void resolveSelectionBasedOnBooleanArray() {
-            assertThat(selectByIndexAsOrdinals(new boolean[] {true, false, false, true}, MyEnum.class), contains(A, ABC));
-            assertThat(selectByIndexAsOrdinals(new boolean[] {true, false, false, true, true}, MyEnum.class), contains(A, ABC));
-            assertThat(selectByIndexAsOrdinals(new boolean[] {true, false, false}, MyEnum.class), contains(A));
-            assertThat(selectByIndexAsOrdinals(new boolean[] {true, true, false}, MyEnum.class), contains(A, AA));
+            assertThat(selectOrdinalsByIndex(MyEnum.class, new boolean[] {true, false, false, true}), contains(A, ABC));
+            assertThat(selectOrdinalsByIndex(MyEnum.class, new boolean[] {true, false, false, true, true}), contains(A, ABC));
+            assertThat(selectOrdinalsByIndex(MyEnum.class, new boolean[] {true, false, false}), contains(A));
+            assertThat(selectOrdinalsByIndex(MyEnum.class, new boolean[] {true, true, false}), contains(A, AA));
         }
     }
 
@@ -133,10 +133,10 @@ class DiggEnumsTest {
 
         @Test
         void bitsetsConstructedFromMasksAreTraversedFromLeastSignificantBit() {
-            assertThat(selectByBitmask(BitSet.valueOf(new long[] {0b0001}), MyEnum.class), contains(A));
-            assertThat(selectByBitmask(BitSet.valueOf(new long[] {0b0010}), MyEnum.class), contains(AA));
-            assertThat(selectByBitmask(BitSet.valueOf(new long[] {0b1001}), MyEnum.class), contains(A, ABC));
-            assertThat(selectByBitmask(BitSet.valueOf(new long[] {0b1010}), MyEnum.class), contains(AA, ABC));
+            assertThat(selectOrdinalsByBitmask(MyEnum.class, BitSet.valueOf(new long[] {0b0001})), contains(A));
+            assertThat(selectOrdinalsByBitmask(MyEnum.class, BitSet.valueOf(new long[] {0b0010})), contains(AA));
+            assertThat(selectOrdinalsByBitmask(MyEnum.class, BitSet.valueOf(new long[] {0b1001})), contains(A, ABC));
+            assertThat(selectOrdinalsByBitmask(MyEnum.class, BitSet.valueOf(new long[] {0b1010})), contains(AA, ABC));
         }
     }
 

@@ -105,18 +105,18 @@ public final class DiggEnums {
      * will at most consider two first constants of a given enum type, as well as if the enum only has one
      * constant, only the first boolean will be processed.
      *
+     * @param enumType the enum type to resolve constants from
      * @param includedOrdinals the boolean array where the <em>indexes</em> of {@code true} elements are mapped
      *                         to any existing ordinals of the given {@code enumType}
-     * @param enumType the enum type to resolve constants from
      *
      * @return the resolved {@code enum} constants
      */
-    public static <E extends Enum<E>> Stream<E> selectByIndexAsOrdinals(boolean[] includedOrdinals, Class<E> enumType) {
+    public static <E extends Enum<E>> Stream<E> selectOrdinalsByIndex(Class<E> enumType, boolean[] includedOrdinals) {
         BitSet mask = new BitSet(includedOrdinals.length);
         for (int i = 0; i < includedOrdinals.length; i++) {
             mask.set(i, includedOrdinals[i]);
         }
-        return selectByBitmask(mask, enumType);
+        return selectOrdinalsByBitmask(enumType, mask);
     }
 
 
@@ -130,12 +130,12 @@ public final class DiggEnums {
      * and the resolving will discard any exhaustive elements in either cases. E.g. a set bit at
      * index 2 will be ignored for enums with only one constant.
      *
-     * @param mask the bit mask used for selecting enum constants, the method may mutate this mask
      * @param enumType the enum type to resolve constants from
+     * @param mask the bit mask used for selecting enum constants, the method may mutate this mask
      *
      * @return the resolved {@code enum} constants
      */
-    public static <E extends Enum<E>> Stream<E> selectByBitmask(BitSet mask, Class<E> enumType) {
+    public static <E extends Enum<E>> Stream<E> selectOrdinalsByBitmask(Class<E> enumType, BitSet mask) {
         if (mask.cardinality() == 0) {
             return Stream.empty();
         }
