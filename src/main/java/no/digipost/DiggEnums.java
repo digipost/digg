@@ -1,5 +1,5 @@
 /*
- * Copyright (C) Posten Norge AS
+ * Copyright (C) Posten Bring AS
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
  */
 package no.digipost;
 
+import java.util.BitSet;
 import java.util.Collection;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -23,6 +24,7 @@ import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static java.util.Arrays.stream;
+import static java.util.Objects.requireNonNull;
 import static java.util.stream.Collectors.joining;
 
 /**
@@ -91,6 +93,57 @@ public final class DiggEnums {
     public static <E extends Enum<E>> Stream<E> fromEnumsString(String enumsString, String delimRegex, Predicate<String> included, Function<String, E> convertToEnum) {
         String trimmed = enumsString != null ? enumsString.trim() : "";
         return trimmed.isEmpty() ? Stream.empty() : stream(trimmed.split(delimRegex)).filter(included).map(convertToEnum);
+    }
+
+
+    /**
+     * Select enum constants by mapping <em>indexes</em> of elements in a boolean array which are {@code true} to <em>ordinals</em>
+     * of the enum type.
+     * <p>
+     * It is valid that the enum contains either more or less constants than the given boolean array,
+     * and the resolving will discard any exhaustive elements in either cases. E.g. specifying two booleans
+     * will at most consider two first constants of a given enum type, as well as if the enum only has one
+     * constant, only the first boolean will be processed.
+     *
+     * @param enumType the enum type to resolve constants from
+     * @param includedOrdinals the boolean array where the <em>indexes</em> of {@code true} elements are mapped
+     *                         to any existing ordinals of the given {@code enumType}
+     *
+     * @return the resolved {@code enum} constants
+     */
+    public static <E extends Enum<E>> Stream<E> selectOrdinalsByIndex(Class<E> enumType, boolean[] includedOrdinals) {
+        BitSet mask = new BitSet(includedOrdinals.length);
+        for (int i = 0; i < includedOrdinals.length; i++) {
+            mask.set(i, includedOrdinals[i]);
+        }
+        return selectOrdinalsByBitmask(enumType, mask);
+    }
+
+
+    /**
+     * Select enum constants by overlaying a bitmask ({@code long}) and selecting the enum <em>by ordinals</em>
+     * which align with the indices of the set bits, mapping the first index to the first enum constant and so
+     * forth. A bitmask of {@code 10110001} (177) will select the first, fifth, sixth, and eight enum constant.
+     * <p>
+     * It is valid both for the enum to contain more constants than the length of the mask,
+     * or less constants than the highest index of a <em>set</em> bit in the given mask,
+     * and the resolving will discard any exhaustive elements in either cases. E.g. a set bit at
+     * index 2 will be ignored for enums with only one constant.
+     *
+     * @param enumType the enum type to resolve constants from
+     * @param mask the bit mask used for selecting enum constants, the method may mutate this mask
+     *
+     * @return the resolved {@code enum} constants
+     */
+    public static <E extends Enum<E>> Stream<E> selectOrdinalsByBitmask(Class<E> enumType, BitSet mask) {
+        if (mask.cardinality() == 0) {
+            return Stream.empty();
+        }
+        E[] candidates = requireNonNull(enumType.getEnumConstants(), enumType + " is not an enum");
+        if (candidates.length == 0) {
+            return Stream.empty();
+        }
+        return mask.get(0, candidates.length).stream().mapToObj(selectedOrdinal -> candidates[selectedOrdinal]);
     }
 
 

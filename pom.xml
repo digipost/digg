@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
 
-    Copyright (C) Posten Norge AS
+    Copyright (C) Posten Bring AS
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -63,7 +63,7 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-bom</artifactId>
-                <version>2.0.16</version>
+                <version>2.0.17</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -101,7 +101,7 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.17.0</version>
+            <version>2.21.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -118,7 +118,7 @@
         <dependency>
             <groupId>no.digipost</groupId>
             <artifactId>jul-to-slf4j-junit-extension</artifactId>
-            <version>1.0.1</version>
+            <version>1.0.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -167,11 +167,11 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-enforcer-plugin</artifactId>
-                    <version>3.6.1</version>
+                    <version>3.6.2</version>
                     <configuration>
                         <rules>
                             <requireMavenVersion>
-                                <version>3.6.3</version>
+                                <version>3.8.1</version>
                             </requireMavenVersion>
                             <bannedDependencies>
                                 <excludes>
@@ -190,7 +190,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.14.0</version>
+                    <version>3.15.0</version>
                     <configuration>
                         <compilerArgs>
                             <arg>-Xlint</arg>
@@ -199,7 +199,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>3.5.3</version>
+                    <version>3.5.5</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-deploy-plugin</artifactId>
@@ -211,7 +211,7 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.8.1</version>
+                    <version>3.10.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-install-plugin</artifactId>
@@ -219,11 +219,11 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.3.1</version>
+                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>3.11.2</version>
+                    <version>3.12.0</version>
                     <configuration>
                         <tags>
                             <tag>
@@ -236,12 +236,12 @@
                 </plugin>
                 <plugin>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.4.2</version>
+                    <version>3.5.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>versions-maven-plugin</artifactId>
-                    <version>2.18.0</version>
+                    <version>2.21.0</version>
                     <configuration>
                         <generateBackupPoms>false</generateBackupPoms>
                     </configuration>
@@ -249,7 +249,7 @@
                 <plugin>
                     <groupId>com.github.siom79.japicmp</groupId>
                     <artifactId>japicmp-maven-plugin</artifactId>
-                    <version>0.23.1</version>
+                    <version>0.25.4</version>
                     <configuration>
                         <parameter>
                             <includes>
